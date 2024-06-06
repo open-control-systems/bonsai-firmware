@@ -17,8 +17,8 @@ This project aims to monitor soil moisture levels using an ESP32 board and a soi
 
 **Configure the Software:**
 
-  - Ensure you have the ESP-IDF framework installed.
-   - Configure your `sdkconfig` as per your hardware setup.
+- Ensure you have the ESP-IDF framework installed.
+- Configure your `sdkconfig` as per your hardware setup.
 
 **Build and Flash:**
 

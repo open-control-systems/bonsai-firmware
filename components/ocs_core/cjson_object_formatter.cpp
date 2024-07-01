@@ -1,5 +1,8 @@
-#include "cjson_object_formatter.h"
-#include "cjson_builder.h"
+#include "ocs_core/cjson_object_formatter.h"
+#include "ocs_core/cjson_builder.h"
+
+namespace ocs {
+namespace core {
 
 cJSONObjectFormatter::cJSONObjectFormatter(cJSON* json)
     : json_(json) {
@@ -82,3 +85,6 @@ bool cJSONObjectFormatter::add_null_cs(const char* key) {
     item.release();
     return true;
 }
+
+} // namespace core
+} // namespace ocs

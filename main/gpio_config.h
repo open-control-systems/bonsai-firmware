@@ -2,9 +2,12 @@
 
 #include "driver/gpio.h"
 
-#include "noncopyable.h"
+#include "ocs_core/noncopyable.h"
 
-class GPIOConfig : public NonCopyable<> {
+namespace ocs {
+namespace app {
+
+class GPIOConfig : public core::NonCopyable<> {
 public:
     //! Initialize system wide GPIO configuration.
     GPIOConfig();
@@ -12,3 +15,6 @@ public:
 private:
     gpio_config_t config_ {};
 };
+
+} // namespace app
+} // namespace ocs

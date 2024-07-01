@@ -1,6 +1,9 @@
-#include "status_code_to_str.h"
+#include "ocs_status/code_to_str.h"
 
-const char* status_code_to_str(StatusCode status) {
+namespace ocs {
+namespace status {
+
+const char* code_to_str(StatusCode status) {
     switch (status) {
     case StatusCode::OK:
         return "OK";
@@ -13,3 +16,6 @@ const char* status_code_to_str(StatusCode status) {
 
     return "<none>";
 }
+
+} // namespace status
+} // namespace ocs

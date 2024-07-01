@@ -2,7 +2,10 @@
 
 #include "cJSON.h"
 
-#include "noncopyable.h"
+#include "ocs_core/noncopyable.h"
+
+namespace ocs {
+namespace core {
 
 class cJSONArrayFormatter : public NonCopyable<> {
 public:
@@ -18,3 +21,6 @@ public:
 private:
     cJSON* json_ { nullptr };
 };
+
+} // namespace core
+} // namespace ocs

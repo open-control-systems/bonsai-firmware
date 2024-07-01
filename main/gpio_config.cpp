@@ -2,6 +2,9 @@
 
 #include "gpio_config.h"
 
+namespace ocs {
+namespace app {
+
 namespace {
 
 const gpio_num_t RELAY_GPIO = GPIO_NUM_26;
@@ -25,3 +28,6 @@ GPIOConfig::GPIOConfig() {
     // configure GPIO with the given settings
     gpio_config(&config_);
 }
+
+} // namespace app
+} // namespace ocs

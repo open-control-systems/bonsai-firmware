@@ -2,6 +2,9 @@
 
 #include <unordered_map>
 
+namespace ocs {
+namespace app {
+
 //! Known soil statuses.
 enum class SoilStatus {
     None,
@@ -23,3 +26,6 @@ enum class SoilMoistureCharacteristic {
 };
 
 const char* soil_moisture_characteristic_to_str(SoilMoistureCharacteristic);
+
+} // namespace app
+} // namespace ocs

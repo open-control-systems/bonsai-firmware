@@ -4,10 +4,13 @@
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_adc/adc_oneshot.h"
 
-#include "ijson_reader.h"
-#include "noncopyable.h"
+#include "ocs_core/ijson_reader.h"
+#include "ocs_core/noncopyable.h"
 
-class ADCReader : public IJSONReader, public NonCopyable<> {
+namespace ocs {
+namespace app {
+
+class ADCReader : public core::IJSONReader, public core::NonCopyable<> {
 public:
     struct Params {
         adc_channel_t channel { ADC_CHANNEL_0 };
@@ -22,7 +25,7 @@ public:
     ~ADCReader();
 
     //! Read raw value for configured channel.
-    StatusCode read(cJSONSharedBuilder::Ptr& json) override;
+    status::StatusCode read(core::cJSONSharedBuilder::Ptr& json) override;
 
 private:
     const Params params_;
@@ -34,3 +37,6 @@ private:
     adc_oneshot_unit_handle_t unit_handle_ { nullptr };
     adc_cali_handle_t calibration_handle_ { nullptr };
 };
+
+} // namespace app
+} // namespace ocs

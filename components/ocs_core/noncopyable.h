@@ -1,5 +1,8 @@
 #pragma once
 
+namespace ocs {
+namespace core {
+
 //! Base class for non-copyable objects.
 //!
 //! @note
@@ -17,3 +20,6 @@ protected:
     NonCopyable(const NonCopyable&) = delete;
     NonCopyable& operator=(const NonCopyable&) = delete;
 };
+
+} // namespace core
+} // namespace ocs

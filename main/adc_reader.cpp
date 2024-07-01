@@ -1,8 +1,11 @@
 #include <cstring>
 
 #include "adc_reader.h"
-#include "cjson_object_formatter.h"
+#include "ocs_core/cjson_object_formatter.h"
 #include "types.h"
+
+namespace ocs {
+namespace app {
 
 ADCReader::ADCReader(ADCReader::Params params)
     : params_(params) {
@@ -31,11 +34,11 @@ ADCReader::~ADCReader() {
     ESP_ERROR_CHECK(adc_cali_delete_scheme_line_fitting(calibration_handle_));
 }
 
-StatusCode ADCReader::read(cJSONSharedBuilder::Ptr& json) {
+status::StatusCode ADCReader::read(core::cJSONSharedBuilder::Ptr& json) {
     int raw = 0;
     ESP_ERROR_CHECK(adc_oneshot_read(unit_handle_, params_.channel, &raw));
 
-    cJSONObjectFormatter formatter(json.get());
+    core::cJSONObjectFormatter formatter(json.get());
 
     formatter.add_number_cs(
         soil_moisture_characteristic_to_str(SoilMoistureCharacteristic::Raw), raw);
@@ -47,5 +50,8 @@ StatusCode ADCReader::read(cJSONSharedBuilder::Ptr& json) {
         soil_moisture_characteristic_to_str(SoilMoistureCharacteristic::Voltage),
         voltage);
 
-    return StatusCode::OK;
+    return status::StatusCode::OK;
 }
+
+} // namespace app
+} // namespace ocs

@@ -1,5 +1,8 @@
 #include "types.h"
 
+namespace ocs {
+namespace app {
+
 const char* soil_status_to_str(SoilStatus status) {
     switch (status) {
     case SoilStatus::Dry:
@@ -40,3 +43,6 @@ const char* soil_moisture_characteristic_to_str(SoilMoistureCharacteristic c) {
 
     return "<none>";
 }
+
+} // namespace app
+} // namespace ocs

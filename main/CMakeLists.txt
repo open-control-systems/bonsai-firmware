@@ -4,10 +4,6 @@ idf_component_register(
     "adc_reader.cpp"
     "soil_moisture_monitor.cpp"
     "yl69_moisture_reader.cpp"
-    "console_json_writer.cpp"
-    "cjson_object_formatter.cpp"
-    "cjson_array_formatter.cpp"
-    "status_code_to_str.cpp"
     "gpio_config.cpp"
     "types.cpp"
 
@@ -16,6 +12,8 @@ idf_component_register(
     "json"
     "esp_adc"
     "driver"
+    "ocs_core"
+    "ocs_status"
 
     INCLUDE_DIRS
     "."

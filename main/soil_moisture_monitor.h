@@ -5,11 +5,14 @@
 
 #include "driver/gpio.h"
 
-#include "ijson_reader.h"
-#include "ijson_writer.h"
-#include "noncopyable.h"
+#include "ocs_core/ijson_reader.h"
+#include "ocs_core/ijson_writer.h"
+#include "ocs_core/noncopyable.h"
 
-class SoilMoistureMonitor : public NonCopyable<> {
+namespace ocs {
+namespace app {
+
+class SoilMoistureMonitor : public core::NonCopyable<> {
 public:
     struct Params {
         //! Wait for some time for a switching scheme to be powered on.
@@ -23,7 +26,9 @@ public:
     };
 
     //! Initialize.
-    SoilMoistureMonitor(Params params, IJSONReader& reader, IJSONWriter& writer);
+    SoilMoistureMonitor(Params params,
+                        core::IJSONReader& reader,
+                        core::IJSONWriter& writer);
 
     //! Start monitoring soil status.
     //!
@@ -37,6 +42,9 @@ private:
 
     const Params params_;
 
-    IJSONReader& reader_;
-    IJSONWriter& writer_;
+    core::IJSONReader& reader_;
+    core::IJSONWriter& writer_;
 };
+
+} // namespace app
+} // namespace ocs

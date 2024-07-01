@@ -1,7 +1,10 @@
 #include <cassert>
 
-#include "cjson_array_formatter.h"
-#include "cjson_builder.h"
+#include "ocs_core/cjson_array_formatter.h"
+#include "ocs_core/cjson_builder.h"
+
+namespace ocs {
+namespace core {
 
 cJSONArrayFormatter::cJSONArrayFormatter(cJSON* json)
     : json_(json) {
@@ -21,3 +24,6 @@ bool cJSONArrayFormatter::append_uint16(uint16_t value) {
     item.release();
     return true;
 }
+
+} // namespace core
+} // namespace ocs

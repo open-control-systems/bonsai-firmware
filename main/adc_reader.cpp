@@ -34,21 +34,11 @@ ADCReader::~ADCReader() {
     ESP_ERROR_CHECK(adc_cali_delete_scheme_line_fitting(calibration_handle_));
 }
 
-status::StatusCode ADCReader::read(core::cJSONSharedBuilder::Ptr& json) {
-    int raw = 0;
-    ESP_ERROR_CHECK(adc_oneshot_read(unit_handle_, params_.channel, &raw));
+status::StatusCode ADCReader::read(Telemetry& telemetry) {
+    ESP_ERROR_CHECK(adc_oneshot_read(unit_handle_, params_.channel, &telemetry.raw));
 
-    core::cJSONObjectFormatter formatter(json.get());
-
-    formatter.add_number_cs(
-        soil_moisture_characteristic_to_str(SoilMoistureCharacteristic::Raw), raw);
-
-    int voltage = 0;
-    ESP_ERROR_CHECK(adc_cali_raw_to_voltage(calibration_handle_, raw, &voltage));
-
-    formatter.add_number_cs(
-        soil_moisture_characteristic_to_str(SoilMoistureCharacteristic::Voltage),
-        voltage);
+    ESP_ERROR_CHECK(
+        adc_cali_raw_to_voltage(calibration_handle_, telemetry.raw, &telemetry.voltage));
 
     return status::StatusCode::OK;
 }

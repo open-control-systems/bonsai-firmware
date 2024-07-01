@@ -4,9 +4,9 @@
 #include "driver/gpio.h"
 
 #include "adc_reader.h"
+#include "console_telemetry_writer.h"
 #include "gpio_config.h"
-#include "ocs_core/console_json_writer.h"
-#include "ocs_core/ijson_writer.h"
+#include "itelemetry_writer.h"
 #include "soil_moisture_monitor.h"
 #include "yl69_moisture_reader.h"
 
@@ -15,12 +15,12 @@ using namespace ocs::app;
 
 namespace {
 
-using IJSONWriterPtr = std::unique_ptr<core::IJSONWriter>;
+using ITelemetryWriterPtr = std::unique_ptr<ITelemetryWriter>;
 
-IJSONWriterPtr select_json_writer() {
-    IJSONWriterPtr ret;
+ITelemetryWriterPtr select_json_writer() {
+    ITelemetryWriterPtr ret;
 
-    ret = std::make_unique<core::ConsoleJSONWriter>();
+    ret = std::make_unique<ConsoleTelemetryWriter>();
 
     return ret;
 }

@@ -4,6 +4,7 @@ idf_component_register(
     "adc_reader.cpp"
     "soil_moisture_monitor.cpp"
     "yl69_moisture_reader.cpp"
+    "console_telemetry_writer.cpp"
     "gpio_config.cpp"
     "types.cpp"
 

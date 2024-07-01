@@ -4,13 +4,13 @@
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_adc/adc_oneshot.h"
 
-#include "ocs_core/ijson_reader.h"
+#include "itelemetry_reader.h"
 #include "ocs_core/noncopyable.h"
 
 namespace ocs {
 namespace app {
 
-class ADCReader : public core::IJSONReader, public core::NonCopyable<> {
+class ADCReader : public ITelemetryReader, public core::NonCopyable<> {
 public:
     struct Params {
         adc_channel_t channel { ADC_CHANNEL_0 };
@@ -25,7 +25,7 @@ public:
     ~ADCReader();
 
     //! Read raw value for configured channel.
-    status::StatusCode read(core::cJSONSharedBuilder::Ptr& json) override;
+    status::StatusCode read(Telemetry& telemetry) override;
 
 private:
     const Params params_;

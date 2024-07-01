@@ -27,5 +27,11 @@ enum class SoilMoistureCharacteristic {
 
 const char* soil_moisture_characteristic_to_str(SoilMoistureCharacteristic);
 
+struct Telemetry {
+    SoilStatus status { SoilStatus::None };
+    int raw { 0 };
+    int voltage { 0 };
+};
+
 } // namespace app
 } // namespace ocs

@@ -5,8 +5,8 @@
 
 #include "driver/gpio.h"
 
-#include "ocs_core/ijson_reader.h"
-#include "ocs_core/ijson_writer.h"
+#include "itelemetry_reader.h"
+#include "itelemetry_writer.h"
 #include "ocs_core/noncopyable.h"
 
 namespace ocs {
@@ -27,8 +27,8 @@ public:
 
     //! Initialize.
     SoilMoistureMonitor(Params params,
-                        core::IJSONReader& reader,
-                        core::IJSONWriter& writer);
+                        ITelemetryReader& reader,
+                        ITelemetryWriter& writer);
 
     //! Start monitoring soil status.
     //!
@@ -42,8 +42,8 @@ private:
 
     const Params params_;
 
-    core::IJSONReader& reader_;
-    core::IJSONWriter& writer_;
+    ITelemetryReader& reader_;
+    ITelemetryWriter& writer_;
 };
 
 } // namespace app

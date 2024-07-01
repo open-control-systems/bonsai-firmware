@@ -6,8 +6,8 @@ namespace ocs {
 namespace app {
 
 SoilMoistureMonitor::SoilMoistureMonitor(SoilMoistureMonitor::Params params,
-                                         core::IJSONReader& reader,
-                                         core::IJSONWriter& writer)
+                                         ITelemetryReader& reader,
+                                         ITelemetryWriter& writer)
     : params_(params)
     , reader_(reader)
     , writer_(writer) {
@@ -18,11 +18,11 @@ void SoilMoistureMonitor::start() {
         relay_turn_on_();
         vTaskDelay(params_.power_up_delay_interval);
 
-        auto data = core::cJSONSharedBuilder::make_json();
+        Telemetry telemetry;
 
-        auto status = reader_.read(data);
+        auto status = reader_.read(telemetry);
         if (status == status::StatusCode::OK) {
-            status = writer_.write(data);
+            status = writer_.write(telemetry);
             if (status != status::StatusCode::OK) {
                 fprintf(stderr, "Failed to write data: err=%s\n",
                         status::code_to_str(status));

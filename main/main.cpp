@@ -30,21 +30,23 @@ ITelemetryWriterPtr select_json_writer() {
 extern "C" void app_main(void) {
     ADCReader adc_reader(ADCReader::Params {
         // GPIO 34 -> ADC CHANNEL 6
-        .channel = ADC_CHANNEL_6,
+        .channel = static_cast<adc_channel_t>(CONFIG_SMC_SENSOR_ADC_CHANNEL),
         .atten = ADC_ATTEN_DB_12,
         .bitwidth = ADC_BITWIDTH_10,
     });
 
-    YL69MoistureReader moisture_reader(800, adc_reader);
+    YL69MoistureReader moisture_reader(CONFIG_OCS_MOISTURE_SENSOR_THRESHOLD, adc_reader);
     auto moisture_writer = select_json_writer();
+    YL69MoistureReader moisture_reader(CONFIG_SMC_SENSOR_THRESHOLD, adc_reader);
 
     GPIOConfig config;
 
     SoilMoistureMonitor monitor(
         SoilMoistureMonitor::Params {
-            .power_up_delay_interval = pdMS_TO_TICKS(1000 * 1),
-            .read_delay_interval = pdMS_TO_TICKS(1000 * 60 * 30),
-            .relay_gpio = GPIO_NUM_26,
+            .power_up_delay_interval =
+                pdMS_TO_TICKS(1000 * CONFIG_SMC_POWER_ON_DELAY_INTERVAL),
+            .read_delay_interval = pdMS_TO_TICKS(1000 * CONFIG_SMC_READ_INTERVAL),
+            .relay_gpio = static_cast<gpio_num_t>(CONFIG_SMC_RELAY_GPIO),
         },
         moisture_reader, *moisture_writer);
 

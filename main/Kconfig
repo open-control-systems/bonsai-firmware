@@ -1,0 +1,31 @@
+menu "Soil Control System Configuration"
+    config SMC_SENSOR_ADC_CHANNEL
+        int "Moisture sensor ADC"
+        default 6
+        help
+            ESP32 ADC channel to read the soil moisture values.
+
+    config SMC_SENSOR_THRESHOLD
+        int "Moisture sensor threshold"
+        default 800
+        help
+            Soil moisture threshold to determine if the soil is wet/dry.
+
+    config SMC_RELAY_GPIO
+        int "Enable/disable relay GPIO"
+        default 26
+        help
+            ESP32 GPIO to control the relay.
+
+    config SMC_READ_INTERVAL
+        int "Soil moisture read interval, in seconds"
+        default 1800
+        help
+            How often the control system is enabled to read the soil moisture value.
+
+    config SMC_POWER_ON_DELAY_INTERVAL
+        int "Power on delay interval, in seconds"
+        default 1
+        help
+            How long to wait after the control relay is energised.
+endmenu

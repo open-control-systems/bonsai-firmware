@@ -15,11 +15,11 @@ namespace app {
 class SoilMoistureMonitor : public core::NonCopyable<> {
 public:
     struct Params {
-        //! Wait for some time for a switching scheme to be powered on.
-        TickType_t power_up_delay_interval { pdMS_TO_TICKS(0) };
+        //! Interval to wait after the control system is powered on.
+        TickType_t power_on_delay_interval { pdMS_TO_TICKS(0) };
 
         //! Too frequent reads may damage the sensor, read the corresponding datasheet.
-        TickType_t read_delay_interval { pdMS_TO_TICKS(0) };
+        TickType_t read_interval { pdMS_TO_TICKS(0) };
 
         //! Relay GPIO.
         gpio_num_t relay_gpio { GPIO_NUM_NC };

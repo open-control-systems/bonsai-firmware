@@ -17,7 +17,7 @@ namespace {
 
 using ITelemetryWriterPtr = std::unique_ptr<ITelemetryWriter>;
 
-ITelemetryWriterPtr select_json_writer() {
+ITelemetryWriterPtr select_telemetry_writer() {
     ITelemetryWriterPtr ret;
 
     ret = std::make_unique<ConsoleTelemetryWriter>();
@@ -35,17 +35,16 @@ extern "C" void app_main(void) {
         .bitwidth = ADC_BITWIDTH_10,
     });
 
-    YL69MoistureReader moisture_reader(CONFIG_OCS_MOISTURE_SENSOR_THRESHOLD, adc_reader);
-    auto moisture_writer = select_json_writer();
     YL69MoistureReader moisture_reader(CONFIG_SMC_SENSOR_THRESHOLD, adc_reader);
+    auto moisture_writer = select_telemetry_writer();
 
     GPIOConfig config;
 
     SoilMoistureMonitor monitor(
         SoilMoistureMonitor::Params {
-            .power_up_delay_interval =
+            .power_on_delay_interval =
                 pdMS_TO_TICKS(1000 * CONFIG_SMC_POWER_ON_DELAY_INTERVAL),
-            .read_delay_interval = pdMS_TO_TICKS(1000 * CONFIG_SMC_READ_INTERVAL),
+            .read_interval = pdMS_TO_TICKS(1000 * CONFIG_SMC_READ_INTERVAL),
             .relay_gpio = static_cast<gpio_num_t>(CONFIG_SMC_RELAY_GPIO),
         },
         moisture_reader, *moisture_writer);

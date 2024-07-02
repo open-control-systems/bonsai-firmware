@@ -16,7 +16,7 @@ SoilMoistureMonitor::SoilMoistureMonitor(SoilMoistureMonitor::Params params,
 void SoilMoistureMonitor::start() {
     while (true) {
         relay_turn_on_();
-        vTaskDelay(params_.power_up_delay_interval);
+        vTaskDelay(params_.power_on_delay_interval);
 
         Telemetry telemetry;
 
@@ -32,7 +32,7 @@ void SoilMoistureMonitor::start() {
         }
 
         relay_turn_off_();
-        vTaskDelay(params_.read_delay_interval);
+        vTaskDelay(params_.read_interval);
     }
 }
 

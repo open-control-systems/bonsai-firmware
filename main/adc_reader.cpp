@@ -2,7 +2,7 @@
 
 #include "adc_reader.h"
 #include "ocs_core/cjson_object_formatter.h"
-#include "types.h"
+#include "telemetry.h"
 
 namespace ocs {
 namespace app {

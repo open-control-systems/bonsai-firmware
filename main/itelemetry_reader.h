@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ocs_status/code.h"
-#include "types.h"
+#include "telemetry.h"
 
 namespace ocs {
 namespace app {

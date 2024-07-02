@@ -2,7 +2,7 @@
 
 #include "itelemetry_writer.h"
 #include "ocs_core/noncopyable.h"
-#include "types.h"
+#include "telemetry.h"
 
 namespace ocs {
 namespace app {

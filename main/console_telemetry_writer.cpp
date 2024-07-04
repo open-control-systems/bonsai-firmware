@@ -8,7 +8,7 @@ namespace app {
 
 namespace {
 
-const char* log_tag = "console-json-writer";
+const char* log_tag = "console-telemetry-writer";
 
 } // namespace
 

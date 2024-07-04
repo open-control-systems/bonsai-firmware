@@ -1,12 +1,18 @@
 #include <cstring>
 
-#include "esp_netif.h"
+#include "esp_log.h"
 
 #include "http_server.h"
 #include "telemetry_formatter.h"
 
 namespace ocs {
 namespace app {
+
+namespace {
+
+const char* log_tag = "http-server";
+
+} // namespace
 
 HTTPServer::HTTPServer() {
     config_ = HTTPD_DEFAULT_CONFIG();
@@ -33,21 +39,28 @@ status::StatusCode HTTPServer::write(const Telemetry& telemetry) {
 }
 
 status::StatusCode HTTPServer::start() {
-    const auto ret = httpd_start(&handle_, &config_);
-    if (ret != ESP_OK) {
-        fprintf(stderr, "http-server: failed to start server: err=%d\n", ret);
+    auto err = httpd_start(&handle_, &config_);
+    if (err != ESP_OK) {
+        ESP_LOGE(log_tag, "httpd_start(): %s", esp_err_to_name(err));
         return status::StatusCode::Error;
     }
 
     // Register URI handlers
-    httpd_register_uri_handler(handle_, &uri_get_telemetry_);
+    err = httpd_register_uri_handler(handle_, &uri_get_telemetry_);
+    if (err != ESP_OK) {
+        ESP_LOGE(log_tag, "httpd_register_uri_handler(): %s", esp_err_to_name(err));
+        return status::StatusCode::Error;
+    }
 
     return status::StatusCode::OK;
 }
 
 status::StatusCode HTTPServer::stop() {
     if (handle_) {
-        httpd_stop(handle_);
+        const auto err = httpd_stop(handle_);
+        if (err != ESP_OK) {
+            ESP_LOGE(log_tag, "httpd_stop(): %s", esp_err_to_name(err));
+        }
         handle_ = nullptr;
     }
 
@@ -69,7 +82,10 @@ void HTTPServer::handle_get_telemetry_(httpd_req_t* req) {
         formatter.format_json(telemetry_);
     }
 
-    httpd_resp_send(req, formatter.c_str(), HTTPD_RESP_USE_STRLEN);
+    const auto err = httpd_resp_send(req, formatter.c_str(), HTTPD_RESP_USE_STRLEN);
+    if (err != ESP_OK) {
+        ESP_LOGE(log_tag, "httpd_resp_send(): %s", esp_err_to_name(err));
+    }
 }
 
 } // namespace app

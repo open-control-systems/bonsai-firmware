@@ -12,7 +12,7 @@ namespace app {
 
 namespace {
 
-const char* TAG = "control-pipeline";
+const char* log_tag = "control-pipeline";
 
 } // namespace
 
@@ -69,12 +69,12 @@ void ControlPipeline::start() {
         status = wifi_network_->wait();
     }
     if (status != status::StatusCode::OK) {
-        ESP_LOGE(TAG, "failed to start the WiFi connection process: status=%s",
+        ESP_LOGE(log_tag, "failed to start the WiFi connection process: status=%s",
                  status::code_to_str(status));
 
         status = wifi_network_->stop();
         if (status != status::StatusCode::OK) {
-            ESP_LOGE(TAG, "failed to stop the WiFi connection process: status=%s",
+            ESP_LOGE(log_tag, "failed to stop the WiFi connection process: status=%s",
                      status::code_to_str(status));
         }
     }

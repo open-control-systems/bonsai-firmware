@@ -1,9 +1,17 @@
-#include "soil_moisture_monitor.h"
+#include "esp_log.h"
+
 #include "ocs_status/code.h"
 #include "ocs_status/code_to_str.h"
+#include "soil_moisture_monitor.h"
 
 namespace ocs {
 namespace app {
+
+namespace {
+
+const char* log_tag = "soil-moisture-monitor";
+
+} // namespace
 
 SoilMoistureMonitor::SoilMoistureMonitor(SoilMoistureMonitor::Params params,
                                          ITelemetryReader& reader,
@@ -24,11 +32,12 @@ void SoilMoistureMonitor::start() {
         if (status == status::StatusCode::OK) {
             status = writer_.write(telemetry);
             if (status != status::StatusCode::OK) {
-                fprintf(stderr, "Failed to write data: err=%s\n",
-                        status::code_to_str(status));
+                ESP_LOGE(log_tag, "failed to write data: code=%s",
+                         status::code_to_str(status));
             }
         } else {
-            fprintf(stderr, "Failed to read data: err=%s\n", status::code_to_str(status));
+            ESP_LOGE(log_tag, "failed to read data: code=%s",
+                     status::code_to_str(status));
         }
 
         relay_turn_off_();

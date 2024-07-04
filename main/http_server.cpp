@@ -14,8 +14,9 @@ const char* log_tag = "http-server";
 
 } // namespace
 
-HTTPServer::HTTPServer() {
+HTTPServer::HTTPServer(const Params& params) {
     config_ = HTTPD_DEFAULT_CONFIG();
+    config_.server_port = params.server_port;
 
     memset(&uri_get_telemetry_, 0, sizeof(uri_get_telemetry_));
 

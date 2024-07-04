@@ -12,8 +12,13 @@ namespace app {
 
 class HTTPServer : public ITelemetryWriter, public core::NonCopyable<> {
 public:
+    struct Params {
+        //! TCP port to accept incoming connections.
+        unsigned server_port { 80 };
+    };
+
     //! Initialize.
-    HTTPServer();
+    explicit HTTPServer(const Params& params);
 
     //! Destroy.
     ~HTTPServer();

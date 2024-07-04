@@ -14,6 +14,9 @@ public:
     status::StatusCode write(const Telemetry& telemetry) override;
 
     //! Add telemetry writer.
+    //!
+    //! @remarks
+    //!  All writers should be added before the main loop is started.
     void add(ITelemetryWriter& writer);
 
 private:

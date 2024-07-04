@@ -46,6 +46,9 @@ public:
     status::StatusCode wait();
 
     //! Add handler to be notified about the WiFi network connection status.
+    //!
+    //! @remarks
+    //!  All handlers should be added before the network is started.
     void add(INetworkHandler& handler);
 
 private:

@@ -40,8 +40,17 @@ ControlPipeline::ControlPipeline() {
     }));
     wifi_network_->add(*this);
 
-    http_server_.reset(new (std::nothrow) HTTPServer());
+    http_params_.reset(new (std::nothrow) HTTPServer::Params {
+        .server_port = 80,
+    });
+
+    http_server_.reset(new (std::nothrow) HTTPServer(*http_params_));
     fanout_telemetry_writer_->add(*http_server_);
+
+    mdns_provider_.reset(new (std::nothrow) net::MDNSProvider(net::MDNSProvider::Params {
+        .hostname = "soil-control-system",
+        .instance_name = "Soil Control System",
+    }));
 
     gpio_config_.reset(new (std::nothrow) GPIOConfig());
 
@@ -69,14 +78,32 @@ void ControlPipeline::start() {
         status = wifi_network_->wait();
     }
     if (status != status::StatusCode::OK) {
-        ESP_LOGE(log_tag, "failed to start the WiFi connection process: status=%s",
+        ESP_LOGE(log_tag, "failed to start the WiFi connection process: code=%s",
                  status::code_to_str(status));
 
         status = wifi_network_->stop();
         if (status != status::StatusCode::OK) {
-            ESP_LOGE(log_tag, "failed to stop the WiFi connection process: status=%s",
+            ESP_LOGE(log_tag, "failed to stop the WiFi connection process: code=%s",
                      status::code_to_str(status));
         }
+    }
+
+    status = mdns_provider_->start();
+    if (status == status::StatusCode::OK) {
+        status = mdns_provider_->add_service("_http", "_tcp", http_params_->server_port);
+        if (status == status::StatusCode::OK) {
+            mdns_provider_->add_service_txt_records("_http", "_tcp",
+                                                    net::MDNSProvider::TxtRecordList {
+                                                        {
+                                                            "telemetry",
+                                                            "/telemetry",
+                                                        },
+                                                    });
+        }
+    }
+    if (status != status::StatusCode::OK) {
+        ESP_LOGE(log_tag, "failed to start mDNS service: code=%s",
+                 status::code_to_str(status));
     }
 
     soil_moisture_monitor_->start();

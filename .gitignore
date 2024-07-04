@@ -93,6 +93,7 @@ dkms.conf
 # ESP32 build files
 sdkconfig.old
 sdkconfig
+managed_components
 
 # Kicad
 *.000

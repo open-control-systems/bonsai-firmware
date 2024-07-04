@@ -6,6 +6,7 @@
 #include "gpio_config.h"
 #include "http_server.h"
 #include "ocs_core/noncopyable.h"
+#include "ocs_net/mdns_provider.h"
 #include "ocs_net/wifi_network.h"
 #include "ocs_storage/flash_storage.h"
 #include "soil_moisture_monitor.h"
@@ -36,7 +37,9 @@ private:
 
     std::unique_ptr<storage::FlashStorage> flash_storage_;
     std::unique_ptr<net::WiFiNetwork> wifi_network_;
+    std::unique_ptr<HTTPServer::Params> http_params_;
     std::unique_ptr<HTTPServer> http_server_;
+    std::unique_ptr<net::MDNSProvider> mdns_provider_;
 
     std::unique_ptr<GPIOConfig> gpio_config_;
     std::unique_ptr<SoilMoistureMonitor> soil_moisture_monitor_;

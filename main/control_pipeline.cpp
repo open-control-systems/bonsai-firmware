@@ -34,22 +34,20 @@ ControlPipeline::ControlPipeline() {
     flash_storage_.reset(new (std::nothrow) storage::FlashStorage());
 
     wifi_network_.reset(new (std::nothrow) net::WiFiNetwork(net::WiFiNetwork::Params {
-        .max_retry_count = 3,
+        .max_retry_count = CONFIG_OCS_NETWORK_WIFI_STA_RETRY_COUNT,
         .ssid = CONFIG_OCS_NETWORK_WIFI_STA_SSID,
         .password = CONFIG_OCS_NETWORK_WIFI_STA_PASSWORD,
     }));
     wifi_network_->add(*this);
 
-    http_params_.reset(new (std::nothrow) HTTPServer::Params {
-        .server_port = 80,
-    });
-
-    http_server_.reset(new (std::nothrow) HTTPServer(*http_params_));
+    http_server_.reset(new (std::nothrow) HTTPServer(HTTPServer::Params {
+        .server_port = CONFIG_OCS_NETWORK_HTTP_SERVER_PORT,
+    }));
     fanout_telemetry_writer_->add(*http_server_);
 
     mdns_provider_.reset(new (std::nothrow) net::MDNSProvider(net::MDNSProvider::Params {
-        .hostname = "soil-control-system",
-        .instance_name = "Soil Control System",
+        .hostname = CONFIG_OCS_NETWORK_MDNS_HOSTNAME,
+        .instance_name = CONFIG_OCS_NETWORK_MDNS_INSTANCE_NAME,
     }));
 
     gpio_config_.reset(new (std::nothrow) GPIOConfig());
@@ -90,7 +88,8 @@ void ControlPipeline::start() {
 
     status = mdns_provider_->start();
     if (status == status::StatusCode::OK) {
-        status = mdns_provider_->add_service("_http", "_tcp", http_params_->server_port);
+        status = mdns_provider_->add_service("_http", "_tcp",
+                                             CONFIG_OCS_NETWORK_HTTP_SERVER_PORT);
         if (status == status::StatusCode::OK) {
             mdns_provider_->add_service_txt_records("_http", "_tcp",
                                                     net::MDNSProvider::TxtRecordList {

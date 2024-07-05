@@ -37,7 +37,6 @@ private:
 
     std::unique_ptr<storage::FlashStorage> flash_storage_;
     std::unique_ptr<net::WiFiNetwork> wifi_network_;
-    std::unique_ptr<HTTPServer::Params> http_params_;
     std::unique_ptr<HTTPServer> http_server_;
     std::unique_ptr<net::MDNSProvider> mdns_provider_;
 

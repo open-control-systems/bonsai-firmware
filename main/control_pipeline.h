@@ -25,7 +25,7 @@ public:
     //! Stop providing telemetry data via HTTP server.
     void handle_disconnected() override;
 
-    //! Start soil moisture control.
+    //! Start the soil control system.
     void start();
 
 private:

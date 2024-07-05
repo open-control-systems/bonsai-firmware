@@ -1,0 +1,3 @@
+[submodule "ocs-esp-components"]
+	path = ocs-esp-components
+	url = git@github.com:open-control-systems/esp-components.git

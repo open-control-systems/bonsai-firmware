@@ -1,6 +1,6 @@
-# Soil Moisture Monitor
+# Soil Moisture Control
 
-This project aims to monitor soil moisture levels using an ESP32 board and a soil moisture sensor. The setup includes periodic readings and controlled power management for the sensor to enhance its longevity.
+This project aims to control soil moisture levels using an ESP32 board and a soil moisture sensor. The setup includes periodic readings and controlled power management for the sensor to enhance its longevity.
 
 ## Features
 
@@ -13,7 +13,7 @@ This project aims to monitor soil moisture levels using an ESP32 board and a soi
 **Clone repository**
 
 ```
-git clone git@github.com:open-control-systems/soil-moisture-monitor.git --recursive
+git clone git@github.com:open-control-systems/soil-moisture-control.git --recursive
 ```
 
 **Set Up the Hardware:**

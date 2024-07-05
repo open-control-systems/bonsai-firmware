@@ -10,6 +10,12 @@ This project aims to monitor soil moisture levels using an ESP32 board and a soi
 
 ## Installation
 
+**Clone repository**
+
+```
+git clone git@github.com:open-control-systems/soil-moisture-monitor.git --recursive
+```
+
 **Set Up the Hardware:**
 
 - Connect the soil moisture sensor to the ESP32 board.

@@ -8,16 +8,15 @@ idf_component_register(
     "gpio_config.cpp"
     "telemetry.cpp"
     "telemetry_formatter.cpp"
-    "http_server.cpp"
     "fanout_telemetry_writer.cpp"
     "control_pipeline.cpp"
+    "http_telemetry_writer.cpp"
 
     REQUIRES
     "freertos"
     "json"
     "esp_adc"
     "driver"
-    "esp_http_server"
     "ocs_core"
     "ocs_status"
     "ocs_net"

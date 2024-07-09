@@ -3,6 +3,7 @@
 #include "adc_reader.h"
 #include "console_telemetry_writer.h"
 #include "control_pipeline.h"
+#include "http_telemetry_writer.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_storage/flash_storage.h"
 #include "yl69_moisture_reader.h"
@@ -40,15 +41,17 @@ ControlPipeline::ControlPipeline() {
     }));
     wifi_network_->add(*this);
 
-    http_server_.reset(new (std::nothrow) HTTPServer(HTTPServer::Params {
+    http_server_.reset(new (std::nothrow) net::HTTPServer(net::HTTPServer::Params {
         .server_port = CONFIG_OCS_NETWORK_HTTP_SERVER_PORT,
     }));
-    fanout_telemetry_writer_->add(*http_server_);
 
     mdns_provider_.reset(new (std::nothrow) net::MDNSProvider(net::MDNSProvider::Params {
         .hostname = CONFIG_OCS_NETWORK_MDNS_HOSTNAME,
         .instance_name = CONFIG_OCS_NETWORK_MDNS_INSTANCE_NAME,
     }));
+
+    http_telemetry_writer_.reset(new (std::nothrow) HTTPTelemetryWriter(*http_server_));
+    fanout_telemetry_writer_->add(*http_telemetry_writer_);
 
     gpio_config_.reset(new (std::nothrow) GPIOConfig());
 

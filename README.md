@@ -49,7 +49,7 @@ This will display the moisture readings logged by the sensor.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details
+This project is licensed under the MPL 2.0 License - see the LICENSE file for details.
 
 ## Contact
 

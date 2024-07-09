@@ -37,6 +37,9 @@ public:
     void start();
 
 private:
+    bool try_start_wifi_();
+    void try_start_mdns_();
+
     std::unique_ptr<ITelemetryReader> adc_reader_;
     std::unique_ptr<ITelemetryReader> moisture_reader_;
 

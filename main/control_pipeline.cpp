@@ -82,26 +82,44 @@ void ControlPipeline::handle_disconnected() {
 }
 
 void ControlPipeline::start() {
-    auto status = wifi_network_->start();
-    if (status == status::StatusCode::OK) {
-        status = wifi_network_->wait();
+    if (try_start_wifi_()) {
+        try_start_mdns_();
     }
-    if (status != status::StatusCode::OK) {
+
+    soil_moisture_monitor_->start();
+}
+
+bool ControlPipeline::try_start_wifi_() {
+    auto code = wifi_network_->start();
+    if (code != status::StatusCode::OK) {
+        return false;
+    }
+
+    code = wifi_network_->wait();
+    if (code != status::StatusCode::OK) {
         ESP_LOGE(log_tag, "failed to start the WiFi connection process: code=%s",
-                 status::code_to_str(status));
+                 status::code_to_str(code));
 
-        status = wifi_network_->stop();
-        if (status != status::StatusCode::OK) {
+        code = wifi_network_->stop();
+        if (code != status::StatusCode::OK) {
             ESP_LOGE(log_tag, "failed to stop the WiFi connection process: code=%s",
-                     status::code_to_str(status));
+                     status::code_to_str(code));
         }
+
+        wifi_network_ = nullptr;
+
+        return false;
     }
 
-    status = mdns_provider_->start();
-    if (status == status::StatusCode::OK) {
-        status = mdns_provider_->add_service("_http", "_tcp",
-                                             CONFIG_OCS_NETWORK_HTTP_SERVER_PORT);
-        if (status == status::StatusCode::OK) {
+    return true;
+}
+
+void ControlPipeline::try_start_mdns_() {
+    auto code = mdns_provider_->start();
+    if (code == status::StatusCode::OK) {
+        code = mdns_provider_->add_service("_http", "_tcp",
+                                           CONFIG_OCS_NETWORK_HTTP_SERVER_PORT);
+        if (code == status::StatusCode::OK) {
             mdns_provider_->add_service_txt_records("_http", "_tcp",
                                                     net::MDNSProvider::TxtRecordList {
                                                         {
@@ -111,12 +129,11 @@ void ControlPipeline::start() {
                                                     });
         }
     }
-    if (status != status::StatusCode::OK) {
-        ESP_LOGE(log_tag, "failed to start mDNS service: code=%s",
-                 status::code_to_str(status));
-    }
 
-    soil_moisture_monitor_->start();
+    if (code != status::StatusCode::OK) {
+        ESP_LOGE(log_tag, "failed to start mDNS service: code=%s",
+                 status::code_to_str(code));
+    }
 }
 
 } // namespace app

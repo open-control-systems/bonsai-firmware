@@ -15,7 +15,9 @@
 
 #include "itelemetry_reader.h"
 #include "itelemetry_writer.h"
+#include "ocs_core/cond.h"
 #include "ocs_core/noncopyable.h"
+#include "ocs_core/static_mutex.h"
 
 namespace ocs {
 namespace app {
@@ -44,6 +46,9 @@ public:
     //!  - Blocking call.
     void start();
 
+    //! Reread soil moisture data.
+    void reload();
+
 private:
     void relay_turn_on_();
     void relay_turn_off_();
@@ -52,6 +57,9 @@ private:
 
     ITelemetryReader& reader_;
     ITelemetryWriter& writer_;
+
+    core::StaticMutex mu_;
+    core::Cond cond_;
 };
 
 } // namespace app

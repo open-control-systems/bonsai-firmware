@@ -26,7 +26,8 @@ SoilMoistureMonitor::SoilMoistureMonitor(SoilMoistureMonitor::Params params,
                                          ITelemetryWriter& writer)
     : params_(params)
     , reader_(reader)
-    , writer_(writer) {
+    , writer_(writer)
+    , cond_(mu_) {
 }
 
 void SoilMoistureMonitor::start() {
@@ -49,8 +50,15 @@ void SoilMoistureMonitor::start() {
         }
 
         relay_turn_off_();
-        vTaskDelay(params_.read_interval);
+
+        core::StaticMutex::Lock lock(mu_);
+        cond_.wait(params_.read_interval);
     }
+}
+
+void SoilMoistureMonitor::reload() {
+    core::StaticMutex::Lock lock(mu_);
+    cond_.signal();
 }
 
 void SoilMoistureMonitor::relay_turn_on_() {

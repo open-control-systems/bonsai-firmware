@@ -72,7 +72,8 @@ ControlPipeline::ControlPipeline() {
         },
         *moisture_reader_, *fanout_telemetry_writer_));
 
-    http_command_handler_.reset(new (std::nothrow) HTTPCommandHandler(*http_server_));
+    http_command_handler_.reset(
+        new (std::nothrow) HTTPCommandHandler(*http_server_, *soil_moisture_monitor_));
 }
 
 void ControlPipeline::handle_connected() {
@@ -131,6 +132,10 @@ void ControlPipeline::try_start_mdns_() {
                                                         {
                                                             "command_reboot",
                                                             "/commands/reboot",
+                                                        },
+                                                        {
+                                                            "command_reload",
+                                                            "/commands/reload",
                                                         },
                                                     });
         }

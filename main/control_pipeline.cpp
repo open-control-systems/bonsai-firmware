@@ -71,6 +71,8 @@ ControlPipeline::ControlPipeline() {
             .relay_gpio = static_cast<gpio_num_t>(CONFIG_SMC_RELAY_GPIO),
         },
         *moisture_reader_, *fanout_telemetry_writer_));
+
+    http_command_handler_.reset(new (std::nothrow) HTTPCommandHandler(*http_server_));
 }
 
 void ControlPipeline::handle_connected() {
@@ -125,6 +127,10 @@ void ControlPipeline::try_start_mdns_() {
                                                         {
                                                             "telemetry",
                                                             "/telemetry",
+                                                        },
+                                                        {
+                                                            "command_reboot",
+                                                            "/commands/reboot",
                                                         },
                                                     });
         }

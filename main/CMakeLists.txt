@@ -11,6 +11,7 @@ idf_component_register(
     "fanout_telemetry_writer.cpp"
     "control_pipeline.cpp"
     "http_telemetry_writer.cpp"
+    "http_command_handler.cpp"
 
     REQUIRES
     "freertos"

@@ -12,6 +12,7 @@
 
 #include "fanout_telemetry_writer.h"
 #include "gpio_config.h"
+#include "http_command_handler.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_net/http_server.h"
 #include "ocs_net/mdns_provider.h"
@@ -55,6 +56,8 @@ private:
 
     std::unique_ptr<GPIOConfig> gpio_config_;
     std::unique_ptr<SoilMoistureMonitor> soil_moisture_monitor_;
+
+    std::unique_ptr<HTTPCommandHandler> http_command_handler_;
 };
 
 } // namespace app

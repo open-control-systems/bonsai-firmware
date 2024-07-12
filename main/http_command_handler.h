@@ -10,6 +10,7 @@
 
 #include "ocs_core/noncopyable.h"
 #include "ocs_net/http_server.h"
+#include "soil_moisture_monitor.h"
 
 namespace ocs {
 namespace app {
@@ -19,8 +20,9 @@ public:
     //! Initialize.
     //!
     //! @params
-    //!  - @p http_server to register HTTP commands.
-    explicit HTTPCommandHandler(net::HTTPServer& http_server);
+    //!  - @p server to register HTTP commands.
+    //!  - @p monitor to request a new soil moisture reading.
+    HTTPCommandHandler(net::HTTPServer& server, SoilMoistureMonitor& monitor);
 };
 
 } // namespace app

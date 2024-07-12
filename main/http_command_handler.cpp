@@ -13,8 +13,9 @@
 namespace ocs {
 namespace app {
 
-HTTPCommandHandler::HTTPCommandHandler(net::HTTPServer& http_server) {
-    http_server.add_GET("/commands/reboot", [](httpd_req_t* req) {
+HTTPCommandHandler::HTTPCommandHandler(net::HTTPServer& server,
+                                       SoilMoistureMonitor& monitor) {
+    server.add_GET("/commands/reboot", [](httpd_req_t* req) {
         const auto err = httpd_resp_send(req, "Rebooting...", HTTPD_RESP_USE_STRLEN);
         if (err != ESP_OK) {
             return status::StatusCode::Error;
@@ -22,6 +23,16 @@ HTTPCommandHandler::HTTPCommandHandler(net::HTTPServer& http_server) {
 
         vTaskDelay(pdMS_TO_TICKS(500));
         esp_restart();
+
+        return status::StatusCode::OK;
+    });
+    server.add_GET("/commands/reload", [&monitor](httpd_req_t* req) {
+        const auto err = httpd_resp_send(req, "Reloading...", HTTPD_RESP_USE_STRLEN);
+        if (err != ESP_OK) {
+            return status::StatusCode::Error;
+        }
+
+        monitor.reload();
 
         return status::StatusCode::OK;
     });

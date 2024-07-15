@@ -6,12 +6,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include "esp_log.h"
 #include "esp_system.h"
 
 #include "http_command_handler.h"
 
 namespace ocs {
 namespace app {
+
+namespace {
+
+const char* log_tag = "http-command-handler";
+
+} // namespace
 
 HTTPCommandHandler::HTTPCommandHandler(net::HTTPServer& server,
                                        SoilMoistureMonitor& monitor) {
@@ -20,6 +27,8 @@ HTTPCommandHandler::HTTPCommandHandler(net::HTTPServer& server,
         if (err != ESP_OK) {
             return status::StatusCode::Error;
         }
+
+        ESP_LOGI(log_tag, "Rebooting...");
 
         vTaskDelay(pdMS_TO_TICKS(500));
         esp_restart();
@@ -31,6 +40,8 @@ HTTPCommandHandler::HTTPCommandHandler(net::HTTPServer& server,
         if (err != ESP_OK) {
             return status::StatusCode::Error;
         }
+
+        ESP_LOGI(log_tag, "Reloading...");
 
         monitor.reload();
 

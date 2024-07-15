@@ -66,8 +66,8 @@ ControlPipeline::ControlPipeline() {
     soil_moisture_monitor_.reset(new (std::nothrow) SoilMoistureMonitor(
         SoilMoistureMonitor::Params {
             .power_on_delay_interval =
-                pdMS_TO_TICKS(1000 * CONFIG_SMC_POWER_ON_DELAY_INTERVAL),
-            .read_interval = pdMS_TO_TICKS(1000 * CONFIG_SMC_READ_INTERVAL),
+                (1000 * CONFIG_SMC_POWER_ON_DELAY_INTERVAL) / portTICK_PERIOD_MS,
+            .read_interval = (1000 * CONFIG_SMC_READ_INTERVAL) / portTICK_PERIOD_MS,
             .relay_gpio = static_cast<gpio_num_t>(CONFIG_SMC_RELAY_GPIO),
         },
         *moisture_reader_, *fanout_telemetry_writer_));

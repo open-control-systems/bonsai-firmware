@@ -10,10 +10,8 @@ idf_component_register(
     "telemetry_formatter.cpp"
     "fanout_telemetry_writer.cpp"
     "control_pipeline.cpp"
-    "http_telemetry_writer.cpp"
     "http_command_handler.cpp"
     "registration_formatter.cpp"
-    "http_registration_handler.cpp"
 
     REQUIRES
     "freertos"

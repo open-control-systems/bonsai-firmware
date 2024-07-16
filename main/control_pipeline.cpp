@@ -74,6 +74,12 @@ ControlPipeline::ControlPipeline() {
 
     http_command_handler_.reset(
         new (std::nothrow) HTTPCommandHandler(*http_server_, *soil_moisture_monitor_));
+
+    registration_formatter_.reset(new (std::nothrow)
+                                      RegistrationFormatter(*wifi_network_));
+
+    http_registration_handler_.reset(new (std::nothrow) HTTPRegistrationHandler(
+        *http_server_, *registration_formatter_));
 }
 
 void ControlPipeline::handle_connected() {
@@ -128,6 +134,10 @@ void ControlPipeline::try_start_mdns_() {
                                                         {
                                                             "telemetry",
                                                             "/telemetry",
+                                                        },
+                                                        {
+                                                            "registration",
+                                                            "/registration",
                                                         },
                                                         {
                                                             "command_reboot",

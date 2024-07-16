@@ -12,6 +12,8 @@ idf_component_register(
     "control_pipeline.cpp"
     "http_telemetry_writer.cpp"
     "http_command_handler.cpp"
+    "registration_formatter.cpp"
+    "http_registration_handler.cpp"
 
     REQUIRES
     "freertos"
@@ -22,6 +24,7 @@ idf_component_register(
     "ocs_status"
     "ocs_net"
     "ocs_storage"
+    "ocs_iot"
 
     INCLUDE_DIRS
     "."

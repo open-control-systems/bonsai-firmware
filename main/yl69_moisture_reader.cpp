@@ -7,7 +7,7 @@
  */
 
 #include "yl69_moisture_reader.h"
-#include "ocs_core/cjson_object_formatter.h"
+#include "ocs_iot/cjson_object_formatter.h"
 #include "telemetry.h"
 
 namespace ocs {

@@ -6,32 +6,28 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <cstring>
-
-#include "ocs_iot/cjson_builder.h"
-#include "ocs_iot/cjson_object_formatter.h"
 #include "telemetry_formatter.h"
+#include "ocs_iot/cjson_object_formatter.h"
 
 namespace ocs {
 namespace app {
 
-TelemetryFormatter::TelemetryFormatter() {
-    memset(buf_, 0, sizeof(buf_));
+void TelemetryFormatter::format(cJSON* json) {
+    core::StaticMutex::Lock lock(mu_);
+
+    iot::cJSONObjectFormatter formatter(json);
+
+    formatter.add_number_cs("raw", telemetry_.raw);
+    formatter.add_number_cs("voltage", telemetry_.voltage);
+    formatter.add_string_ref_cs("status", soil_status_to_str(telemetry_.status));
 }
 
-const char* TelemetryFormatter::c_str() const {
-    return buf_;
-}
+status::StatusCode TelemetryFormatter::write(const Telemetry& telemetry) {
+    core::StaticMutex::Lock lock(mu_);
 
-void TelemetryFormatter::format_json(const Telemetry& telemetry) {
-    auto json = iot::cJSONSharedBuilder::make_json();
-    iot::cJSONObjectFormatter formatter(json.get());
+    telemetry_ = telemetry;
 
-    formatter.add_number_cs("raw", telemetry.raw);
-    formatter.add_number_cs("voltage", telemetry.voltage);
-    formatter.add_string_ref_cs("status", soil_status_to_str(telemetry.status));
-
-    cJSON_PrintPreallocated(json.get(), buf_, sizeof(buf_), 0);
+    return status::StatusCode::OK;
 }
 
 } // namespace app

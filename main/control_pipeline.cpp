@@ -11,7 +11,6 @@
 #include "adc_reader.h"
 #include "console_telemetry_writer.h"
 #include "control_pipeline.h"
-#include "http_telemetry_writer.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_storage/flash_storage.h"
 #include "yl69_moisture_reader.h"
@@ -35,10 +34,7 @@ ControlPipeline::ControlPipeline() {
     moisture_reader_.reset(
         new (std::nothrow) YL69MoistureReader(CONFIG_SMC_SENSOR_THRESHOLD, *adc_reader_));
 
-    console_telemetry_writer_.reset(new (std::nothrow) ConsoleTelemetryWriter());
     fanout_telemetry_writer_.reset(new (std::nothrow) FanoutTelemetryWriter());
-
-    fanout_telemetry_writer_->add(*console_telemetry_writer_);
 
     flash_storage_.reset(new (std::nothrow) storage::FlashStorage());
 
@@ -58,8 +54,16 @@ ControlPipeline::ControlPipeline() {
         .instance_name = CONFIG_OCS_NETWORK_MDNS_INSTANCE_NAME,
     }));
 
-    http_telemetry_writer_.reset(new (std::nothrow) HTTPTelemetryWriter(*http_server_));
-    fanout_telemetry_writer_->add(*http_telemetry_writer_);
+    telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter());
+    fanout_telemetry_writer_->add(*telemetry_formatter_);
+
+    console_telemetry_writer_.reset(new (std::nothrow)
+                                        ConsoleTelemetryWriter(*telemetry_formatter_));
+
+    fanout_telemetry_writer_->add(*console_telemetry_writer_);
+
+    http_telemetry_handler_.reset(new (std::nothrow) HTTPTelemetryHandler(
+        *http_server_, *telemetry_formatter_, "/telemetry", "http-telemetry-handler"));
 
     gpio_config_.reset(new (std::nothrow) GPIOConfig());
 
@@ -79,7 +83,8 @@ ControlPipeline::ControlPipeline() {
                                       RegistrationFormatter(*wifi_network_));
 
     http_registration_handler_.reset(new (std::nothrow) HTTPRegistrationHandler(
-        *http_server_, *registration_formatter_));
+        *http_server_, *registration_formatter_, "/registration",
+        "http-registration-handler"));
 }
 
 void ControlPipeline::handle_connected() {

@@ -8,8 +8,8 @@
 
 #include <cstring>
 
-#include "ocs_core/cjson_builder.h"
-#include "ocs_core/cjson_object_formatter.h"
+#include "ocs_iot/cjson_builder.h"
+#include "ocs_iot/cjson_object_formatter.h"
 #include "telemetry_formatter.h"
 
 namespace ocs {
@@ -24,8 +24,8 @@ const char* TelemetryFormatter::c_str() const {
 }
 
 void TelemetryFormatter::format_json(const Telemetry& telemetry) {
-    auto json = core::cJSONSharedBuilder::make_json();
-    core::cJSONObjectFormatter formatter(json.get());
+    auto json = iot::cJSONSharedBuilder::make_json();
+    iot::cJSONObjectFormatter formatter(json.get());
 
     formatter.add_number_cs("raw", telemetry.raw);
     formatter.add_number_cs("voltage", telemetry.voltage);

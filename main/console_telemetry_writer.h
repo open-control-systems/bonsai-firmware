@@ -13,6 +13,7 @@
 #include "itelemetry_writer.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_iot/default_json_formatter.h"
+#include "ocs_iot/fanout_json_formatter.h"
 #include "telemetry.h"
 
 namespace ocs {
@@ -32,7 +33,8 @@ public:
 private:
     using JSONFormatter = iot::DefaultJSONFormatter<256>;
 
-    std::unique_ptr<JSONFormatter> formatter_;
+    std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;
+    std::unique_ptr<JSONFormatter> json_formatter_;
 };
 
 } // namespace app

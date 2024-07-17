@@ -34,8 +34,6 @@ ControlPipeline::ControlPipeline() {
     moisture_reader_.reset(
         new (std::nothrow) YL69MoistureReader(CONFIG_SMC_SENSOR_THRESHOLD, *adc_reader_));
 
-    fanout_telemetry_writer_.reset(new (std::nothrow) FanoutTelemetryWriter());
-
     flash_storage_.reset(new (std::nothrow) storage::FlashStorage());
 
     wifi_network_.reset(new (std::nothrow) net::WiFiNetwork(net::WiFiNetwork::Params {
@@ -54,13 +52,14 @@ ControlPipeline::ControlPipeline() {
         .instance_name = CONFIG_OCS_NETWORK_MDNS_INSTANCE_NAME,
     }));
 
-    telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter());
-    fanout_telemetry_writer_->add(*telemetry_formatter_);
+    fanout_telemetry_writer_.reset(new (std::nothrow) FanoutTelemetryWriter());
 
     console_telemetry_writer_.reset(new (std::nothrow)
                                         ConsoleTelemetryWriter(*telemetry_formatter_));
-
     fanout_telemetry_writer_->add(*console_telemetry_writer_);
+
+    telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter());
+    fanout_telemetry_writer_->add(*telemetry_formatter_);
 
     http_telemetry_handler_.reset(new (std::nothrow) HTTPTelemetryHandler(
         *http_server_, *telemetry_formatter_, "/telemetry", "http-telemetry-handler"));

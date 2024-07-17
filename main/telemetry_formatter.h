@@ -8,28 +8,29 @@
 
 #pragma once
 
-#include "itelemetry_writer.h"
+#include <memory>
+
 #include "ocs_core/noncopyable.h"
-#include "ocs_core/static_mutex.h"
+#include "ocs_iot/fanout_json_formatter.h"
 #include "ocs_iot/ijson_formatter.h"
-#include "telemetry.h"
 
 namespace ocs {
 namespace app {
 
-class TelemetryFormatter : public ITelemetryWriter,
-                           public iot::IJSONFormatter,
-                           public core::NonCopyable<> {
+class TelemetryFormatter : public iot::IJSONFormatter, public core::NonCopyable<> {
 public:
-    //! Format telemetry into @p json.
-    void format(cJSON* json) override;
+    //! Initialize.
+    //!
+    //! @params
+    //!  - @p formatter to format basic telemetry data.
+    explicit TelemetryFormatter(iot::IJSONFormatter& formatter);
 
-    //! Handle telemetry update.
-    status::StatusCode write(const Telemetry& telemetry) override;
+    //! Format all telemetry data into @p json.
+    void format(cJSON* json);
 
 private:
-    core::StaticMutex mu_;
-    Telemetry telemetry_;
+    std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;
+    std::unique_ptr<iot::IJSONFormatter> system_formatter_;
 };
 
 } // namespace app

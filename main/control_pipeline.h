@@ -21,7 +21,7 @@
 #include "ocs_storage/flash_storage.h"
 #include "registration_formatter.h"
 #include "soil_moisture_monitor.h"
-#include "telemetry_formatter.h"
+#include "telemetry_holder.h"
 
 namespace ocs {
 namespace app {
@@ -57,10 +57,11 @@ private:
 
     std::unique_ptr<FanoutTelemetryWriter> fanout_telemetry_writer_;
 
-    std::unique_ptr<ITelemetryWriter> console_telemetry_writer_;
-
-    std::unique_ptr<TelemetryFormatter> telemetry_formatter_;
+    std::unique_ptr<TelemetryHolder> telemetry_holder_;
+    std::unique_ptr<iot::IJSONFormatter> telemetry_formatter_;
     std::unique_ptr<HTTPTelemetryHandler> http_telemetry_handler_;
+
+    std::unique_ptr<ITelemetryWriter> console_telemetry_writer_;
 
     std::unique_ptr<GPIOConfig> gpio_config_;
     std::unique_ptr<SoilMoistureMonitor> soil_moisture_monitor_;

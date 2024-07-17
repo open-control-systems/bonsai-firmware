@@ -13,6 +13,7 @@
 #include "control_pipeline.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_storage/flash_storage.h"
+#include "telemetry_formatter.h"
 #include "yl69_moisture_reader.h"
 
 namespace ocs {
@@ -54,15 +55,17 @@ ControlPipeline::ControlPipeline() {
 
     fanout_telemetry_writer_.reset(new (std::nothrow) FanoutTelemetryWriter());
 
-    console_telemetry_writer_.reset(new (std::nothrow)
-                                        ConsoleTelemetryWriter(*telemetry_formatter_));
-    fanout_telemetry_writer_->add(*console_telemetry_writer_);
+    telemetry_holder_.reset(new (std::nothrow) TelemetryHolder());
+    fanout_telemetry_writer_->add(*telemetry_holder_);
 
-    telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter());
-    fanout_telemetry_writer_->add(*telemetry_formatter_);
+    telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter(*telemetry_holder_));
 
     http_telemetry_handler_.reset(new (std::nothrow) HTTPTelemetryHandler(
         *http_server_, *telemetry_formatter_, "/telemetry", "http-telemetry-handler"));
+
+    console_telemetry_writer_.reset(new (std::nothrow)
+                                        ConsoleTelemetryWriter(*telemetry_formatter_));
+    fanout_telemetry_writer_->add(*console_telemetry_writer_);
 
     gpio_config_.reset(new (std::nothrow) GPIOConfig());
 

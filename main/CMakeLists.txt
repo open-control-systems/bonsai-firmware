@@ -7,6 +7,7 @@ idf_component_register(
     "console_telemetry_writer.cpp"
     "gpio_config.cpp"
     "telemetry.cpp"
+    "telemetry_holder.cpp"
     "telemetry_formatter.cpp"
     "fanout_telemetry_writer.cpp"
     "control_pipeline.cpp"

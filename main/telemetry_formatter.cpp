@@ -7,27 +7,21 @@
  */
 
 #include "telemetry_formatter.h"
-#include "ocs_iot/cjson_object_formatter.h"
+#include "ocs_iot/system_json_formatter.h"
 
 namespace ocs {
 namespace app {
 
-void TelemetryFormatter::format(cJSON* json) {
-    core::StaticMutex::Lock lock(mu_);
+TelemetryFormatter::TelemetryFormatter(iot::IJSONFormatter& formatter) {
+    fanout_formatter_.reset(new (std::nothrow) iot::FanoutJSONFormatter());
+    fanout_formatter_->add(formatter);
 
-    iot::cJSONObjectFormatter formatter(json);
-
-    formatter.add_number_cs("raw", telemetry_.raw);
-    formatter.add_number_cs("voltage", telemetry_.voltage);
-    formatter.add_string_ref_cs("status", soil_status_to_str(telemetry_.status));
+    system_formatter_.reset(new (std::nothrow) iot::SystemJSONFormatter());
+    fanout_formatter_->add(*system_formatter_);
 }
 
-status::StatusCode TelemetryFormatter::write(const Telemetry& telemetry) {
-    core::StaticMutex::Lock lock(mu_);
-
-    telemetry_ = telemetry;
-
-    return status::StatusCode::OK;
+void TelemetryFormatter::format(cJSON* json) {
+    fanout_formatter_->format(json);
 }
 
 } // namespace app

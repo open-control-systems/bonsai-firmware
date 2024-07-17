@@ -10,7 +10,6 @@
 
 #include "console_telemetry_writer.h"
 #include "ocs_iot/cjson_builder.h"
-#include "telemetry_formatter.h"
 
 namespace ocs {
 namespace app {

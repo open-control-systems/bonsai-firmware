@@ -11,7 +11,9 @@
 #include <memory>
 
 #include "ocs_core/noncopyable.h"
+#include "ocs_iot/fanout_json_formatter.h"
 #include "ocs_iot/ijson_formatter.h"
+#include "ocs_iot/version_json_formatter.h"
 #include "ocs_net/basic_network.h"
 
 namespace ocs {
@@ -29,7 +31,9 @@ public:
     void format(cJSON* json) override;
 
 private:
+    std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;
     std::unique_ptr<iot::IJSONFormatter> network_formatter_;
+    std::unique_ptr<iot::VersionJSONFormatter> version_formatter_;
 };
 
 } // namespace app

@@ -10,6 +10,7 @@
 
 #include "ocs_core/noncopyable.h"
 #include "ocs_net/http_server.h"
+#include "ocs_system/irebooter.h"
 #include "soil_moisture_monitor.h"
 
 namespace ocs {
@@ -20,9 +21,12 @@ public:
     //! Initialize.
     //!
     //! @params
+    //!  - @p rebooter to initiate the reboot process.
     //!  - @p server to register HTTP commands.
     //!  - @p monitor to request a new soil moisture reading.
-    HTTPCommandHandler(net::HTTPServer& server, SoilMoistureMonitor& monitor);
+    HTTPCommandHandler(system::IRebooter& rebooter,
+                       net::HTTPServer& server,
+                       SoilMoistureMonitor& monitor);
 };
 
 } // namespace app

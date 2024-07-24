@@ -12,8 +12,9 @@
 #include "console_telemetry_writer.h"
 #include "control_pipeline.h"
 #include "ocs_status/code_to_str.h"
-#include "ocs_storage/flash_storage.h"
-#include "telemetry_formatter.h"
+#include "ocs_system/default_clock.h"
+#include "ocs_system/default_rebooter.h"
+#include "ocs_system/delay_rebooter.h"
 #include "yl69_moisture_reader.h"
 
 namespace ocs {
@@ -35,7 +36,7 @@ ControlPipeline::ControlPipeline() {
     moisture_reader_.reset(
         new (std::nothrow) YL69MoistureReader(CONFIG_SMC_SENSOR_THRESHOLD, *adc_reader_));
 
-    flash_storage_.reset(new (std::nothrow) storage::FlashStorage());
+    flash_initializer_.reset(new (std::nothrow) storage::FlashInitializer());
 
     wifi_network_.reset(new (std::nothrow) net::WiFiNetwork(net::WiFiNetwork::Params {
         .max_retry_count = CONFIG_OCS_NETWORK_WIFI_STA_RETRY_COUNT,
@@ -53,12 +54,23 @@ ControlPipeline::ControlPipeline() {
         .instance_name = CONFIG_OCS_NETWORK_MDNS_INSTANCE_NAME,
     }));
 
+    default_clock_.reset(new (std::nothrow) system::DefaultClock());
+
+    fanout_reboot_handler_.reset(new (std::nothrow) system::FanoutRebootHandler());
+
+    default_rebooter_.reset(new (std::nothrow)
+                                system::DefaultRebooter(*fanout_reboot_handler_));
+
+    delay_rebooter_.reset(
+        new (std::nothrow) system::DelayRebooter(pdMS_TO_TICKS(500), *default_rebooter_));
+
     fanout_telemetry_writer_.reset(new (std::nothrow) FanoutTelemetryWriter());
 
     telemetry_holder_.reset(new (std::nothrow) TelemetryHolder());
     fanout_telemetry_writer_->add(*telemetry_holder_);
 
-    telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter(*telemetry_holder_));
+    telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter());
+    telemetry_formatter_->fanout().add(*telemetry_holder_);
 
     http_telemetry_handler_.reset(new (std::nothrow) HTTPTelemetryHandler(
         *http_server_, *telemetry_formatter_, "/telemetry", "http-telemetry-handler"));
@@ -78,8 +90,8 @@ ControlPipeline::ControlPipeline() {
         },
         *moisture_reader_, *fanout_telemetry_writer_));
 
-    http_command_handler_.reset(
-        new (std::nothrow) HTTPCommandHandler(*http_server_, *soil_moisture_monitor_));
+    http_command_handler_.reset(new (std::nothrow) HTTPCommandHandler(
+        *delay_rebooter_, *http_server_, *soil_moisture_monitor_));
 
     registration_formatter_.reset(new (std::nothrow)
                                       RegistrationFormatter(*wifi_network_));
@@ -87,6 +99,15 @@ ControlPipeline::ControlPipeline() {
     http_registration_handler_.reset(new (std::nothrow) HTTPRegistrationHandler(
         *http_server_, *registration_formatter_, "/registration",
         "http-registration-handler"));
+
+    storage_builder_.reset(new (std::nothrow) storage::StorageBuilder());
+    counter_json_formatter_.reset(new (std::nothrow) iot::CounterJSONFormatter());
+
+    system_counter_pipeline_.reset(new (std::nothrow) iot::SystemCounterPipeline(
+        *default_clock_, *storage_builder_, *fanout_reboot_handler_,
+        *counter_json_formatter_));
+
+    telemetry_formatter_->fanout().add(*counter_json_formatter_);
 }
 
 void ControlPipeline::handle_connected() {

@@ -20,13 +20,13 @@ namespace app {
 class TelemetryFormatter : public iot::IJSONFormatter, public core::NonCopyable<> {
 public:
     //! Initialize.
-    //!
-    //! @params
-    //!  - @p formatter to format basic telemetry data.
-    explicit TelemetryFormatter(iot::IJSONFormatter& formatter);
+    TelemetryFormatter();
 
     //! Format all telemetry data into @p json.
     void format(cJSON* json);
+
+    //! Return fanout to register more telemetry formatters.
+    iot::FanoutJSONFormatter& fanout();
 
 private:
     std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;

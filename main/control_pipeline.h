@@ -17,10 +17,8 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_iot/counter_json_formatter.h"
 #include "ocs_iot/default_http_handler.h"
+#include "ocs_iot/http_server_pipeline.h"
 #include "ocs_iot/system_counter_pipeline.h"
-#include "ocs_net/http_server.h"
-#include "ocs_net/mdns_provider.h"
-#include "ocs_net/wifi_network.h"
 #include "ocs_storage/flash_initializer.h"
 #include "ocs_storage/storage_builder.h"
 #include "ocs_system/fanout_reboot_handler.h"
@@ -33,23 +31,16 @@
 namespace ocs {
 namespace app {
 
-class ControlPipeline : public net::INetworkHandler, public core::NonCopyable<> {
+class ControlPipeline : public core::NonCopyable<> {
 public:
     //! Initialize.
     ControlPipeline();
-
-    //! Start providing telemetry data via HTTP server.
-    void handle_connected() override;
-
-    //! Stop providing telemetry data via HTTP server.
-    void handle_disconnected() override;
 
     //! Start the soil control system.
     void start();
 
 private:
-    bool try_start_wifi_();
-    void try_start_mdns_();
+    void register_mdns_endpoints_();
 
     using HTTPRegistrationHandler = iot::DefaultHTTPHandler<256>;
     using HTTPTelemetryHandler = iot::DefaultHTTPHandler<256>;
@@ -58,9 +49,7 @@ private:
     std::unique_ptr<ITelemetryReader> moisture_reader_;
 
     std::unique_ptr<storage::FlashInitializer> flash_initializer_;
-    std::unique_ptr<net::WiFiNetwork> wifi_network_;
-    std::unique_ptr<net::HTTPServer> http_server_;
-    std::unique_ptr<net::MDNSProvider> mdns_provider_;
+    std::unique_ptr<iot::HTTPServerPipeline> http_server_pipeline_;
 
     std::unique_ptr<core::IClock> default_clock_;
 

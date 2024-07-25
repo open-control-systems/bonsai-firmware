@@ -38,21 +38,7 @@ ControlPipeline::ControlPipeline() {
 
     flash_initializer_.reset(new (std::nothrow) storage::FlashInitializer());
 
-    wifi_network_.reset(new (std::nothrow) net::WiFiNetwork(net::WiFiNetwork::Params {
-        .max_retry_count = CONFIG_OCS_NETWORK_WIFI_STA_RETRY_COUNT,
-        .ssid = CONFIG_OCS_NETWORK_WIFI_STA_SSID,
-        .password = CONFIG_OCS_NETWORK_WIFI_STA_PASSWORD,
-    }));
-    wifi_network_->add(*this);
-
-    http_server_.reset(new (std::nothrow) net::HTTPServer(net::HTTPServer::Params {
-        .server_port = CONFIG_OCS_NETWORK_HTTP_SERVER_PORT,
-    }));
-
-    mdns_provider_.reset(new (std::nothrow) net::MDNSProvider(net::MDNSProvider::Params {
-        .hostname = CONFIG_OCS_NETWORK_MDNS_HOSTNAME,
-        .instance_name = CONFIG_OCS_NETWORK_MDNS_INSTANCE_NAME,
-    }));
+    http_server_pipeline_.reset(new (std::nothrow) iot::HTTPServerPipeline());
 
     default_clock_.reset(new (std::nothrow) system::DefaultClock());
 
@@ -73,7 +59,8 @@ ControlPipeline::ControlPipeline() {
     telemetry_formatter_->fanout().add(*telemetry_holder_);
 
     http_telemetry_handler_.reset(new (std::nothrow) HTTPTelemetryHandler(
-        *http_server_, *telemetry_formatter_, "/telemetry", "http-telemetry-handler"));
+        http_server_pipeline_->server(), *telemetry_formatter_, "/telemetry",
+        "http-telemetry-handler"));
 
     console_telemetry_writer_.reset(new (std::nothrow)
                                         ConsoleTelemetryWriter(*telemetry_formatter_));
@@ -91,13 +78,13 @@ ControlPipeline::ControlPipeline() {
         *moisture_reader_, *fanout_telemetry_writer_));
 
     http_command_handler_.reset(new (std::nothrow) HTTPCommandHandler(
-        *delay_rebooter_, *http_server_, *soil_moisture_monitor_));
+        *delay_rebooter_, http_server_pipeline_->server(), *soil_moisture_monitor_));
 
-    registration_formatter_.reset(new (std::nothrow)
-                                      RegistrationFormatter(*wifi_network_));
+    registration_formatter_.reset(
+        new (std::nothrow) RegistrationFormatter(http_server_pipeline_->network()));
 
     http_registration_handler_.reset(new (std::nothrow) HTTPRegistrationHandler(
-        *http_server_, *registration_formatter_, "/registration",
+        http_server_pipeline_->server(), *registration_formatter_, "/registration",
         "http-registration-handler"));
 
     storage_builder_.reset(new (std::nothrow) storage::StorageBuilder());
@@ -110,79 +97,39 @@ ControlPipeline::ControlPipeline() {
     telemetry_formatter_->fanout().add(*counter_json_formatter_);
 }
 
-void ControlPipeline::handle_connected() {
-    http_server_->start();
-}
-
-void ControlPipeline::handle_disconnected() {
-    http_server_->stop();
-}
-
 void ControlPipeline::start() {
-    if (try_start_wifi_()) {
-        try_start_mdns_();
+    const auto code = http_server_pipeline_->start();
+    if (code != status::StatusCode::OK) {
+        ESP_LOGE(log_tag, "failed to start HTTP server pipeline: code=%s",
+                 status::code_to_str(code));
+    } else {
+        register_mdns_endpoints_();
     }
 
     soil_moisture_monitor_->start();
 }
 
-bool ControlPipeline::try_start_wifi_() {
-    auto code = wifi_network_->start();
-    if (code != status::StatusCode::OK) {
-        return false;
-    }
-
-    code = wifi_network_->wait();
-    if (code != status::StatusCode::OK) {
-        ESP_LOGE(log_tag, "failed to start the WiFi connection process: code=%s",
-                 status::code_to_str(code));
-
-        code = wifi_network_->stop();
-        if (code != status::StatusCode::OK) {
-            ESP_LOGE(log_tag, "failed to stop the WiFi connection process: code=%s",
-                     status::code_to_str(code));
-        }
-
-        wifi_network_ = nullptr;
-
-        return false;
-    }
-
-    return true;
-}
-
-void ControlPipeline::try_start_mdns_() {
-    auto code = mdns_provider_->start();
-    if (code == status::StatusCode::OK) {
-        code = mdns_provider_->add_service("_http", "_tcp",
-                                           CONFIG_OCS_NETWORK_HTTP_SERVER_PORT);
-        if (code == status::StatusCode::OK) {
-            mdns_provider_->add_service_txt_records("_http", "_tcp",
-                                                    net::MDNSProvider::TxtRecordList {
-                                                        {
-                                                            "telemetry",
-                                                            "/telemetry",
-                                                        },
-                                                        {
-                                                            "registration",
-                                                            "/registration",
-                                                        },
-                                                        {
-                                                            "command_reboot",
-                                                            "/commands/reboot",
-                                                        },
-                                                        {
-                                                            "command_reload",
-                                                            "/commands/reload",
-                                                        },
-                                                    });
-        }
-    }
-
-    if (code != status::StatusCode::OK) {
-        ESP_LOGE(log_tag, "failed to start mDNS service: code=%s",
-                 status::code_to_str(code));
-    }
+void ControlPipeline::register_mdns_endpoints_() {
+    http_server_pipeline_->mdns().add_service_txt_records(
+        "_http", "_tcp",
+        net::MDNSProvider::TxtRecordList {
+            {
+                "telemetry",
+                "/telemetry",
+            },
+            {
+                "registration",
+                "/registration",
+            },
+            {
+                "command_reboot",
+                "/commands/reboot",
+            },
+            {
+                "command_reload",
+                "/commands/reload",
+            },
+        });
 }
 
 } // namespace app

@@ -10,9 +10,6 @@
 
 #include <memory>
 
-#include "fanout_telemetry_writer.h"
-#include "gpio_config.h"
-#include "http_command_handler.h"
 #include "ocs_core/iclock.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_iot/counter_json_formatter.h"
@@ -23,10 +20,13 @@
 #include "ocs_storage/storage_builder.h"
 #include "ocs_system/fanout_reboot_handler.h"
 #include "ocs_system/irebooter.h"
-#include "registration_formatter.h"
-#include "soil_moisture_monitor.h"
-#include "telemetry_formatter.h"
-#include "telemetry_holder.h"
+#include "scs/fanout_telemetry_writer.h"
+#include "scs/gpio_config.h"
+#include "scs/http_command_handler.h"
+#include "scs/registration_formatter.h"
+#include "scs/soil_moisture_monitor.h"
+#include "scs/telemetry_formatter.h"
+#include "scs/telemetry_holder.h"
 
 namespace ocs {
 namespace app {

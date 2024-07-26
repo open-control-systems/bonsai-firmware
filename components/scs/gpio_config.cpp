@@ -8,7 +8,7 @@
 
 #include <cstring>
 
-#include "gpio_config.h"
+#include "scs/gpio_config.h"
 
 namespace ocs {
 namespace app {

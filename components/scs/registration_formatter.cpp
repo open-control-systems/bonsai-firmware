@@ -11,7 +11,7 @@
 #include "ocs_core/version.h"
 #include "ocs_core/version_to_str.h"
 #include "ocs_iot/network_json_formatter.h"
-#include "registration_formatter.h"
+#include "scs/registration_formatter.h"
 
 namespace ocs {
 namespace app {

@@ -6,9 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "yl69_moisture_reader.h"
+#include "scs/yl69_moisture_reader.h"
 #include "ocs_iot/cjson_object_formatter.h"
-#include "telemetry.h"
+#include "scs/telemetry.h"
 
 namespace ocs {
 namespace app {

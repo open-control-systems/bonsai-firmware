@@ -10,7 +10,7 @@
 
 #include "ocs_status/code.h"
 #include "ocs_status/code_to_str.h"
-#include "soil_moisture_monitor.h"
+#include "scs/soil_moisture_monitor.h"
 
 namespace ocs {
 namespace app {

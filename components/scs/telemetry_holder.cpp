@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "telemetry_holder.h"
+#include "scs/telemetry_holder.h"
 #include "ocs_iot/cjson_object_formatter.h"
 
 namespace ocs {

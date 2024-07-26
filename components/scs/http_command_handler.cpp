@@ -9,7 +9,7 @@
 #include "esp_log.h"
 #include "esp_system.h"
 
-#include "http_command_handler.h"
+#include "scs/http_command_handler.h"
 
 namespace ocs {
 namespace app {

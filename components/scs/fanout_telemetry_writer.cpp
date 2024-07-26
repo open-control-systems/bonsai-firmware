@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "fanout_telemetry_writer.h"
+#include "scs/fanout_telemetry_writer.h"
 
 namespace ocs {
 namespace app {

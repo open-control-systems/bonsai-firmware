@@ -8,14 +8,14 @@
 
 #include "esp_log.h"
 
-#include "adc_reader.h"
-#include "console_telemetry_writer.h"
-#include "control_pipeline.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_system/default_clock.h"
 #include "ocs_system/default_rebooter.h"
 #include "ocs_system/delay_rebooter.h"
-#include "yl69_moisture_reader.h"
+#include "scs/adc_reader.h"
+#include "scs/console_telemetry_writer.h"
+#include "scs/control_pipeline.h"
+#include "scs/yl69_moisture_reader.h"
 
 namespace ocs {
 namespace app {

@@ -13,11 +13,11 @@
 
 #include "driver/gpio.h"
 
-#include "itelemetry_reader.h"
-#include "itelemetry_writer.h"
 #include "ocs_core/cond.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_core/static_mutex.h"
+#include "scs/itelemetry_reader.h"
+#include "scs/itelemetry_writer.h"
 
 namespace ocs {
 namespace app {

@@ -11,7 +11,7 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_net/http_server.h"
 #include "ocs_system/irebooter.h"
-#include "soil_moisture_monitor.h"
+#include "scs/soil_moisture_monitor.h"
 
 namespace ocs {
 namespace app {

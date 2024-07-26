@@ -8,8 +8,8 @@
 
 #include <cstring>
 
-#include "adc_reader.h"
-#include "telemetry.h"
+#include "scs/adc_reader.h"
+#include "scs/telemetry.h"
 
 namespace ocs {
 namespace app {

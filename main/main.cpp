@@ -6,12 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "control_pipeline.h"
-
-using namespace ocs;
-using namespace ocs::app;
+#include "scs/control_pipeline.h"
 
 extern "C" void app_main(void) {
-    ControlPipeline pipeline;
+    ocs::app::ControlPipeline pipeline;
     pipeline.start();
 }

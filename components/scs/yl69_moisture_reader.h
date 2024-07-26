@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "itelemetry_reader.h"
 #include "ocs_core/noncopyable.h"
+#include "scs/itelemetry_reader.h"
 
 namespace ocs {
 namespace app {

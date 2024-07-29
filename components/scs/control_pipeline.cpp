@@ -88,10 +88,14 @@ ControlPipeline::ControlPipeline() {
         "http-registration-handler"));
 
     storage_builder_.reset(new (std::nothrow) storage::StorageBuilder());
+
+    system_counter_storage_ = storage_builder_->make("system_counter");
+    configASSERT(system_counter_storage_);
+
     counter_json_formatter_.reset(new (std::nothrow) iot::CounterJSONFormatter());
 
     system_counter_pipeline_.reset(new (std::nothrow) iot::SystemCounterPipeline(
-        *default_clock_, *storage_builder_, *fanout_reboot_handler_,
+        *default_clock_, *system_counter_storage_, *fanout_reboot_handler_,
         *counter_json_formatter_));
 
     telemetry_formatter_->fanout().add(*counter_json_formatter_);

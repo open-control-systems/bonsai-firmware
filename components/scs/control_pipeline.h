@@ -74,6 +74,8 @@ private:
     std::unique_ptr<HTTPRegistrationHandler> http_registration_handler_;
 
     std::unique_ptr<storage::StorageBuilder> storage_builder_;
+    std::unique_ptr<storage::IStorage> system_counter_storage_;
+
     std::unique_ptr<iot::CounterJSONFormatter> counter_json_formatter_;
     std::unique_ptr<iot::SystemCounterPipeline> system_counter_pipeline_;
 };

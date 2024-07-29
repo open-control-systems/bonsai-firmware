@@ -31,7 +31,7 @@ public:
     status::StatusCode write(const Telemetry& telemetry) override;
 
 private:
-    using JSONFormatter = iot::DefaultJSONFormatter<256>;
+    using JSONFormatter = iot::DefaultJSONFormatter<512>;
 
     std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;
     std::unique_ptr<JSONFormatter> json_formatter_;

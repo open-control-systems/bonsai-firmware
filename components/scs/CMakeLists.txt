@@ -12,6 +12,7 @@ idf_component_register(
     "control_pipeline.cpp"
     "http_command_handler.cpp"
     "registration_formatter.cpp"
+    "soil_status_monitor.cpp"
 
     REQUIRES
     "freertos"

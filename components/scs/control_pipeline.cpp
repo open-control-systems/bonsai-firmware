@@ -99,6 +99,15 @@ ControlPipeline::ControlPipeline() {
         *counter_json_formatter_));
 
     telemetry_formatter_->fanout().add(*counter_json_formatter_);
+
+    soil_counter_storage_ = storage_builder_->make("soil_counter");
+    configASSERT(soil_counter_storage_);
+
+    soil_status_monitor_.reset(new (std::nothrow) SoilStatusMonitor(
+        *default_clock_, *soil_counter_storage_, *fanout_reboot_handler_,
+        *counter_json_formatter_));
+
+    fanout_telemetry_writer_->add(*soil_status_monitor_);
 }
 
 void ControlPipeline::start() {

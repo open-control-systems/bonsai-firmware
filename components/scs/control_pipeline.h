@@ -25,6 +25,7 @@
 #include "scs/http_command_handler.h"
 #include "scs/registration_formatter.h"
 #include "scs/soil_moisture_monitor.h"
+#include "scs/soil_status_monitor.h"
 #include "scs/telemetry_formatter.h"
 #include "scs/telemetry_holder.h"
 
@@ -43,7 +44,7 @@ private:
     void register_mdns_endpoints_();
 
     using HTTPRegistrationHandler = iot::DefaultHTTPHandler<256>;
-    using HTTPTelemetryHandler = iot::DefaultHTTPHandler<256>;
+    using HTTPTelemetryHandler = iot::DefaultHTTPHandler<512>;
 
     std::unique_ptr<ITelemetryReader> adc_reader_;
     std::unique_ptr<ITelemetryReader> moisture_reader_;
@@ -78,6 +79,9 @@ private:
 
     std::unique_ptr<iot::CounterJSONFormatter> counter_json_formatter_;
     std::unique_ptr<iot::SystemCounterPipeline> system_counter_pipeline_;
+
+    std::unique_ptr<storage::IStorage> soil_counter_storage_;
+    std::unique_ptr<SoilStatusMonitor> soil_status_monitor_;
 };
 
 } // namespace app

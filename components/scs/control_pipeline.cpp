@@ -167,6 +167,10 @@ void ControlPipeline::register_mdns_endpoints_() {
                 "command_reload",
                 "/commands/reload",
             },
+            {
+                "commands",
+                "/commands",
+            },
         });
 }
 

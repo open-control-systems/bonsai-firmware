@@ -14,7 +14,7 @@
 namespace ocs {
 namespace app {
 
-ADCReader::ADCReader(ADCReader::Params params)
+AdcReader::AdcReader(AdcReader::Params params)
     : params_(params) {
     // Unit configuration.
     memset(&unit_config_, 0, sizeof(unit_config_));
@@ -36,12 +36,12 @@ ADCReader::ADCReader(ADCReader::Params params)
         adc_cali_create_scheme_line_fitting(&calibration_config_, &calibration_handle_));
 }
 
-ADCReader::~ADCReader() {
+AdcReader::~AdcReader() {
     ESP_ERROR_CHECK(adc_oneshot_del_unit(unit_handle_));
     ESP_ERROR_CHECK(adc_cali_delete_scheme_line_fitting(calibration_handle_));
 }
 
-status::StatusCode ADCReader::read(Telemetry& telemetry) {
+status::StatusCode AdcReader::read(Telemetry& telemetry) {
     ESP_ERROR_CHECK(adc_oneshot_read(unit_handle_, params_.channel, &telemetry.raw));
 
     ESP_ERROR_CHECK(

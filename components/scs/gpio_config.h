@@ -15,10 +15,10 @@
 namespace ocs {
 namespace app {
 
-class GPIOConfig : public core::NonCopyable<> {
+class GpioConfig : public core::NonCopyable<> {
 public:
     //! Initialize system wide GPIO configuration.
-    GPIOConfig();
+    GpioConfig();
 
 private:
     gpio_config_t config_ {};

@@ -43,8 +43,8 @@ public:
 private:
     void register_mdns_endpoints_();
 
-    using HTTPRegistrationHandler = iot::DefaultHttpHandler<256>;
-    using HTTPTelemetryHandler = iot::DefaultHttpHandler<512>;
+    using HttpRegistrationHandler = iot::DefaultHttpHandler<256>;
+    using HttpTelemetryHandler = iot::DefaultHttpHandler<512>;
 
     std::unique_ptr<ITelemetryReader> adc_reader_;
     std::unique_ptr<ITelemetryReader> moisture_reader_;
@@ -62,22 +62,22 @@ private:
 
     std::unique_ptr<TelemetryHolder> telemetry_holder_;
     std::unique_ptr<TelemetryFormatter> telemetry_formatter_;
-    std::unique_ptr<HTTPTelemetryHandler> http_telemetry_handler_;
+    std::unique_ptr<HttpTelemetryHandler> http_telemetry_handler_;
 
     std::unique_ptr<ITelemetryWriter> console_telemetry_writer_;
 
-    std::unique_ptr<GPIOConfig> gpio_config_;
+    std::unique_ptr<GpioConfig> gpio_config_;
     std::unique_ptr<SoilMoistureMonitor> soil_moisture_monitor_;
 
-    std::unique_ptr<HTTPCommandHandler> http_command_handler_;
+    std::unique_ptr<HttpCommandHandler> http_command_handler_;
 
     std::unique_ptr<RegistrationFormatter> registration_formatter_;
-    std::unique_ptr<HTTPRegistrationHandler> http_registration_handler_;
+    std::unique_ptr<HttpRegistrationHandler> http_registration_handler_;
 
     std::unique_ptr<storage::StorageBuilder> storage_builder_;
     std::unique_ptr<storage::IStorage> system_counter_storage_;
 
-    std::unique_ptr<iot::CounterJSONFormatter> counter_json_formatter_;
+    std::unique_ptr<iot::CounterJsonFormatter> counter_json_formatter_;
     std::unique_ptr<iot::SystemCounterPipeline> system_counter_pipeline_;
 
     std::unique_ptr<storage::IStorage> soil_counter_storage_;

@@ -19,7 +19,7 @@
 namespace ocs {
 namespace app {
 
-class HTTPCommandHandler : public core::NonCopyable<> {
+class HttpCommandHandler : public core::NonCopyable<> {
 public:
     //! Initialize.
     //!
@@ -27,7 +27,7 @@ public:
     //!  - @p rebooter to initiate the reboot process.
     //!  - @p server to register HTTP commands.
     //!  - @p monitor to request a new soil moisture reading.
-    HTTPCommandHandler(system::IRebooter& rebooter,
+    HttpCommandHandler(system::IRebooter& rebooter,
                        net::HttpServer& server,
                        SoilMoistureMonitor& monitor);
 

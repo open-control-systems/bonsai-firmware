@@ -24,7 +24,7 @@ ConsoleTelemetryWriter::ConsoleTelemetryWriter(iot::IJsonFormatter& formatter) {
     fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
     fanout_formatter_->add(formatter);
 
-    json_formatter_.reset(new (std::nothrow) JSONFormatter());
+    json_formatter_.reset(new (std::nothrow) JsonFormatter());
     fanout_formatter_->add(*json_formatter_);
 }
 

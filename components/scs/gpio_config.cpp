@@ -20,7 +20,7 @@ const unsigned GPIO_OUTPUT_PIN_SEL = ((1ULL << RELAY_GPIO));
 
 } // namespace
 
-GPIOConfig::GPIOConfig() {
+GpioConfig::GpioConfig() {
     memset(&config_, 0, sizeof(config_));
 
     // disable interrupt

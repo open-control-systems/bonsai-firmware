@@ -6,16 +6,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "scs/telemetry_formatter.h"
+#include "freertos/FreeRTOSConfig.h"
+
 #include "ocs_iot/system_json_formatter.h"
+#include "scs/telemetry_formatter.h"
 
 namespace ocs {
 namespace app {
 
 TelemetryFormatter::TelemetryFormatter() {
     fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
+    configASSERT(fanout_formatter_);
 
     system_formatter_.reset(new (std::nothrow) iot::SystemJsonFormatter());
+    configASSERT(system_formatter_);
+
     fanout_formatter_->add(*system_formatter_);
 }
 

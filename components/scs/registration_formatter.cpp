@@ -24,8 +24,11 @@ const char* log_tag = "registration-formatter";
 
 RegistrationFormatter::RegistrationFormatter(net::BasicNetwork& network) {
     fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
+    configASSERT(fanout_formatter_);
 
     network_formatter_.reset(new (std::nothrow) iot::NetworkJsonFormatter(network));
+    configASSERT(network_formatter_);
+
     fanout_formatter_->add(*network_formatter_);
 
     core::Version version;
@@ -36,6 +39,8 @@ RegistrationFormatter::RegistrationFormatter(net::BasicNetwork& network) {
     core::version_to_str version_str(version);
 
     version_formatter_.reset(new (std::nothrow) iot::VersionJsonFormatter());
+    configASSERT(version_formatter_);
+
     version_formatter_->add("version_scs", version_str.c_str());
     fanout_formatter_->add(*version_formatter_);
 }

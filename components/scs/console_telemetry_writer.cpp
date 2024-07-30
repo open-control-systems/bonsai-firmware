@@ -8,6 +8,8 @@
 
 #include "esp_log.h"
 
+#include "freertos/FreeRTOSConfig.h"
+
 #include "ocs_iot/cjson_builder.h"
 #include "scs/console_telemetry_writer.h"
 
@@ -22,9 +24,13 @@ const char* log_tag = "console-telemetry-writer";
 
 ConsoleTelemetryWriter::ConsoleTelemetryWriter(iot::IJsonFormatter& formatter) {
     fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
+    configASSERT(fanout_formatter_);
+
     fanout_formatter_->add(formatter);
 
     json_formatter_.reset(new (std::nothrow) JsonFormatter());
+    configASSERT(json_formatter_);
+
     fanout_formatter_->add(*json_formatter_);
 }
 

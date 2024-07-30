@@ -6,8 +6,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "scs/soil_status_monitor.h"
+#include "freertos/FreeRTOSConfig.h"
+
 #include "ocs_core/time.h"
+#include "scs/soil_status_monitor.h"
 
 namespace ocs {
 namespace app {
@@ -19,6 +21,7 @@ SoilStatusMonitor::SoilStatusMonitor(core::IClock& clock,
     dry_state_counter_.reset(new (std::nothrow) diagnostic::StateCounter(
         storage, clock, "c_scs_dry_state", core::Second,
         static_cast<diagnostic::StateCounter::State>(SoilStatus::Dry)));
+    configASSERT(dry_state_counter_);
 
     counter_holder.add(*dry_state_counter_);
     reboot_handler.add(*dry_state_counter_);
@@ -26,6 +29,7 @@ SoilStatusMonitor::SoilStatusMonitor(core::IClock& clock,
     wet_state_counter_.reset(new (std::nothrow) diagnostic::StateCounter(
         storage, clock, "c_scs_wet_state", core::Second,
         static_cast<diagnostic::StateCounter::State>(SoilStatus::Wet)));
+    configASSERT(wet_state_counter_);
 
     counter_holder.add(*wet_state_counter_);
     reboot_handler.add(*wet_state_counter_);

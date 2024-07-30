@@ -24,14 +24,14 @@ const char* log_tag = "http-command-handler";
 
 } // namespace
 
-HttpCommandHandler::HttpCommandHandler(system::IRebooter& rebooter,
-                                       net::HttpServer& server,
-                                       SoilMoistureMonitor& monitor) {
+HttpCommandHandler::HttpCommandHandler(net::HttpServer& server,
+                                       scheduler::ITask& reboot_task,
+                                       scheduler::ITask& soil_moisture_task) {
     commands_response_.reset(new (std::nothrow) JsonFormatter());
     configASSERT(commands_response_);
 
     format_commands_response_();
-    register_routes_(rebooter, server, monitor);
+    register_routes_(server, reboot_task, soil_moisture_task);
 }
 
 void HttpCommandHandler::format_commands_response_() {
@@ -49,20 +49,18 @@ void HttpCommandHandler::format_commands_response_() {
     commands_response_->format(json.get());
 }
 
-void HttpCommandHandler::register_routes_(system::IRebooter& rebooter,
-                                          net::HttpServer& server,
-                                          SoilMoistureMonitor& monitor) {
-    server.add_GET("/commands/reboot", [&rebooter](httpd_req_t* req) {
+void HttpCommandHandler::register_routes_(net::HttpServer& server,
+                                          scheduler::ITask& reboot_task,
+                                          scheduler::ITask& soil_moisture_task) {
+    server.add_GET("/commands/reboot", [&reboot_task](httpd_req_t* req) {
         const auto err = httpd_resp_send(req, "Rebooting...", HTTPD_RESP_USE_STRLEN);
         if (err != ESP_OK) {
             return status::StatusCode::Error;
         }
 
-        rebooter.reboot();
-
-        return status::StatusCode::OK;
+        return reboot_task.run();
     });
-    server.add_GET("/commands/reload", [&monitor](httpd_req_t* req) {
+    server.add_GET("/commands/reload", [&soil_moisture_task](httpd_req_t* req) {
         const auto err = httpd_resp_send(req, "Reloading...", HTTPD_RESP_USE_STRLEN);
         if (err != ESP_OK) {
             return status::StatusCode::Error;
@@ -70,9 +68,7 @@ void HttpCommandHandler::register_routes_(system::IRebooter& rebooter,
 
         ESP_LOGI(log_tag, "Reloading...");
 
-        monitor.reload();
-
-        return status::StatusCode::OK;
+        return soil_moisture_task.run();
     });
     server.add_GET("/commands", [this](httpd_req_t* req) {
         const auto err =

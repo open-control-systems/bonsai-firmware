@@ -13,23 +13,19 @@
 
 #include "driver/gpio.h"
 
-#include "ocs_core/cond.h"
 #include "ocs_core/noncopyable.h"
-#include "ocs_core/static_mutex.h"
+#include "ocs_scheduler/itask.h"
 #include "scs/itelemetry_reader.h"
 #include "scs/itelemetry_writer.h"
 
 namespace ocs {
 namespace app {
 
-class SoilMoistureMonitor : public core::NonCopyable<> {
+class SoilMoistureMonitor : public scheduler::ITask, public core::NonCopyable<> {
 public:
     struct Params {
         //! Interval to wait after the control system is powered on.
         TickType_t power_on_delay_interval { pdMS_TO_TICKS(0) };
-
-        //! Too frequent reads may damage the sensor, read the corresponding datasheet.
-        TickType_t read_interval { pdMS_TO_TICKS(0) };
 
         //! Relay GPIO.
         gpio_num_t relay_gpio { GPIO_NUM_NC };
@@ -40,16 +36,11 @@ public:
                         ITelemetryReader& reader,
                         ITelemetryWriter& writer);
 
-    //! Start monitoring soil status.
-    //!
-    //! @remarks
-    //!  - Blocking call.
-    void start();
-
-    //! Reread soil moisture data.
-    void reload();
+    //! Monitor soil moisture data.
+    status::StatusCode run() override;
 
 private:
+    status::StatusCode run_();
     void relay_turn_on_();
     void relay_turn_off_();
 
@@ -57,9 +48,6 @@ private:
 
     ITelemetryReader& reader_;
     ITelemetryWriter& writer_;
-
-    core::StaticMutex mu_;
-    core::Cond cond_;
 };
 
 } // namespace app

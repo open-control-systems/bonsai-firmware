@@ -13,8 +13,8 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_iot/default_json_formatter.h"
 #include "ocs_net/http_server.h"
+#include "ocs_scheduler/itask.h"
 #include "ocs_system/irebooter.h"
-#include "scs/soil_moisture_monitor.h"
 
 namespace ocs {
 namespace app {
@@ -24,21 +24,21 @@ public:
     //! Initialize.
     //!
     //! @params
-    //!  - @p rebooter to initiate the reboot process.
     //!  - @p server to register HTTP commands.
-    //!  - @p monitor to request a new soil moisture reading.
-    HttpCommandHandler(system::IRebooter& rebooter,
-                       net::HttpServer& server,
-                       SoilMoistureMonitor& monitor);
+    //!  - @p reboot_task to initiate the reboot process.
+    //!  - @p soil_moisture_task to request a new soil moisture reading.
+    HttpCommandHandler(net::HttpServer& server,
+                       scheduler::ITask& reboot_task,
+                       scheduler::ITask& soil_moisture_task);
 
 private:
     using JsonFormatter = iot::DefaultJsonFormatter<128>;
 
     void format_commands_response_();
 
-    void register_routes_(system::IRebooter& rebooter,
-                          net::HttpServer& server,
-                          SoilMoistureMonitor& monitor);
+    void register_routes_(net::HttpServer& server,
+                          scheduler::ITask& reboot_task,
+                          scheduler::ITask& soil_moisture_task);
 
     std::unique_ptr<JsonFormatter> commands_response_;
 };

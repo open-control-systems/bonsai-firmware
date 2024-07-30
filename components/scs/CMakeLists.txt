@@ -26,6 +26,7 @@ idf_component_register(
     "ocs_iot"
     "ocs_system"
     "ocs_diagnostic"
+    "ocs_scheduler"
 
     INCLUDE_DIRS
     ".."

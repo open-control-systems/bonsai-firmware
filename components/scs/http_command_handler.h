@@ -25,7 +25,7 @@ public:
     //!  - @p server to register HTTP commands.
     //!  - @p monitor to request a new soil moisture reading.
     HTTPCommandHandler(system::IRebooter& rebooter,
-                       net::HTTPServer& server,
+                       net::HttpServer& server,
                        SoilMoistureMonitor& monitor);
 };
 

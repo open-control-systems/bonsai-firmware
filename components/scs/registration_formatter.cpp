@@ -23,9 +23,9 @@ const char* log_tag = "registration-formatter";
 } // namespace
 
 RegistrationFormatter::RegistrationFormatter(net::BasicNetwork& network) {
-    fanout_formatter_.reset(new (std::nothrow) iot::FanoutJSONFormatter());
+    fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
 
-    network_formatter_.reset(new (std::nothrow) iot::NetworkJSONFormatter(network));
+    network_formatter_.reset(new (std::nothrow) iot::NetworkJsonFormatter(network));
     fanout_formatter_->add(*network_formatter_);
 
     core::Version version;
@@ -35,7 +35,7 @@ RegistrationFormatter::RegistrationFormatter(net::BasicNetwork& network) {
 
     core::version_to_str version_str(version);
 
-    version_formatter_.reset(new (std::nothrow) iot::VersionJSONFormatter());
+    version_formatter_.reset(new (std::nothrow) iot::VersionJsonFormatter());
     version_formatter_->add("version_scs", version_str.c_str());
     fanout_formatter_->add(*version_formatter_);
 }

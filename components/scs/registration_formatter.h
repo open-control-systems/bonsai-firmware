@@ -19,7 +19,7 @@
 namespace ocs {
 namespace app {
 
-class RegistrationFormatter : public iot::IJSONFormatter, public core::NonCopyable<> {
+class RegistrationFormatter : public iot::IJsonFormatter, public core::NonCopyable<> {
 public:
     //! Initialize.
     //!
@@ -31,9 +31,9 @@ public:
     void format(cJSON* json) override;
 
 private:
-    std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;
-    std::unique_ptr<iot::IJSONFormatter> network_formatter_;
-    std::unique_ptr<iot::VersionJSONFormatter> version_formatter_;
+    std::unique_ptr<iot::FanoutJsonFormatter> fanout_formatter_;
+    std::unique_ptr<iot::IJsonFormatter> network_formatter_;
+    std::unique_ptr<iot::VersionJsonFormatter> version_formatter_;
 };
 
 } // namespace app

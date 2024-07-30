@@ -25,15 +25,15 @@ public:
     //!
     //! @params
     //!  - @p formatter to format the telemetry data.
-    explicit ConsoleTelemetryWriter(iot::IJSONFormatter& formatter);
+    explicit ConsoleTelemetryWriter(iot::IJsonFormatter& formatter);
 
     //! Write soil moisture data to the console.
     status::StatusCode write(const Telemetry& telemetry) override;
 
 private:
-    using JSONFormatter = iot::DefaultJSONFormatter<512>;
+    using JSONFormatter = iot::DefaultJsonFormatter<512>;
 
-    std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;
+    std::unique_ptr<iot::FanoutJsonFormatter> fanout_formatter_;
     std::unique_ptr<JSONFormatter> json_formatter_;
 };
 

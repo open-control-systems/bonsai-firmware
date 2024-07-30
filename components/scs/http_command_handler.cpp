@@ -21,7 +21,7 @@ const char* log_tag = "http-command-handler";
 } // namespace
 
 HTTPCommandHandler::HTTPCommandHandler(system::IRebooter& rebooter,
-                                       net::HTTPServer& server,
+                                       net::HttpServer& server,
                                        SoilMoistureMonitor& monitor) {
     server.add_GET("/commands/reboot", [&rebooter](httpd_req_t* req) {
         const auto err = httpd_resp_send(req, "Rebooting...", HTTPD_RESP_USE_STRLEN);

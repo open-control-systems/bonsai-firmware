@@ -27,7 +27,7 @@ const char* log_tag = "control-pipeline";
 } // namespace
 
 ControlPipeline::ControlPipeline() {
-    adc_reader_.reset(new (std::nothrow) ADCReader(ADCReader::Params {
+    adc_reader_.reset(new (std::nothrow) AdcReader(AdcReader::Params {
         .channel = static_cast<adc_channel_t>(CONFIG_SMC_SENSOR_ADC_CHANNEL),
         .atten = ADC_ATTEN_DB_12,
         .bitwidth = ADC_BITWIDTH_10,
@@ -58,7 +58,7 @@ ControlPipeline::ControlPipeline() {
     telemetry_formatter_.reset(new (std::nothrow) TelemetryFormatter());
     telemetry_formatter_->fanout().add(*telemetry_holder_);
 
-    http_telemetry_handler_.reset(new (std::nothrow) HTTPTelemetryHandler(
+    http_telemetry_handler_.reset(new (std::nothrow) HttpTelemetryHandler(
         http_server_pipeline_->server(), *telemetry_formatter_, "/telemetry",
         "http-telemetry-handler"));
 
@@ -66,7 +66,7 @@ ControlPipeline::ControlPipeline() {
                                         ConsoleTelemetryWriter(*telemetry_formatter_));
     fanout_telemetry_writer_->add(*console_telemetry_writer_);
 
-    gpio_config_.reset(new (std::nothrow) GPIOConfig());
+    gpio_config_.reset(new (std::nothrow) GpioConfig());
 
     soil_moisture_monitor_.reset(new (std::nothrow) SoilMoistureMonitor(
         SoilMoistureMonitor::Params {
@@ -77,13 +77,13 @@ ControlPipeline::ControlPipeline() {
         },
         *moisture_reader_, *fanout_telemetry_writer_));
 
-    http_command_handler_.reset(new (std::nothrow) HTTPCommandHandler(
+    http_command_handler_.reset(new (std::nothrow) HttpCommandHandler(
         *delay_rebooter_, http_server_pipeline_->server(), *soil_moisture_monitor_));
 
     registration_formatter_.reset(
         new (std::nothrow) RegistrationFormatter(http_server_pipeline_->network()));
 
-    http_registration_handler_.reset(new (std::nothrow) HTTPRegistrationHandler(
+    http_registration_handler_.reset(new (std::nothrow) HttpRegistrationHandler(
         http_server_pipeline_->server(), *registration_formatter_, "/registration",
         "http-registration-handler"));
 
@@ -92,7 +92,7 @@ ControlPipeline::ControlPipeline() {
     system_counter_storage_ = storage_builder_->make("system_counter");
     configASSERT(system_counter_storage_);
 
-    counter_json_formatter_.reset(new (std::nothrow) iot::CounterJSONFormatter());
+    counter_json_formatter_.reset(new (std::nothrow) iot::CounterJsonFormatter());
 
     system_counter_pipeline_.reset(new (std::nothrow) iot::SystemCounterPipeline(
         *default_clock_, *system_counter_storage_, *fanout_reboot_handler_,

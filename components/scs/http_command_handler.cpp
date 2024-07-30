@@ -24,7 +24,7 @@ const char* log_tag = "http-command-handler";
 
 } // namespace
 
-HTTPCommandHandler::HTTPCommandHandler(system::IRebooter& rebooter,
+HttpCommandHandler::HttpCommandHandler(system::IRebooter& rebooter,
                                        net::HttpServer& server,
                                        SoilMoistureMonitor& monitor) {
     commands_response_.reset(new (std::nothrow) JsonFormatter());
@@ -34,7 +34,7 @@ HTTPCommandHandler::HTTPCommandHandler(system::IRebooter& rebooter,
     register_routes_(rebooter, server, monitor);
 }
 
-void HTTPCommandHandler::format_commands_response_() {
+void HttpCommandHandler::format_commands_response_() {
     auto json = iot::CjsonUniqueBuilder::make_json();
     configASSERT(json);
 
@@ -49,7 +49,7 @@ void HTTPCommandHandler::format_commands_response_() {
     commands_response_->format(json.get());
 }
 
-void HTTPCommandHandler::register_routes_(system::IRebooter& rebooter,
+void HttpCommandHandler::register_routes_(system::IRebooter& rebooter,
                                           net::HttpServer& server,
                                           SoilMoistureMonitor& monitor) {
     server.add_GET("/commands/reboot", [&rebooter](httpd_req_t* req) {

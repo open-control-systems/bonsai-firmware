@@ -18,7 +18,7 @@
 namespace ocs {
 namespace app {
 
-class ADCReader : public ITelemetryReader, public core::NonCopyable<> {
+class AdcReader : public ITelemetryReader, public core::NonCopyable<> {
 public:
     struct Params {
         adc_channel_t channel { ADC_CHANNEL_0 };
@@ -27,10 +27,10 @@ public:
     };
 
     //! Initialize ESP specific ADC instances.
-    explicit ADCReader(Params);
+    explicit AdcReader(Params);
 
     //! De-initialize ESP specific ADC instances.
-    ~ADCReader();
+    ~AdcReader();
 
     //! Read raw value for configured channel.
     status::StatusCode read(Telemetry& telemetry) override;

@@ -31,10 +31,10 @@ public:
     status::StatusCode write(const Telemetry& telemetry) override;
 
 private:
-    using JSONFormatter = iot::DefaultJsonFormatter<512>;
+    using JsonFormatter = iot::DefaultJsonFormatter<512>;
 
     std::unique_ptr<iot::FanoutJsonFormatter> fanout_formatter_;
-    std::unique_ptr<JSONFormatter> json_formatter_;
+    std::unique_ptr<JsonFormatter> json_formatter_;
 };
 
 } // namespace app

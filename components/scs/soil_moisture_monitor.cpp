@@ -26,39 +26,36 @@ SoilMoistureMonitor::SoilMoistureMonitor(SoilMoistureMonitor::Params params,
                                          ITelemetryWriter& writer)
     : params_(params)
     , reader_(reader)
-    , writer_(writer)
-    , cond_(mu_) {
+    , writer_(writer) {
 }
 
-void SoilMoistureMonitor::start() {
-    while (true) {
-        relay_turn_on_();
-        vTaskDelay(params_.power_on_delay_interval);
+status::StatusCode SoilMoistureMonitor::run() {
+    relay_turn_on_();
+    vTaskDelay(params_.power_on_delay_interval);
 
-        Telemetry telemetry;
+    const auto code = run_();
 
-        auto status = reader_.read(telemetry);
-        if (status == status::StatusCode::OK) {
-            status = writer_.write(telemetry);
-            if (status != status::StatusCode::OK) {
-                ESP_LOGE(log_tag, "failed to write data: code=%s",
-                         status::code_to_str(status));
-            }
-        } else {
-            ESP_LOGE(log_tag, "failed to read data: code=%s",
-                     status::code_to_str(status));
-        }
+    relay_turn_off_();
 
-        relay_turn_off_();
+    return code;
+}
 
-        core::StaticMutex::Lock lock(mu_);
-        cond_.wait(params_.read_interval);
+status::StatusCode SoilMoistureMonitor::run_() {
+    Telemetry telemetry;
+
+    auto code = reader_.read(telemetry);
+    if (code != status::StatusCode::OK) {
+        ESP_LOGE(log_tag, "failed to read data: code=%s", status::code_to_str(code));
+        return code;
     }
-}
 
-void SoilMoistureMonitor::reload() {
-    core::StaticMutex::Lock lock(mu_);
-    cond_.signal();
+    code = writer_.write(telemetry);
+    if (code != status::StatusCode::OK) {
+        ESP_LOGE(log_tag, "failed to write data: code=%s", status::code_to_str(code));
+        return code;
+    }
+
+    return status::StatusCode::OK;
 }
 
 void SoilMoistureMonitor::relay_turn_on_() {

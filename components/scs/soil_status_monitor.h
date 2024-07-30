@@ -15,6 +15,10 @@
 #include "ocs_diagnostic/basic_counter_holder.h"
 #include "ocs_diagnostic/icounter.h"
 #include "ocs_diagnostic/state_counter.h"
+#include "ocs_scheduler/async_task_scheduler.h"
+#include "ocs_scheduler/fanout_task.h"
+#include "ocs_scheduler/itimer.h"
+#include "ocs_scheduler/timer_store.h"
 #include "ocs_storage/istorage.h"
 #include "ocs_system/fanout_reboot_handler.h"
 #include "scs/itelemetry_writer.h"
@@ -29,14 +33,20 @@ public:
     SoilStatusMonitor(core::IClock& clock,
                       storage::IStorage& storage,
                       system::FanoutRebootHandler& reboot_handler,
+                      scheduler::AsyncTaskScheduler& task_scheduler,
+                      scheduler::TimerStore& timer_store,
                       diagnostic::BasicCounterHolder& counter_holder);
 
     //! Monitor soil status change in @p telemetry.
     status::StatusCode write(const Telemetry& telemetry) override;
 
 private:
-    std::unique_ptr<diagnostic::StateCounter> dry_state_counter_;
-    std::unique_ptr<diagnostic::StateCounter> wet_state_counter_;
+    std::unique_ptr<diagnostic::StateCounter> dry_state_task_;
+    std::unique_ptr<diagnostic::StateCounter> wet_state_task_;
+
+    std::unique_ptr<scheduler::FanoutTask> fanout_task_;
+    scheduler::AsyncTaskScheduler::TaskPtr fanout_task_async_;
+    std::unique_ptr<scheduler::ITimer> task_timer_;
 };
 
 } // namespace app

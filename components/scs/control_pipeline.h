@@ -16,6 +16,8 @@
 #include "ocs_iot/default_http_handler.h"
 #include "ocs_iot/http_server_pipeline.h"
 #include "ocs_iot/system_counter_pipeline.h"
+#include "ocs_scheduler/async_task_scheduler.h"
+#include "ocs_scheduler/timer_store.h"
 #include "ocs_storage/flash_initializer.h"
 #include "ocs_storage/storage_builder.h"
 #include "ocs_system/fanout_reboot_handler.h"
@@ -54,9 +56,15 @@ private:
 
     std::unique_ptr<core::IClock> default_clock_;
 
+    std::unique_ptr<scheduler::AsyncTaskScheduler> task_scheduler_;
+    std::unique_ptr<scheduler::TimerStore> timer_store_;
+
     std::unique_ptr<system::FanoutRebootHandler> fanout_reboot_handler_;
     std::unique_ptr<system::IRebooter> default_rebooter_;
     std::unique_ptr<system::IRebooter> delay_rebooter_;
+
+    std::unique_ptr<scheduler::ITask> reboot_task_;
+    scheduler::AsyncTaskScheduler::TaskPtr reboot_task_async_;
 
     std::unique_ptr<FanoutTelemetryWriter> fanout_telemetry_writer_;
 
@@ -67,7 +75,10 @@ private:
     std::unique_ptr<ITelemetryWriter> console_telemetry_writer_;
 
     std::unique_ptr<GpioConfig> gpio_config_;
-    std::unique_ptr<SoilMoistureMonitor> soil_moisture_monitor_;
+
+    std::unique_ptr<scheduler::ITask> soil_moisture_task_;
+    scheduler::AsyncTaskScheduler::TaskPtr soil_moisture_task_async_;
+    std::unique_ptr<scheduler::ITimer> soil_moisture_timer_;
 
     std::unique_ptr<HttpCommandHandler> http_command_handler_;
 

@@ -8,7 +8,10 @@
 
 #pragma once
 
+#include <memory>
+
 #include "ocs_core/noncopyable.h"
+#include "ocs_iot/default_json_formatter.h"
 #include "ocs_net/http_server.h"
 #include "ocs_system/irebooter.h"
 #include "scs/soil_moisture_monitor.h"
@@ -27,6 +30,17 @@ public:
     HTTPCommandHandler(system::IRebooter& rebooter,
                        net::HttpServer& server,
                        SoilMoistureMonitor& monitor);
+
+private:
+    using JsonFormatter = iot::DefaultJsonFormatter<128>;
+
+    void format_commands_response_();
+
+    void register_routes_(system::IRebooter& rebooter,
+                          net::HttpServer& server,
+                          SoilMoistureMonitor& monitor);
+
+    std::unique_ptr<JsonFormatter> commands_response_;
 };
 
 } // namespace app

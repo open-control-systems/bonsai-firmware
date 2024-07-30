@@ -43,14 +43,14 @@ public:
 private:
     void register_mdns_endpoints_();
 
-    using HTTPRegistrationHandler = iot::DefaultHTTPHandler<256>;
-    using HTTPTelemetryHandler = iot::DefaultHTTPHandler<512>;
+    using HTTPRegistrationHandler = iot::DefaultHttpHandler<256>;
+    using HTTPTelemetryHandler = iot::DefaultHttpHandler<512>;
 
     std::unique_ptr<ITelemetryReader> adc_reader_;
     std::unique_ptr<ITelemetryReader> moisture_reader_;
 
     std::unique_ptr<storage::FlashInitializer> flash_initializer_;
-    std::unique_ptr<iot::HTTPServerPipeline> http_server_pipeline_;
+    std::unique_ptr<iot::HttpServerPipeline> http_server_pipeline_;
 
     std::unique_ptr<core::IClock> default_clock_;
 

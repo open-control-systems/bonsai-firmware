@@ -13,9 +13,9 @@ namespace ocs {
 namespace app {
 
 TelemetryFormatter::TelemetryFormatter() {
-    fanout_formatter_.reset(new (std::nothrow) iot::FanoutJSONFormatter());
+    fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
 
-    system_formatter_.reset(new (std::nothrow) iot::SystemJSONFormatter());
+    system_formatter_.reset(new (std::nothrow) iot::SystemJsonFormatter());
     fanout_formatter_->add(*system_formatter_);
 }
 
@@ -23,7 +23,7 @@ void TelemetryFormatter::format(cJSON* json) {
     fanout_formatter_->format(json);
 }
 
-iot::FanoutJSONFormatter& TelemetryFormatter::fanout() {
+iot::FanoutJsonFormatter& TelemetryFormatter::fanout() {
     return *fanout_formatter_;
 }
 

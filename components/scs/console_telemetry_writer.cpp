@@ -20,8 +20,8 @@ const char* log_tag = "console-telemetry-writer";
 
 } // namespace
 
-ConsoleTelemetryWriter::ConsoleTelemetryWriter(iot::IJSONFormatter& formatter) {
-    fanout_formatter_.reset(new (std::nothrow) iot::FanoutJSONFormatter());
+ConsoleTelemetryWriter::ConsoleTelemetryWriter(iot::IJsonFormatter& formatter) {
+    fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
     fanout_formatter_->add(formatter);
 
     json_formatter_.reset(new (std::nothrow) JSONFormatter());
@@ -29,7 +29,7 @@ ConsoleTelemetryWriter::ConsoleTelemetryWriter(iot::IJSONFormatter& formatter) {
 }
 
 status::StatusCode ConsoleTelemetryWriter::write(const Telemetry& telemetry) {
-    auto json = iot::cJSONUniqueBuilder::make_json();
+    auto json = iot::CjsonUniqueBuilder::make_json();
     fanout_formatter_->format(json.get());
 
     ESP_LOGI(log_tag, "telemetry=%s", json_formatter_->c_str());

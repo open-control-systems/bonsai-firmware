@@ -17,7 +17,7 @@
 namespace ocs {
 namespace app {
 
-class TelemetryFormatter : public iot::IJSONFormatter, public core::NonCopyable<> {
+class TelemetryFormatter : public iot::IJsonFormatter, public core::NonCopyable<> {
 public:
     //! Initialize.
     TelemetryFormatter();
@@ -26,11 +26,11 @@ public:
     void format(cJSON* json);
 
     //! Return fanout to register more telemetry formatters.
-    iot::FanoutJSONFormatter& fanout();
+    iot::FanoutJsonFormatter& fanout();
 
 private:
-    std::unique_ptr<iot::FanoutJSONFormatter> fanout_formatter_;
-    std::unique_ptr<iot::IJSONFormatter> system_formatter_;
+    std::unique_ptr<iot::FanoutJsonFormatter> fanout_formatter_;
+    std::unique_ptr<iot::IJsonFormatter> system_formatter_;
 };
 
 } // namespace app

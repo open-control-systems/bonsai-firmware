@@ -18,7 +18,7 @@ namespace ocs {
 namespace app {
 
 class TelemetryHolder : public ITelemetryWriter,
-                        public iot::IJSONFormatter,
+                        public iot::IJsonFormatter,
                         public core::NonCopyable<> {
 public:
     //! Handle telemetry update.

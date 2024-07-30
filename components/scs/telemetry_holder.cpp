@@ -23,7 +23,7 @@ status::StatusCode TelemetryHolder::write(const Telemetry& telemetry) {
 void TelemetryHolder::format(cJSON* json) {
     core::StaticMutex::Lock lock(mu_);
 
-    iot::cJSONObjectFormatter formatter(json);
+    iot::CjsonObjectFormatter formatter(json);
 
     formatter.add_number_cs("sensor_raw", telemetry_.raw);
     formatter.add_number_cs("sensor_voltage", telemetry_.voltage);

@@ -38,7 +38,7 @@ ControlPipeline::ControlPipeline() {
 
     flash_initializer_.reset(new (std::nothrow) storage::FlashInitializer());
 
-    http_server_pipeline_.reset(new (std::nothrow) iot::HTTPServerPipeline());
+    http_server_pipeline_.reset(new (std::nothrow) iot::HttpServerPipeline());
 
     default_clock_.reset(new (std::nothrow) system::DefaultClock());
 
@@ -125,7 +125,7 @@ void ControlPipeline::start() {
 void ControlPipeline::register_mdns_endpoints_() {
     http_server_pipeline_->mdns().add_service_txt_records(
         "_http", "_tcp",
-        net::MDNSProvider::TxtRecordList {
+        net::MdnsProvider::TxtRecordList {
             {
                 "telemetry",
                 "/telemetry",

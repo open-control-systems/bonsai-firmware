@@ -21,26 +21,13 @@ const char* log_tag = "soil-moisture-monitor";
 
 } // namespace
 
-SoilMoistureMonitor::SoilMoistureMonitor(SoilMoistureMonitor::Params params,
-                                         ITelemetryReader& reader,
+SoilMoistureMonitor::SoilMoistureMonitor(ITelemetryReader& reader,
                                          ITelemetryWriter& writer)
-    : params_(params)
-    , reader_(reader)
+    : reader_(reader)
     , writer_(writer) {
 }
 
 status::StatusCode SoilMoistureMonitor::run() {
-    relay_turn_on_();
-    vTaskDelay(params_.power_on_delay_interval);
-
-    const auto code = run_();
-
-    relay_turn_off_();
-
-    return code;
-}
-
-status::StatusCode SoilMoistureMonitor::run_() {
     Telemetry telemetry;
 
     auto code = reader_.read(telemetry);
@@ -56,14 +43,6 @@ status::StatusCode SoilMoistureMonitor::run_() {
     }
 
     return status::StatusCode::OK;
-}
-
-void SoilMoistureMonitor::relay_turn_on_() {
-    gpio_set_level(params_.relay_gpio, true);
-}
-
-void SoilMoistureMonitor::relay_turn_off_() {
-    gpio_set_level(params_.relay_gpio, false);
 }
 
 } // namespace app

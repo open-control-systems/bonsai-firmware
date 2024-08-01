@@ -18,7 +18,6 @@ idf_component_register(
     "freertos"
     "json"
     "esp_adc"
-    "driver"
     "ocs_core"
     "ocs_status"
     "ocs_net"
@@ -27,6 +26,7 @@ idf_component_register(
     "ocs_system"
     "ocs_diagnostic"
     "ocs_scheduler"
+    "ocs_io"
 
     INCLUDE_DIRS
     ".."

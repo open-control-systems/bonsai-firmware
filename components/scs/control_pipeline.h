@@ -12,6 +12,7 @@
 
 #include "ocs_core/iclock.h"
 #include "ocs_core/noncopyable.h"
+#include "ocs_io/igpio.h"
 #include "ocs_iot/counter_json_formatter.h"
 #include "ocs_iot/default_http_handler.h"
 #include "ocs_iot/http_server_pipeline.h"
@@ -76,8 +77,11 @@ private:
 
     std::unique_ptr<GpioConfig> gpio_config_;
 
+    std::unique_ptr<io::IGpio> default_gpio_;
+    std::unique_ptr<io::IGpio> delay_gpio_;
     std::unique_ptr<scheduler::ITask> soil_moisture_task_;
-    scheduler::AsyncTaskScheduler::TaskPtr soil_moisture_task_async_;
+    std::unique_ptr<scheduler::ITask> relay_task_;
+    scheduler::AsyncTaskScheduler::TaskPtr relay_task_async_;
     std::unique_ptr<scheduler::ITimer> soil_moisture_timer_;
 
     std::unique_ptr<HttpCommandHandler> http_command_handler_;

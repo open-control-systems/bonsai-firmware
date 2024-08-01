@@ -8,6 +8,9 @@
 
 #include "esp_log.h"
 
+#include "ocs_io/default_gpio.h"
+#include "ocs_io/delay_gpio.h"
+#include "ocs_io/oneshot_gpio.h"
 #include "ocs_scheduler/high_resolution_timer.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_system/default_clock.h"
@@ -99,28 +102,40 @@ ControlPipeline::ControlPipeline() {
     gpio_config_.reset(new (std::nothrow) GpioConfig());
     configASSERT(gpio_config_);
 
-    soil_moisture_task_.reset(new (std::nothrow) SoilMoistureMonitor(
-        SoilMoistureMonitor::Params {
-            .power_on_delay_interval =
+    default_gpio_.reset(new (std::nothrow) io::DefaultGpio(
+        "relay-control", static_cast<gpio_num_t>(CONFIG_SMC_RELAY_GPIO)));
+    configASSERT(default_gpio_);
+
+    delay_gpio_.reset(new (std::nothrow) io::DelayGpio(
+        *default_gpio_,
+        io::DelayGpio::Params {
+            .flip_delay_interval = pdMS_TO_TICKS(0),
+            .turn_on_delay_interval =
                 (1000 * CONFIG_SMC_POWER_ON_DELAY_INTERVAL) / portTICK_PERIOD_MS,
-            .relay_gpio = static_cast<gpio_num_t>(CONFIG_SMC_RELAY_GPIO),
-        },
+            .turn_off_delay_interval = pdMS_TO_TICKS(0),
+        }));
+    configASSERT(delay_gpio_);
+
+    soil_moisture_task_.reset(new (std::nothrow) SoilMoistureMonitor(
         *moisture_reader_, *fanout_telemetry_writer_));
     configASSERT(soil_moisture_task_);
 
-    soil_moisture_task_async_ = task_scheduler_->add(*soil_moisture_task_);
-    configASSERT(soil_moisture_task_async_);
+    relay_task_.reset(new (std::nothrow)
+                          io::OneshotGpio(*soil_moisture_task_, *delay_gpio_));
+    configASSERT(relay_task_);
+
+    relay_task_async_ = task_scheduler_->add(*soil_moisture_task_);
+    configASSERT(relay_task_async_);
 
     soil_moisture_timer_.reset(new (std::nothrow) scheduler::HighResolutionTimer(
-        *soil_moisture_task_async_, "soil-moisture-timer",
+        *relay_task_async_, "soil-moisture-timer",
         core::Second * CONFIG_SMC_READ_INTERVAL));
     configASSERT(soil_moisture_timer_);
 
     timer_store_->add(*soil_moisture_timer_);
 
     http_command_handler_.reset(new (std::nothrow) HttpCommandHandler(
-        http_server_pipeline_->server(), *reboot_task_async_,
-        *soil_moisture_task_async_));
+        http_server_pipeline_->server(), *reboot_task_async_, *relay_task_async_));
     configASSERT(http_command_handler_);
 
     registration_formatter_.reset(
@@ -161,7 +176,7 @@ ControlPipeline::ControlPipeline() {
 
 void ControlPipeline::start() {
     // Read the soil moisture data at startup.
-    auto code = soil_moisture_task_->run();
+    auto code = relay_task_->run();
     if (code != status::StatusCode::OK) {
         ESP_LOGW(log_tag, "failed to run soil moisture task: code=%s",
                  status::code_to_str(code));

@@ -8,11 +8,6 @@
 
 #pragma once
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-
-#include "driver/gpio.h"
-
 #include "ocs_core/noncopyable.h"
 #include "ocs_scheduler/itask.h"
 #include "scs/itelemetry_reader.h"
@@ -23,29 +18,13 @@ namespace app {
 
 class SoilMoistureMonitor : public scheduler::ITask, public core::NonCopyable<> {
 public:
-    struct Params {
-        //! Interval to wait after the control system is powered on.
-        TickType_t power_on_delay_interval { pdMS_TO_TICKS(0) };
-
-        //! Relay GPIO.
-        gpio_num_t relay_gpio { GPIO_NUM_NC };
-    };
-
     //! Initialize.
-    SoilMoistureMonitor(Params params,
-                        ITelemetryReader& reader,
-                        ITelemetryWriter& writer);
+    SoilMoistureMonitor(ITelemetryReader& reader, ITelemetryWriter& writer);
 
     //! Monitor soil moisture data.
     status::StatusCode run() override;
 
 private:
-    status::StatusCode run_();
-    void relay_turn_on_();
-    void relay_turn_off_();
-
-    const Params params_;
-
     ITelemetryReader& reader_;
     ITelemetryWriter& writer_;
 };

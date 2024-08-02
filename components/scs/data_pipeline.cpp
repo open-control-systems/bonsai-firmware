@@ -29,12 +29,6 @@ DataPipeline::DataPipeline(core::IClock& clock,
 
     telemetry_formatter_->get_fanout_formatter().add(*telemetry_holder_);
 
-    console_telemetry_writer_.reset(new (std::nothrow)
-                                        ConsoleTelemetryWriter(*telemetry_formatter_));
-    configASSERT(console_telemetry_writer_);
-
-    fanout_telemetry_writer_->add(*console_telemetry_writer_);
-
     registration_formatter_.reset(new (std::nothrow) RegistrationFormatter());
     configASSERT(registration_formatter_);
 
@@ -63,6 +57,12 @@ DataPipeline::DataPipeline(core::IClock& clock,
     configASSERT(soil_status_monitor_);
 
     fanout_telemetry_writer_->add(*soil_status_monitor_);
+
+    console_telemetry_writer_.reset(new (std::nothrow)
+                                        ConsoleTelemetryWriter(*telemetry_formatter_));
+    configASSERT(console_telemetry_writer_);
+
+    fanout_telemetry_writer_->add(*console_telemetry_writer_);
 }
 
 ITelemetryWriter& DataPipeline::get_telemetry_writer() {

@@ -12,7 +12,7 @@
 #include "scs/yl69_moisture_reader.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 YL69MoistureReader::YL69MoistureReader(int threshold, ITelemetryReader& reader)
     : threshold_(threshold)
@@ -30,5 +30,5 @@ status::StatusCode YL69MoistureReader::read(Telemetry& telemetry) {
     return status::StatusCode::OK;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

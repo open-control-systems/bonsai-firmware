@@ -16,7 +16,7 @@
 #include "scs/telemetry.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class TelemetryHolder : public ITelemetryWriter,
                         public iot::IJsonFormatter,
@@ -33,5 +33,5 @@ private:
     Telemetry telemetry_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

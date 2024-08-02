@@ -25,7 +25,7 @@
 #include "scs/telemetry_holder.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class DataPipeline : public core::NonCopyable<> {
 public:
@@ -58,5 +58,5 @@ private:
     std::unique_ptr<SoilStatusMonitor> soil_status_monitor_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

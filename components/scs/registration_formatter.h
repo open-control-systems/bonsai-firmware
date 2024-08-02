@@ -16,7 +16,7 @@
 #include "ocs_iot/version_json_formatter.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class RegistrationFormatter : public iot::IJsonFormatter, public core::NonCopyable<> {
 public:
@@ -33,5 +33,5 @@ private:
     std::unique_ptr<iot::VersionJsonFormatter> version_formatter_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

@@ -18,7 +18,7 @@
 #include "scs/telemetry.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class ConsoleTelemetryWriter : public ITelemetryWriter, public core::NonCopyable<> {
 public:
@@ -38,5 +38,5 @@ private:
     std::unique_ptr<JsonFormatter> json_formatter_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

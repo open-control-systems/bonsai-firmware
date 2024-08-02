@@ -9,7 +9,7 @@
 #include "scs/telemetry.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 const char* soil_status_to_str(SoilStatus status) {
     switch (status) {
@@ -26,5 +26,5 @@ const char* soil_status_to_str(SoilStatus status) {
     return "<none>";
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

@@ -13,7 +13,7 @@
 #include "scs/telemetry_formatter.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 TelemetryFormatter::TelemetryFormatter() {
     fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
@@ -33,5 +33,5 @@ iot::FanoutJsonFormatter& TelemetryFormatter::get_fanout_formatter() {
     return *fanout_formatter_;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

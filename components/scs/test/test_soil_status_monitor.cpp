@@ -14,7 +14,7 @@
 #include "scs/soil_status_monitor.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 namespace {
 
@@ -38,5 +38,5 @@ TEST_CASE("Soil status monitor: counters registration", "[soil_status_monitor], 
     TEST_ASSERT_EQUAL(2, counter_holder.count());
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

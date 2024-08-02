@@ -14,7 +14,7 @@
 #include "scs/soil_status_monitor.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 SoilStatusMonitor::SoilStatusMonitor(core::IClock& clock,
                                      storage::IStorage& storage,
@@ -64,5 +64,5 @@ status::StatusCode SoilStatusMonitor::write(const Telemetry& telemetry) {
     return status::StatusCode::OK;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

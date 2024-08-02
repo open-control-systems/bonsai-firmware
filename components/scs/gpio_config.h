@@ -13,7 +13,7 @@
 #include "ocs_core/noncopyable.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class GpioConfig : public core::NonCopyable<> {
 public:
@@ -24,5 +24,5 @@ private:
     gpio_config_t config_ {};
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

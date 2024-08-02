@@ -10,7 +10,7 @@
 #include "scs/console_telemetry_writer.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 DataPipeline::DataPipeline(core::IClock& clock,
                            scheduler::AsyncTaskScheduler& task_scheduler,
@@ -77,5 +77,5 @@ iot::FanoutJsonFormatter& DataPipeline::get_registration_formatter() {
     return registration_formatter_->get_fanout_formatter();
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

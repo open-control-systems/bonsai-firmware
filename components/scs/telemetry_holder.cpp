@@ -11,7 +11,7 @@
 #include "ocs_iot/cjson_object_formatter.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 status::StatusCode TelemetryHolder::write(const Telemetry& telemetry) {
     core::StaticMutex::Lock lock(mu_);
@@ -31,5 +31,5 @@ void TelemetryHolder::format(cJSON* json) {
     formatter.add_string_ref_cs("sensor_status", soil_status_to_str(telemetry_.status));
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

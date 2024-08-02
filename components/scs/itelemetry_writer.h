@@ -13,7 +13,7 @@
 #include "scs/telemetry.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class ITelemetryWriter {
 public:
@@ -24,5 +24,5 @@ public:
     [[nodiscard]] virtual status::StatusCode write(const Telemetry& telemetry) = 0;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

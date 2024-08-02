@@ -16,7 +16,7 @@
 #include "scs/registration_formatter.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 namespace {
 
@@ -50,5 +50,5 @@ iot::FanoutJsonFormatter& RegistrationFormatter::get_fanout_formatter() {
     return *fanout_formatter_;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

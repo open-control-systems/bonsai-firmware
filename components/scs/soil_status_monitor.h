@@ -26,7 +26,7 @@
 #include "scs/telemetry.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class SoilStatusMonitor : public ITelemetryWriter, public core::NonCopyable<> {
 public:
@@ -50,5 +50,5 @@ private:
     std::unique_ptr<scheduler::ITimer> task_timer_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

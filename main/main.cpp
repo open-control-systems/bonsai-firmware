@@ -9,6 +9,6 @@
 #include "scs/project_pipeline.h"
 
 extern "C" void app_main(void) {
-    ocs::app::ProjectPipeline pipeline;
+    ocs::scs::ProjectPipeline pipeline;
     pipeline.start();
 }

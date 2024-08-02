@@ -20,7 +20,7 @@
 #include "scs/yl69_moisture_reader.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 namespace {
 
@@ -93,5 +93,5 @@ scheduler::ITask& ControlPipeline::get_control_task() {
     return *async_task_;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

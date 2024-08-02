@@ -20,7 +20,7 @@
 #include "scs/itelemetry_writer.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class ControlPipeline : public core::NonCopyable<> {
 public:
@@ -53,5 +53,5 @@ private:
     std::unique_ptr<scheduler::ITimer> async_task_timer_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

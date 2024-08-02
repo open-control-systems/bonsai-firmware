@@ -15,7 +15,7 @@
 #include "scs/itelemetry_writer.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class FanoutTelemetryWriter : public ITelemetryWriter, public core::NonCopyable<> {
 public:
@@ -32,5 +32,5 @@ private:
     std::vector<ITelemetryWriter*> writers_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

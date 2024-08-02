@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ocs_core/noncopyable.h"
+
 #include "scs/itelemetry_writer.h"
 
 namespace ocs {

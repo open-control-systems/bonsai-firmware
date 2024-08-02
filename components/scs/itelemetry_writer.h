@@ -8,9 +8,8 @@
 
 #pragma once
 
-#include <memory>
-
 #include "ocs_status/code.h"
+
 #include "scs/telemetry.h"
 
 namespace ocs {

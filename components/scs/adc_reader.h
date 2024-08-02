@@ -13,6 +13,7 @@
 #include "esp_adc/adc_oneshot.h"
 
 #include "ocs_core/noncopyable.h"
+
 #include "scs/itelemetry_reader.h"
 
 namespace ocs {

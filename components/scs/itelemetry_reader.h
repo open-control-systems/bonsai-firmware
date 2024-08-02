@@ -9,6 +9,7 @@
 #pragma once
 
 #include "ocs_status/code.h"
+
 #include "scs/telemetry.h"
 
 namespace ocs {

@@ -11,6 +11,7 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_core/static_mutex.h"
 #include "ocs_iot/ijson_formatter.h"
+
 #include "scs/itelemetry_writer.h"
 #include "scs/telemetry.h"
 

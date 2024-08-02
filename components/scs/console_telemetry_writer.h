@@ -13,6 +13,7 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_iot/default_json_formatter.h"
 #include "ocs_iot/fanout_json_formatter.h"
+
 #include "scs/itelemetry_writer.h"
 #include "scs/telemetry.h"
 

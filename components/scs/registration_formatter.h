@@ -14,7 +14,6 @@
 #include "ocs_iot/fanout_json_formatter.h"
 #include "ocs_iot/ijson_formatter.h"
 #include "ocs_iot/version_json_formatter.h"
-#include "ocs_net/basic_network.h"
 
 namespace ocs {
 namespace app {
@@ -22,17 +21,15 @@ namespace app {
 class RegistrationFormatter : public iot::IJsonFormatter, public core::NonCopyable<> {
 public:
     //! Initialize.
-    //!
-    //! @params
-    //!  - @p network to read the network data.
-    explicit RegistrationFormatter(net::BasicNetwork& network);
+    RegistrationFormatter();
 
     //! Format the underlying data into @p json.
     void format(cJSON* json) override;
 
+    iot::FanoutJsonFormatter& get_fanout_formatter();
+
 private:
     std::unique_ptr<iot::FanoutJsonFormatter> fanout_formatter_;
-    std::unique_ptr<iot::IJsonFormatter> network_formatter_;
     std::unique_ptr<iot::VersionJsonFormatter> version_formatter_;
 };
 

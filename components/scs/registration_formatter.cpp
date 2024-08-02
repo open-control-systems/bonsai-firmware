@@ -8,9 +8,11 @@
 
 #include "esp_log.h"
 
+#include "freertos/FreeRTOSConfig.h"
+
 #include "ocs_core/version.h"
 #include "ocs_core/version_to_str.h"
-#include "ocs_iot/network_json_formatter.h"
+
 #include "scs/registration_formatter.h"
 
 namespace ocs {
@@ -22,14 +24,9 @@ const char* log_tag = "registration-formatter";
 
 } // namespace
 
-RegistrationFormatter::RegistrationFormatter(net::BasicNetwork& network) {
+RegistrationFormatter::RegistrationFormatter() {
     fanout_formatter_.reset(new (std::nothrow) iot::FanoutJsonFormatter());
     configASSERT(fanout_formatter_);
-
-    network_formatter_.reset(new (std::nothrow) iot::NetworkJsonFormatter(network));
-    configASSERT(network_formatter_);
-
-    fanout_formatter_->add(*network_formatter_);
 
     core::Version version;
     if (!version.parse(CONFIG_OCS_CORE_FW_VERSION)) {
@@ -47,6 +44,10 @@ RegistrationFormatter::RegistrationFormatter(net::BasicNetwork& network) {
 
 void RegistrationFormatter::format(cJSON* json) {
     fanout_formatter_->format(json);
+}
+
+iot::FanoutJsonFormatter& RegistrationFormatter::get_fanout_formatter() {
+    return *fanout_formatter_;
 }
 
 } // namespace app

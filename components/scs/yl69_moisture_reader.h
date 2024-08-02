@@ -9,6 +9,7 @@
 #pragma once
 
 #include "ocs_core/noncopyable.h"
+
 #include "scs/itelemetry_reader.h"
 
 namespace ocs {

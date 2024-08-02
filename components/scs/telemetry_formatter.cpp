@@ -9,6 +9,7 @@
 #include "freertos/FreeRTOSConfig.h"
 
 #include "ocs_iot/system_json_formatter.h"
+
 #include "scs/telemetry_formatter.h"
 
 namespace ocs {
@@ -28,7 +29,7 @@ void TelemetryFormatter::format(cJSON* json) {
     fanout_formatter_->format(json);
 }
 
-iot::FanoutJsonFormatter& TelemetryFormatter::fanout() {
+iot::FanoutJsonFormatter& TelemetryFormatter::get_fanout_formatter() {
     return *fanout_formatter_;
 }
 

@@ -21,6 +21,7 @@
 #include "ocs_scheduler/timer_store.h"
 #include "ocs_storage/istorage.h"
 #include "ocs_system/fanout_reboot_handler.h"
+
 #include "scs/itelemetry_writer.h"
 #include "scs/telemetry.h"
 

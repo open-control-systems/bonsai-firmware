@@ -11,6 +11,7 @@
 #include "freertos/FreeRTOSConfig.h"
 
 #include "ocs_iot/cjson_builder.h"
+
 #include "scs/console_telemetry_writer.h"
 
 namespace ocs {

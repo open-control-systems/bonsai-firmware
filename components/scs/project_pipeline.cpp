@@ -13,7 +13,7 @@
 #include "scs/project_pipeline.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 namespace {
 
@@ -22,7 +22,7 @@ const char* log_tag = "project-pipeline";
 } // namespace
 
 ProjectPipeline::ProjectPipeline() {
-    system_pipeline_.reset(new (std::nothrow) SystemPipeline());
+    system_pipeline_.reset(new (std::nothrow) iot::SystemPipeline());
     configASSERT(system_pipeline_);
 
     data_pipeline_.reset(new (std::nothrow) DataPipeline(
@@ -35,7 +35,7 @@ ProjectPipeline::ProjectPipeline() {
         data_pipeline_->get_telemetry_writer()));
     configASSERT(control_pipeline_);
 
-    http_pipeline_.reset(new (std::nothrow) HttpPipeline<256, 512>(
+    http_pipeline_.reset(new (std::nothrow) HttpPipeline(
         system_pipeline_->get_reboot_task(), control_pipeline_->get_control_task(),
         data_pipeline_->get_telemetry_formatter(),
         data_pipeline_->get_registration_formatter()));
@@ -61,5 +61,5 @@ status::StatusCode ProjectPipeline::start() {
     return status::StatusCode::OK;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

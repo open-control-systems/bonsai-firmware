@@ -15,7 +15,7 @@
 #include "scs/console_telemetry_writer.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 namespace {
 
@@ -44,5 +44,5 @@ status::StatusCode ConsoleTelemetryWriter::write(const Telemetry& telemetry) {
     return status::StatusCode::OK;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

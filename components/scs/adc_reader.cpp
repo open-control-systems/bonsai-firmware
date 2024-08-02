@@ -12,7 +12,7 @@
 #include "scs/telemetry.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 AdcReader::AdcReader(AdcReader::Params params)
     : params_(params) {
@@ -50,5 +50,5 @@ status::StatusCode AdcReader::read(Telemetry& telemetry) {
     return status::StatusCode::OK;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

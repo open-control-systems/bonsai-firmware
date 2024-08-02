@@ -9,7 +9,7 @@
 #include "scs/fanout_telemetry_writer.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 status::StatusCode FanoutTelemetryWriter::write(const Telemetry& telemetry) {
     for (auto& writer : writers_) {
@@ -26,5 +26,5 @@ void FanoutTelemetryWriter::add(ITelemetryWriter& writer) {
     writers_.emplace_back(&writer);
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

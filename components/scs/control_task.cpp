@@ -14,7 +14,7 @@
 #include "scs/control_task.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 namespace {
 
@@ -45,5 +45,5 @@ status::StatusCode ControlTask::run() {
     return status::StatusCode::OK;
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

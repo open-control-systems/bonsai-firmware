@@ -13,7 +13,7 @@
 #include "scs/itelemetry_reader.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class YL69MoistureReader : public ITelemetryReader, public core::NonCopyable<> {
 public:
@@ -33,5 +33,5 @@ private:
     ITelemetryReader& reader_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

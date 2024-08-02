@@ -15,7 +15,7 @@
 #include "ocs_iot/ijson_formatter.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class TelemetryFormatter : public iot::IJsonFormatter, public core::NonCopyable<> {
 public:
@@ -32,5 +32,5 @@ private:
     std::unique_ptr<iot::IJsonFormatter> system_formatter_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

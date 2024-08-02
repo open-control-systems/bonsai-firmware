@@ -15,7 +15,7 @@
 #include "scs/itelemetry_writer.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class ControlTask : public scheduler::ITask, public core::NonCopyable<> {
 public:
@@ -30,5 +30,5 @@ private:
     ITelemetryWriter& writer_;
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

@@ -17,7 +17,7 @@
 #include "scs/itelemetry_reader.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 class AdcReader : public ITelemetryReader, public core::NonCopyable<> {
 public:
@@ -47,5 +47,5 @@ private:
     adc_cali_handle_t calibration_handle_ { nullptr };
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

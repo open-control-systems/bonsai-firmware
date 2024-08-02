@@ -9,11 +9,9 @@ idf_component_register(
     "telemetry_holder.cpp"
     "telemetry_formatter.cpp"
     "fanout_telemetry_writer.cpp"
-    "http_command_handler.cpp"
     "registration_formatter.cpp"
     "soil_status_monitor.cpp"
     "project_pipeline.cpp"
-    "system_pipeline.cpp"
     "data_pipeline.cpp"
     "control_pipeline.cpp"
 

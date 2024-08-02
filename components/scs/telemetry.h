@@ -9,7 +9,7 @@
 #pragma once
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 //! Known soil statuses.
 enum class SoilStatus {
@@ -28,5 +28,5 @@ struct Telemetry {
     int voltage { 0 };
 };
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

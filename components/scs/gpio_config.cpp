@@ -11,7 +11,7 @@
 #include "scs/gpio_config.h"
 
 namespace ocs {
-namespace app {
+namespace scs {
 
 namespace {
 
@@ -37,5 +37,5 @@ GpioConfig::GpioConfig() {
     gpio_config(&config_);
 }
 
-} // namespace app
+} // namespace scs
 } // namespace ocs

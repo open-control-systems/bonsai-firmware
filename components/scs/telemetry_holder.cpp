@@ -7,6 +7,7 @@
  */
 
 #include "scs/telemetry_holder.h"
+
 #include "ocs_iot/cjson_object_formatter.h"
 
 namespace ocs {

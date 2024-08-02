@@ -25,8 +25,7 @@ public:
     //! Format all telemetry data into @p json.
     void format(cJSON* json);
 
-    //! Return fanout to register more telemetry formatters.
-    iot::FanoutJsonFormatter& fanout();
+    iot::FanoutJsonFormatter& get_fanout_formatter();
 
 private:
     std::unique_ptr<iot::FanoutJsonFormatter> fanout_formatter_;

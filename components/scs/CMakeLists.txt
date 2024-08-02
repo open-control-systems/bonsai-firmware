@@ -1,7 +1,7 @@
 idf_component_register(
     SRCS
     "adc_reader.cpp"
-    "soil_moisture_monitor.cpp"
+    "control_task.cpp"
     "yl69_moisture_reader.cpp"
     "console_telemetry_writer.cpp"
     "gpio_config.cpp"
@@ -9,10 +9,13 @@ idf_component_register(
     "telemetry_holder.cpp"
     "telemetry_formatter.cpp"
     "fanout_telemetry_writer.cpp"
-    "control_pipeline.cpp"
     "http_command_handler.cpp"
     "registration_formatter.cpp"
     "soil_status_monitor.cpp"
+    "project_pipeline.cpp"
+    "system_pipeline.cpp"
+    "data_pipeline.cpp"
+    "control_pipeline.cpp"
 
     REQUIRES
     "freertos"

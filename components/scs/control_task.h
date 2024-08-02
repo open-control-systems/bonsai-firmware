@@ -10,16 +10,17 @@
 
 #include "ocs_core/noncopyable.h"
 #include "ocs_scheduler/itask.h"
+
 #include "scs/itelemetry_reader.h"
 #include "scs/itelemetry_writer.h"
 
 namespace ocs {
 namespace app {
 
-class SoilMoistureMonitor : public scheduler::ITask, public core::NonCopyable<> {
+class ControlTask : public scheduler::ITask, public core::NonCopyable<> {
 public:
     //! Initialize.
-    SoilMoistureMonitor(ITelemetryReader& reader, ITelemetryWriter& writer);
+    ControlTask(ITelemetryReader& reader, ITelemetryWriter& writer);
 
     //! Monitor soil moisture data.
     status::StatusCode run() override;

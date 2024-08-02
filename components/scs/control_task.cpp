@@ -10,24 +10,24 @@
 
 #include "ocs_status/code.h"
 #include "ocs_status/code_to_str.h"
-#include "scs/soil_moisture_monitor.h"
+
+#include "scs/control_task.h"
 
 namespace ocs {
 namespace app {
 
 namespace {
 
-const char* log_tag = "soil-moisture-monitor";
+const char* log_tag = "control-task";
 
 } // namespace
 
-SoilMoistureMonitor::SoilMoistureMonitor(ITelemetryReader& reader,
-                                         ITelemetryWriter& writer)
+ControlTask::ControlTask(ITelemetryReader& reader, ITelemetryWriter& writer)
     : reader_(reader)
     , writer_(writer) {
 }
 
-status::StatusCode SoilMoistureMonitor::run() {
+status::StatusCode ControlTask::run() {
     Telemetry telemetry;
 
     auto code = reader_.read(telemetry);

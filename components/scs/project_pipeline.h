@@ -11,11 +11,12 @@
 #include <memory>
 
 #include "ocs_core/noncopyable.h"
+#include "ocs_iot/console_json_pipeline.h"
 #include "ocs_iot/http_pipeline.h"
+#include "ocs_iot/json_data_pipeline.h"
 #include "ocs_iot/system_pipeline.h"
 
 #include "scs/control_pipeline.h"
-#include "scs/data_pipeline.h"
 
 namespace ocs {
 namespace scs {
@@ -30,10 +31,14 @@ public:
 
 private:
     std::unique_ptr<iot::SystemPipeline> system_pipeline_;
-    std::unique_ptr<DataPipeline> data_pipeline_;
+    std::unique_ptr<iot::JsonDataPipeline> json_data_pipeline_;
+
+    using ConsolePipeline = iot::ConsoleJsonPipeline<512, 256>;
+    std::unique_ptr<ConsolePipeline> console_pipeline_;
+
     std::unique_ptr<ControlPipeline> control_pipeline_;
 
-    using HttpPipeline = iot::HttpPipeline<256, 512, 256>;
+    using HttpPipeline = iot::HttpPipeline<512, 256, 256>;
     std::unique_ptr<HttpPipeline> http_pipeline_;
 };
 

@@ -25,20 +25,33 @@ ProjectPipeline::ProjectPipeline() {
     system_pipeline_.reset(new (std::nothrow) iot::SystemPipeline());
     configASSERT(system_pipeline_);
 
-    data_pipeline_.reset(new (std::nothrow) DataPipeline(
-        system_pipeline_->get_clock(), system_pipeline_->get_task_scheduler(),
-        system_pipeline_->get_timer_store(), system_pipeline_->get_reboot_handler()));
-    configASSERT(data_pipeline_);
+    json_data_pipeline_.reset(new (std::nothrow) iot::JsonDataPipeline(
+        system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
+        system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
+        system_pipeline_->get_reboot_handler()));
+    configASSERT(json_data_pipeline_);
 
     control_pipeline_.reset(new (std::nothrow) ControlPipeline(
-        system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
-        data_pipeline_->get_telemetry_writer()));
+        system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
+        system_pipeline_->get_reboot_handler(), system_pipeline_->get_task_scheduler(),
+        system_pipeline_->get_timer_store(), json_data_pipeline_->get_counter_holder(),
+        json_data_pipeline_->get_telemetry_formatter()));
     configASSERT(control_pipeline_);
+
+    console_pipeline_.reset(new (std::nothrow) ConsolePipeline(
+        system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
+        json_data_pipeline_->get_telemetry_formatter(),
+        json_data_pipeline_->get_registration_formatter(),
+        ConsolePipeline::Params {
+            .telemetry_interval = core::Second * 10,
+            .registration_interval = core::Second * 20,
+        }));
+    configASSERT(console_pipeline_);
 
     http_pipeline_.reset(new (std::nothrow) HttpPipeline(
         system_pipeline_->get_reboot_task(), control_pipeline_->get_control_task(),
-        data_pipeline_->get_telemetry_formatter(),
-        data_pipeline_->get_registration_formatter()));
+        json_data_pipeline_->get_telemetry_formatter(),
+        json_data_pipeline_->get_registration_formatter()));
     configASSERT(http_pipeline_);
 }
 

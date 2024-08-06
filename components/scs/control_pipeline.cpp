@@ -6,91 +6,60 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "esp_log.h"
-
-#include "ocs_io/default_gpio.h"
-#include "ocs_io/delay_gpio.h"
-#include "ocs_io/oneshot_gpio.h"
+#include "ocs_iot/yl69_sensor_json_formatter.h"
 #include "ocs_scheduler/high_resolution_timer.h"
+#include "ocs_sensor/relay_sensor.h"
+#include "ocs_sensor/safe_yl69_sensor_task.h"
 #include "ocs_status/code_to_str.h"
 
-#include "scs/adc_reader.h"
 #include "scs/control_pipeline.h"
-#include "scs/control_task.h"
-#include "scs/yl69_moisture_reader.h"
 
 namespace ocs {
 namespace scs {
 
-namespace {
-
-const char* log_tag = "control-pipeline";
-
-} // namespace
-
-ControlPipeline::ControlPipeline(scheduler::AsyncTaskScheduler& task_scheduler,
+ControlPipeline::ControlPipeline(core::IClock& clock,
+                                 storage::StorageBuilder& storage_builder,
+                                 system::FanoutRebootHandler& reboot_handler,
+                                 scheduler::AsyncTaskScheduler& task_scheduler,
                                  scheduler::TimerStore& timer_store,
-                                 ITelemetryWriter& telemetry_writer) {
+                                 diagnostic::BasicCounterHolder& counter_holder,
+                                 iot::FanoutJsonFormatter& telemetry_formatter) {
     gpio_config_.reset(new (std::nothrow) GpioConfig());
     configASSERT(gpio_config_);
 
-    default_gpio_.reset(new (std::nothrow) io::DefaultGpio(
-        "relay-control", static_cast<gpio_num_t>(CONFIG_SMC_RELAY_GPIO)));
-    configASSERT(default_gpio_);
-
-    delay_gpio_.reset(new (std::nothrow) io::DelayGpio(
-        *default_gpio_,
-        io::DelayGpio::Params {
-            .flip_delay_interval = pdMS_TO_TICKS(0),
-            .turn_on_delay_interval =
-                (1000 * CONFIG_SMC_POWER_ON_DELAY_INTERVAL) / portTICK_PERIOD_MS,
-            .turn_off_delay_interval = pdMS_TO_TICKS(0),
-        }));
-    configASSERT(delay_gpio_);
-
-    adc_reader_.reset(new (std::nothrow) AdcReader(AdcReader::Params {
-        .channel = static_cast<adc_channel_t>(CONFIG_SMC_SENSOR_ADC_CHANNEL),
+    adc_store_.reset(new (std::nothrow) io::AdcStore(io::AdcStore::Params {
+        .unit = ADC_UNIT_1,
         .atten = ADC_ATTEN_DB_12,
         .bitwidth = ADC_BITWIDTH_10,
     }));
-    configASSERT(adc_reader_);
+    configASSERT(adc_store_);
 
-    moisture_reader_.reset(
-        new (std::nothrow) YL69MoistureReader(CONFIG_SMC_SENSOR_THRESHOLD, *adc_reader_));
-    configASSERT(moisture_reader_);
+    counter_storage_ = storage_builder.make("soil_counter");
+    configASSERT(counter_storage_);
 
-    control_task_.reset(new (std::nothrow)
-                            ControlTask(*moisture_reader_, telemetry_writer));
-    configASSERT(control_task_);
+    fanout_task_.reset(new (std::nothrow) scheduler::FanoutTask());
+    configASSERT(fanout_task_);
 
-    relay_task_.reset(new (std::nothrow) io::OneshotGpio(*control_task_, *delay_gpio_));
-    configASSERT(relay_task_);
+    yl69_sensor_task_.reset(new (std::nothrow) sensor::SafeYL69SensorTask(
+        clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
+        timer_store, counter_holder));
+    configASSERT(yl69_sensor_task_);
 
-    relay_task_async_ = task_scheduler.add(*control_task_);
-    configASSERT(relay_task_async_);
+    fanout_task_->add(*yl69_sensor_task_);
 
-    task_ = relay_task_.get();
-    async_task_ = relay_task_async_.get();
+    yl69_sensor_json_formatter_.reset(
+        new (std::nothrow) iot::YL69SensorJsonFormatter(yl69_sensor_task_->get_sensor()));
+    configASSERT(yl69_sensor_json_formatter_);
 
-    async_task_timer_.reset(new (std::nothrow) scheduler::HighResolutionTimer(
-        *async_task_, "control-task", core::Second * CONFIG_SMC_READ_INTERVAL));
-    configASSERT(async_task_timer_);
-
-    timer_store.add(*async_task_timer_);
+    telemetry_formatter.add(*yl69_sensor_json_formatter_);
 }
 
 status::StatusCode ControlPipeline::start() {
-    const auto code = task_->run();
-    if (code != status::StatusCode::OK) {
-        ESP_LOGE(log_tag, "failed to run control task: code=%s",
-                 status::code_to_str(code));
-    }
-
-    return status::StatusCode::OK;
+    return fanout_task_->run();
 }
 
 scheduler::ITask& ControlPipeline::get_control_task() {
-    return *async_task_;
+    return *fanout_task_;
 }
 
 } // namespace scs

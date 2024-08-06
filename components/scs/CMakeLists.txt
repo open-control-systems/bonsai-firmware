@@ -1,24 +1,11 @@
 idf_component_register(
     SRCS
-    "adc_reader.cpp"
-    "control_task.cpp"
-    "yl69_moisture_reader.cpp"
-    "console_telemetry_writer.cpp"
     "gpio_config.cpp"
-    "telemetry.cpp"
-    "telemetry_holder.cpp"
-    "telemetry_formatter.cpp"
-    "fanout_telemetry_writer.cpp"
-    "registration_formatter.cpp"
-    "soil_status_monitor.cpp"
     "project_pipeline.cpp"
-    "data_pipeline.cpp"
     "control_pipeline.cpp"
 
     REQUIRES
     "freertos"
-    "json"
-    "esp_adc"
     "ocs_core"
     "ocs_status"
     "ocs_net"
@@ -28,6 +15,7 @@ idf_component_register(
     "ocs_diagnostic"
     "ocs_scheduler"
     "ocs_io"
+    "ocs_sensor"
 
     INCLUDE_DIRS
     ".."

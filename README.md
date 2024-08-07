@@ -35,26 +35,7 @@ The firmware can be configured using the following command:
 idf.py menuconfig
 ```
 
-### Soil Control System Configuration
-
-| Config Option                          | Description                                     | Default Value | Help                                               |
-|----------------------------------------|-------------------------------------------------|---------------|----------------------------------------------------|
-| `CONFIG_SMC_SENSOR_ADC_CHANNEL`        | Moisture sensor ADC channel                     | 6             | ESP32 ADC channel to read soil moisture values.    |
-| `CONFIG_SMC_SENSOR_THRESHOLD`          | Moisture sensor threshold                       | 800           | Threshold to determine if the soil is wet/dry.     |
-| `CONFIG_SMC_RELAY_GPIO`                | Relay control GPIO                              | 26            | ESP32 GPIO to control the relay.                   |
-| `CONFIG_SMC_READ_INTERVAL`             | Soil moisture read interval (seconds)           | 1800          | Interval for reading soil moisture value.          |
-| `CONFIG_SMC_POWER_ON_DELAY_INTERVAL`   | Power on delay interval (seconds)               | 1             | Delay after the control relay is energized.        |
-
-### esp-components Configuration
-
-| Config Option                             | Description                     | Default Value | Help                                            |
-|-------------------------------------------|---------------------------------|---------------|-------------------------------------------------|
-| `CONFIG_OCS_NETWORK_WIFI_STA_SSID`        | WiFi SSID                       |               | Set the WiFi SSID for network connection.       |
-| `CONFIG_OCS_NETWORK_WIFI_STA_PASSWORD`    | WiFi Password                   |               | Set the WiFi password for network connection.   |
-| `CONFIG_OCS_NETWORK_WIFI_STA_RETRY_COUNT` | WiFi Retry Count                | 5             | Number of retries for WiFi connection attempts. |
-| `CONFIG_OCS_NETWORK_HTTP_SERVER_PORT`     | HTTP Server Port                | 80            | Port for the HTTP server.                       |
-| `CONFIG_OCS_NETWORK_MDNS_HOSTNAME`        | mDNS Hostname                   |               | Set the mDNS hostname.                          |
-| `CONFIG_OCS_NETWORK_MDNS_INSTANCE_NAME`   | mDNS Hostname                   |               | Set the mDNS instance name.                     |
+There are many configuration options. Each of them contains the prefix "OCS_".
 
 ## Usage
 

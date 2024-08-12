@@ -6,8 +6,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include "ocs_iot/ldr_sensor_json_formatter.h"
 #include "ocs_iot/yl69_sensor_json_formatter.h"
 #include "ocs_scheduler/high_resolution_timer.h"
+#include "ocs_sensor/ldr_sensor_task.h"
 #include "ocs_sensor/relay_sensor.h"
 #include "ocs_sensor/safe_yl69_sensor_task.h"
 #include "ocs_status/code_to_str.h"
@@ -45,13 +47,23 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
         timer_store, counter_holder));
     configASSERT(yl69_sensor_task_);
 
-    fanout_task_->add(*yl69_sensor_task_);
-
     yl69_sensor_json_formatter_.reset(
         new (std::nothrow) iot::YL69SensorJsonFormatter(yl69_sensor_task_->get_sensor()));
     configASSERT(yl69_sensor_json_formatter_);
 
+    ldr_sensor_task_.reset(new (std::nothrow) sensor::LdrSensorTask(
+        *adc_store_, task_scheduler, timer_store));
+    configASSERT(ldr_sensor_task_);
+
+    ldr_sensor_json_formatter_.reset(
+        new (std::nothrow) iot::LdrSensorJsonFormatter(ldr_sensor_task_->get_sensor()));
+    configASSERT(ldr_sensor_json_formatter_);
+
+    fanout_task_->add(*yl69_sensor_task_);
+    fanout_task_->add(*ldr_sensor_task_);
+
     telemetry_formatter.add(*yl69_sensor_json_formatter_);
+    telemetry_formatter.add(*ldr_sensor_json_formatter_);
 }
 
 status::StatusCode ControlPipeline::start() {

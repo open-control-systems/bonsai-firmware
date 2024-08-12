@@ -20,6 +20,7 @@
 #include "ocs_scheduler/fanout_task.h"
 #include "ocs_scheduler/timer_store.h"
 #include "ocs_sensor/basic_sensor_task.h"
+#include "ocs_sensor/ldr_sensor.h"
 #include "ocs_sensor/yl69_sensor.h"
 #include "ocs_storage/istorage.h"
 #include "ocs_storage/storage_builder.h"
@@ -54,6 +55,9 @@ private:
 
     std::unique_ptr<sensor::BasicSensorTask<sensor::YL69Sensor>> yl69_sensor_task_;
     std::unique_ptr<iot::IJsonFormatter> yl69_sensor_json_formatter_;
+
+    std::unique_ptr<sensor::BasicSensorTask<sensor::LdrSensor>> ldr_sensor_task_;
+    std::unique_ptr<iot::IJsonFormatter> ldr_sensor_json_formatter_;
 };
 
 } // namespace scs

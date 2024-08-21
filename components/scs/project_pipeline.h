@@ -32,14 +32,9 @@ public:
 private:
     std::unique_ptr<iot::SystemPipeline> system_pipeline_;
     std::unique_ptr<iot::JsonDataPipeline> json_data_pipeline_;
-
-    using ConsolePipeline = iot::ConsoleJsonPipeline<512, 256>;
-    std::unique_ptr<ConsolePipeline> console_pipeline_;
-
+    std::unique_ptr<iot::ConsoleJsonPipeline> console_pipeline_;
     std::unique_ptr<ControlPipeline> control_pipeline_;
-
-    using HttpPipeline = iot::HttpPipeline<512, 256, 256>;
-    std::unique_ptr<HttpPipeline> http_pipeline_;
+    std::unique_ptr<iot::HttpPipeline> http_pipeline_;
 };
 
 } // namespace scs

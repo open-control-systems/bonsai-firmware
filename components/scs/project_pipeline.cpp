@@ -38,20 +38,42 @@ ProjectPipeline::ProjectPipeline() {
         json_data_pipeline_->get_telemetry_formatter()));
     configASSERT(control_pipeline_);
 
-    console_pipeline_.reset(new (std::nothrow) ConsolePipeline(
+    console_pipeline_.reset(new (std::nothrow) iot::ConsoleJsonPipeline(
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
         json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
-        ConsolePipeline::Params {
-            .telemetry_interval = core::Second * 10,
-            .registration_interval = core::Second * 20,
+        iot::ConsoleJsonPipeline::Params {
+            .telemetry =
+                iot::ConsoleJsonPipeline::DataParams {
+                    .interval = core::Second * 10,
+                    .buffer_size = 512,
+                },
+            .registration =
+                iot::ConsoleJsonPipeline::DataParams {
+                    .interval = core::Second * 20,
+                    .buffer_size = 256,
+                },
         }));
     configASSERT(console_pipeline_);
 
-    http_pipeline_.reset(new (std::nothrow) HttpPipeline(
+    http_pipeline_.reset(new (std::nothrow) iot::HttpPipeline(
         system_pipeline_->get_reboot_task(), control_pipeline_->get_control_task(),
         json_data_pipeline_->get_telemetry_formatter(),
-        json_data_pipeline_->get_registration_formatter()));
+        json_data_pipeline_->get_registration_formatter(),
+        iot::HttpPipeline::Params {
+            .telemetry =
+                iot::HttpPipeline::DataParams {
+                    .buffer_size = 512,
+                },
+            .registration =
+                iot::HttpPipeline::DataParams {
+                    .buffer_size = 256,
+                },
+            .commands =
+                iot::HttpPipeline::DataParams {
+                    .buffer_size = 256,
+                },
+        }));
     configASSERT(http_pipeline_);
 }
 

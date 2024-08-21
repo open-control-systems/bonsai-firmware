@@ -38,6 +38,7 @@ ProjectPipeline::ProjectPipeline() {
         json_data_pipeline_->get_telemetry_formatter()));
     configASSERT(control_pipeline_);
 
+#ifdef CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
     console_pipeline_.reset(new (std::nothrow) iot::ConsoleJsonPipeline(
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
         json_data_pipeline_->get_telemetry_formatter(),
@@ -45,16 +46,20 @@ ProjectPipeline::ProjectPipeline() {
         iot::ConsoleJsonPipeline::Params {
             .telemetry =
                 iot::ConsoleJsonPipeline::DataParams {
-                    .interval = core::Second * 10,
-                    .buffer_size = 512,
+                    .interval =
+                        core::Second * CONFIG_OCS_IOT_CONSOLE_PIPELINE_TELEMETRY_INTERVAL,
+                    .buffer_size = CONFIG_OCS_IOT_CONSOLE_PIPELINE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
                 iot::ConsoleJsonPipeline::DataParams {
-                    .interval = core::Second * 20,
-                    .buffer_size = 256,
+                    .interval = core::Second
+                        * CONFIG_OCS_IOT_CONSOLE_PIPELINE_REGISTRATION_INTERVAL,
+                    .buffer_size =
+                        CONFIG_OCS_IOT_CONSOLE_PIPELINE_REGISTRATION_BUFFER_SIZE,
                 },
         }));
     configASSERT(console_pipeline_);
+#endif // CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
 
     http_pipeline_.reset(new (std::nothrow) iot::HttpPipeline(
         system_pipeline_->get_reboot_task(), control_pipeline_->get_control_task(),
@@ -63,15 +68,15 @@ ProjectPipeline::ProjectPipeline() {
         iot::HttpPipeline::Params {
             .telemetry =
                 iot::HttpPipeline::DataParams {
-                    .buffer_size = 512,
+                    .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
                 iot::HttpPipeline::DataParams {
-                    .buffer_size = 256,
+                    .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_REGISTRATION_BUFFER_SIZE,
                 },
             .commands =
                 iot::HttpPipeline::DataParams {
-                    .buffer_size = 256,
+                    .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_COMMANDS_BUFFER_SIZE,
                 },
         }));
     configASSERT(http_pipeline_);

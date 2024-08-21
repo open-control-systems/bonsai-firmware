@@ -14,14 +14,17 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_diagnostic/basic_counter_holder.h"
 #include "ocs_io/adc_store.h"
-#include "ocs_io/igpio.h"
 #include "ocs_iot/fanout_json_formatter.h"
 #include "ocs_scheduler/async_task_scheduler.h"
 #include "ocs_scheduler/fanout_task.h"
 #include "ocs_scheduler/timer_store.h"
 #include "ocs_sensor/basic_sensor_task.h"
+#ifdef CONFIG_OCS_SENSOR_LDR_ENABLE
 #include "ocs_sensor/ldr_sensor.h"
+#endif // CONFIG_OCS_SENSOR_LDR_ENABLE
+#ifdef CONFIG_OCS_SENSOR_YL69_ENABLE
 #include "ocs_sensor/yl69_sensor.h"
+#endif // CONFIG_OCS_SENSOR_YL69_ENABLE
 #include "ocs_storage/istorage.h"
 #include "ocs_storage/storage_builder.h"
 #include "ocs_system/fanout_reboot_handler.h"
@@ -53,11 +56,15 @@ private:
     std::unique_ptr<storage::IStorage> counter_storage_;
     std::unique_ptr<scheduler::FanoutTask> fanout_task_;
 
+#ifdef CONFIG_OCS_SENSOR_YL69_ENABLE
     std::unique_ptr<sensor::BasicSensorTask<sensor::YL69Sensor>> yl69_sensor_task_;
     std::unique_ptr<iot::IJsonFormatter> yl69_sensor_json_formatter_;
+#endif // CONFIG_OCS_SENSOR_YL69_ENABLE
 
+#ifdef CONFIG_OCS_SENSOR_LDR_ENABLE
     std::unique_ptr<sensor::BasicSensorTask<sensor::LdrSensor>> ldr_sensor_task_;
     std::unique_ptr<iot::IJsonFormatter> ldr_sensor_json_formatter_;
+#endif // CONFIG_OCS_SENSOR_LDR_ENABLE
 };
 
 } // namespace scs

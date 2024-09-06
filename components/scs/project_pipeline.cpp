@@ -31,13 +31,6 @@ ProjectPipeline::ProjectPipeline() {
         system_pipeline_->get_reboot_handler()));
     configASSERT(json_data_pipeline_);
 
-    control_pipeline_.reset(new (std::nothrow) ControlPipeline(
-        system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
-        system_pipeline_->get_reboot_handler(), system_pipeline_->get_task_scheduler(),
-        system_pipeline_->get_timer_store(), json_data_pipeline_->get_counter_holder(),
-        json_data_pipeline_->get_telemetry_formatter()));
-    configASSERT(control_pipeline_);
-
 #ifdef CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
     console_pipeline_.reset(new (std::nothrow) iot::ConsoleJsonPipeline(
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
@@ -62,7 +55,7 @@ ProjectPipeline::ProjectPipeline() {
 #endif // CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
 
     http_pipeline_.reset(new (std::nothrow) iot::HttpPipeline(
-        system_pipeline_->get_reboot_task(), control_pipeline_->get_control_task(),
+        system_pipeline_->get_reboot_task(),
         json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
         iot::HttpPipeline::Params {
@@ -79,6 +72,20 @@ ProjectPipeline::ProjectPipeline() {
                     .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_COMMANDS_BUFFER_SIZE,
                 },
         }));
+
+    control_pipeline_.reset(new (std::nothrow) ControlPipeline(
+        system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
+        system_pipeline_->get_reboot_handler(), system_pipeline_->get_task_scheduler(),
+        system_pipeline_->get_timer_store(), json_data_pipeline_->get_counter_holder(),
+        json_data_pipeline_->get_telemetry_formatter()));
+    configASSERT(control_pipeline_);
+
+    ds18b20_sensor_http_handler_.reset(new (std::nothrow) pipeline::ds18b20::HttpHandler(
+        http_pipeline_->get_server_pipeline().server(),
+        http_pipeline_->get_server_pipeline().mdns(),
+        control_pipeline_->get_ds18b20_store()));
+    configASSERT(ds18b20_sensor_http_handler_);
+
     configASSERT(http_pipeline_);
 }
 

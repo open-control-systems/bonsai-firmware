@@ -35,7 +35,7 @@ The firmware can be configured using the following command:
 idf.py menuconfig
 ```
 
-There are many configuration options. Each of them contains the prefix "OCS_".
+There are many configuration options, see options prefixed with "OCS_" or "SCS_".
 
 ## Usage
 

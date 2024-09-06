@@ -1,6 +1,5 @@
 idf_component_register(
     SRCS
-    "gpio_config.cpp"
     "project_pipeline.cpp"
     "control_pipeline.cpp"
 
@@ -16,6 +15,7 @@ idf_component_register(
     "ocs_scheduler"
     "ocs_io"
     "ocs_sensor"
+    "ocs_pipeline"
 
     INCLUDE_DIRS
     ".."

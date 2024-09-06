@@ -14,6 +14,7 @@
 #include "ocs_iot/http_pipeline.h"
 #include "ocs_iot/json_data_pipeline.h"
 #include "ocs_iot/system_pipeline.h"
+#include "ocs_pipeline/ds18b20/http_handler.h"
 #ifdef CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
 #include "ocs_iot/console_json_pipeline.h"
 #endif // CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
@@ -39,8 +40,10 @@ private:
     std::unique_ptr<iot::ConsoleJsonPipeline> console_pipeline_;
 #endif // CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
 
-    std::unique_ptr<ControlPipeline> control_pipeline_;
     std::unique_ptr<iot::HttpPipeline> http_pipeline_;
+    std::unique_ptr<ControlPipeline> control_pipeline_;
+
+    std::unique_ptr<pipeline::ds18b20::HttpHandler> ds18b20_sensor_http_handler_;
 };
 
 } // namespace scs

@@ -67,10 +67,6 @@ ProjectPipeline::ProjectPipeline() {
                 iot::HttpPipeline::DataParams {
                     .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_REGISTRATION_BUFFER_SIZE,
                 },
-            .commands =
-                iot::HttpPipeline::DataParams {
-                    .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_COMMANDS_BUFFER_SIZE,
-                },
         }));
 
     control_pipeline_.reset(new (std::nothrow) ControlPipeline(

@@ -21,50 +21,53 @@ const char* log_tag = "project-pipeline";
 } // namespace
 
 ProjectPipeline::ProjectPipeline() {
-    system_pipeline_.reset(new (std::nothrow) iot::SystemPipeline());
+    system_pipeline_.reset(new (std::nothrow) pipeline::SystemPipeline());
     configASSERT(system_pipeline_);
 
-    json_data_pipeline_.reset(new (std::nothrow) iot::JsonDataPipeline(
+    json_data_pipeline_.reset(new (std::nothrow) pipeline::JsonDataPipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
         system_pipeline_->get_reboot_handler()));
     configASSERT(json_data_pipeline_);
 
-#ifdef CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
-    console_pipeline_.reset(new (std::nothrow) iot::ConsoleJsonPipeline(
+#ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
+    console_pipeline_.reset(new (std::nothrow) pipeline::ConsoleJsonPipeline(
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
         json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
-        iot::ConsoleJsonPipeline::Params {
+        pipeline::ConsoleJsonPipeline::Params {
             .telemetry =
-                iot::ConsoleJsonPipeline::DataParams {
-                    .interval =
-                        core::Second * CONFIG_OCS_IOT_CONSOLE_PIPELINE_TELEMETRY_INTERVAL,
-                    .buffer_size = CONFIG_OCS_IOT_CONSOLE_PIPELINE_TELEMETRY_BUFFER_SIZE,
+                pipeline::ConsoleJsonPipeline::DataParams {
+                    .interval = core::Second
+                        * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_INTERVAL,
+                    .buffer_size =
+                        CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
-                iot::ConsoleJsonPipeline::DataParams {
+                pipeline::ConsoleJsonPipeline::DataParams {
                     .interval = core::Second
-                        * CONFIG_OCS_IOT_CONSOLE_PIPELINE_REGISTRATION_INTERVAL,
+                        * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_REGISTRATION_INTERVAL,
                     .buffer_size =
-                        CONFIG_OCS_IOT_CONSOLE_PIPELINE_REGISTRATION_BUFFER_SIZE,
+                        CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_REGISTRATION_BUFFER_SIZE,
                 },
         }));
     configASSERT(console_pipeline_);
-#endif // CONFIG_OCS_IOT_CONSOLE_PIPELINE_ENABLE
+#endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
 
-    http_pipeline_.reset(new (std::nothrow) iot::HttpPipeline(
+    http_pipeline_.reset(new (std::nothrow) pipeline::HttpPipeline(
         system_pipeline_->get_reboot_task(),
         json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
-        iot::HttpPipeline::Params {
+        pipeline::HttpPipeline::Params {
             .telemetry =
-                iot::HttpPipeline::DataParams {
-                    .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_TELEMETRY_BUFFER_SIZE,
+                pipeline::HttpPipeline::DataParams {
+                    .buffer_size =
+                        CONFIG_OCS_PIPELINE_HTTP_PIPELINE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
-                iot::HttpPipeline::DataParams {
-                    .buffer_size = CONFIG_OCS_IOT_HTTP_PIPELINE_REGISTRATION_BUFFER_SIZE,
+                pipeline::HttpPipeline::DataParams {
+                    .buffer_size =
+                        CONFIG_OCS_PIPELINE_HTTP_PIPELINE_REGISTRATION_BUFFER_SIZE,
                 },
         }));
 

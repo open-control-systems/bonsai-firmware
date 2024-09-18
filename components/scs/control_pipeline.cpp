@@ -11,13 +11,13 @@
 #include "sdkconfig.h"
 
 #ifdef CONFIG_SCS_SENSOR_YL69_ENABLE
-#include "ocs_iot/yl69_sensor_json_formatter.h"
-#include "ocs_sensor/safe_yl69_sensor_task.h"
+#include "ocs_pipeline/yl69/json_formatter.h"
+#include "ocs_sensor/yl69/safe_sensor_task.h"
 #endif // CONFIG_SCS_SENSOR_YL69_ENABLE
 
 #ifdef CONFIG_SCS_SENSOR_LDR_ENABLE
-#include "ocs_iot/ldr_sensor_json_formatter.h"
-#include "ocs_sensor/ldr_sensor_task.h"
+#include "ocs_pipeline/ldr/json_formatter.h"
+#include "ocs_sensor/ldr/sensor_task.h"
 #endif // CONFIG_SCS_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_SCS_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
@@ -80,7 +80,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                                  scheduler::AsyncTaskScheduler& task_scheduler,
                                  scheduler::TimerStore& timer_store,
                                  diagnostic::BasicCounterHolder& counter_holder,
-                                 iot::FanoutJsonFormatter& telemetry_formatter) {
+                                 fmt::json::FanoutFormatter& telemetry_formatter) {
     adc_store_.reset(new (std::nothrow) io::AdcStore(io::AdcStore::Params {
         .unit = ADC_UNIT_1,
         .atten = ADC_ATTEN_DB_12,
@@ -95,13 +95,13 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     configASSERT(fanout_task_);
 
 #ifdef CONFIG_SCS_SENSOR_YL69_ENABLE
-    yl69_sensor_task_.reset(new (std::nothrow) sensor::SafeYL69SensorTask(
+    yl69_sensor_task_.reset(new (std::nothrow) sensor::yl69::SafeSensorTask(
         clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
         timer_store, counter_holder, "soil-YL69", "soil-YL69-sensor-task",
         "soil-YL69-task",
-        sensor::SafeYL69SensorTask::Params {
+        sensor::yl69::SafeSensorTask::Params {
             .sensor =
-                sensor::YL69Sensor::Params {
+                sensor::yl69::Sensor::Params {
                     .value_min = CONFIG_SCS_SENSOR_YL69_VALUE_MIN,
                     .value_max = CONFIG_SCS_SENSOR_YL69_VALUE_MAX,
                     .adc_channel =
@@ -117,7 +117,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
     fanout_task_->add(*yl69_sensor_task_);
 
-    yl69_sensor_json_formatter_.reset(new (std::nothrow) iot::YL69SensorJsonFormatter(
+    yl69_sensor_json_formatter_.reset(new (std::nothrow) pipeline::yl69::JsonFormatter(
         yl69_sensor_task_->get_sensor(), true));
     configASSERT(yl69_sensor_json_formatter_);
 
@@ -127,11 +127,11 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #endif // CONFIG_SCS_SENSOR_YL69_ENABLE
 
 #ifdef CONFIG_SCS_SENSOR_LDR_ENABLE
-    ldr_sensor_task_.reset(new (std::nothrow) sensor::LdrSensorTask(
+    ldr_sensor_task_.reset(new (std::nothrow) sensor::ldr::SensorTask(
         *adc_store_, task_scheduler, timer_store, "soil-LDR", "soil-LDR-task",
-        sensor::LdrSensorTask::Params {
+        sensor::ldr::SensorTask::Params {
             .sensor =
-                sensor::LdrSensor::Params {
+                sensor::ldr::Sensor::Params {
                     .value_min = CONFIG_SCS_SENSOR_LDR_VALUE_MIN,
                     .value_max = CONFIG_SCS_SENSOR_LDR_VALUE_MAX,
                     .adc_channel =
@@ -143,7 +143,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
     fanout_task_->add(*ldr_sensor_task_);
 
-    ldr_sensor_json_formatter_.reset(new (std::nothrow) iot::LdrSensorJsonFormatter(
+    ldr_sensor_json_formatter_.reset(new (std::nothrow) pipeline::ldr::JsonFormatter(
         ldr_sensor_task_->get_sensor(), true));
     configASSERT(ldr_sensor_json_formatter_);
 

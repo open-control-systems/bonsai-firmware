@@ -9,7 +9,6 @@ idf_component_register(
     "ocs_status"
     "ocs_net"
     "ocs_storage"
-    "ocs_iot"
     "ocs_system"
     "ocs_diagnostic"
     "ocs_scheduler"

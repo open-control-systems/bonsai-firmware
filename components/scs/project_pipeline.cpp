@@ -6,8 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "esp_log.h"
-
+#include "ocs_core/log.h"
 #include "ocs_status/code_to_str.h"
 
 #include "scs/project_pipeline.h"
@@ -88,7 +87,7 @@ ProjectPipeline::ProjectPipeline() {
 status::StatusCode ProjectPipeline::start() {
     auto code = http_pipeline_->start();
     if (code != status::StatusCode::OK) {
-        ESP_LOGW(log_tag, "failed to start HTTP pipeline: %s", status::code_to_str(code));
+        ocs_logw(log_tag, "failed to start HTTP pipeline: %s", status::code_to_str(code));
     }
 
     code = control_pipeline_->start();

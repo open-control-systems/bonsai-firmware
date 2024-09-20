@@ -26,6 +26,11 @@
 #include "ocs_system/delayer_configuration.h"
 #endif // CONFIG_SCS_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
 
+#ifdef CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
+#include "ocs_pipeline/yl69/json_formatter.h"
+#include "ocs_sensor/yl69/default_sensor_task.h"
+#endif // CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
+
 #include "ocs_core/bit_ops.h"
 #include "ocs_scheduler/high_resolution_timer.h"
 
@@ -222,6 +227,34 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
         timer_store.add(*ds18b20_sensor_store_timer_);
     }
+
+#ifdef CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
+    capacitive_sensor_task_.reset(new (std::nothrow) sensor::yl69::DefaultSensorTask(
+        clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
+        timer_store, counter_holder, "soil-capacitive", "soil-capacitive-sensor-task",
+        "soil-capacitive-task",
+        sensor::yl69::DefaultSensorTask::Params {
+            .sensor =
+                sensor::yl69::Sensor::Params {
+                    .value_min = CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_VALUE_MIN,
+                    .value_max = CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_VALUE_MAX,
+                    .adc_channel = static_cast<adc_channel_t>(
+                        CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ADC_CHANNEL),
+                },
+            .read_interval =
+                core::Second * CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_READ_INTERVAL,
+        }));
+    configASSERT(capacitive_sensor_task_);
+
+    fanout_task_->add(*capacitive_sensor_task_);
+
+    capacitive_sensor_json_formatter_.reset(
+        new (std::nothrow)
+            pipeline::yl69::JsonFormatter(capacitive_sensor_task_->get_sensor(), true));
+    configASSERT(capacitive_sensor_json_formatter_);
+
+    telemetry_formatter.add(*capacitive_sensor_json_formatter_);
+#endif // CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
 }
 
 status::StatusCode ControlPipeline::start() {

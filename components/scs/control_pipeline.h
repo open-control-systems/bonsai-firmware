@@ -26,6 +26,10 @@
 #include "ocs_sensor/ds18b20/sensor.h"
 #endif // CONFIG_SCS_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
 
+#ifdef CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
+#include "ocs_sensor/yl69/sensor.h"
+#endif // CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
+
 #include "ocs_core/iclock.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_diagnostic/basic_counter_holder.h"
@@ -93,6 +97,13 @@ private:
 
     scheduler::ITask* ds18b20_sensor_store_task_ { nullptr };
     std::unique_ptr<scheduler::ITimer> ds18b20_sensor_store_timer_;
+
+#ifdef CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
+    std::unique_ptr<sensor::BasicSensorTask<sensor::yl69::Sensor>>
+        capacitive_sensor_task_;
+
+    std::unique_ptr<fmt::json::IFormatter> capacitive_sensor_json_formatter_;
+#endif // CONFIG_SCS_SENSOR_CAPACITIVE_V1_2_ENABLE
 };
 
 } // namespace scs

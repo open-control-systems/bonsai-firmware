@@ -36,6 +36,8 @@ namespace scs {
 
 namespace {
 
+#if defined(CONFIG_SCS_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)                           \
+    || defined(CONFIG_SCS_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 void configure_onewire_gpio(int gpio) {
     gpio_config_t config;
     memset(&config, 0, sizeof(config));
@@ -53,7 +55,10 @@ void configure_onewire_gpio(int gpio) {
     // configure GPIO with the given settings
     gpio_config(&config);
 }
+#endif // defined(CONFIG_SCS_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
+       // defined(CONFIG_SCS_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 
+#ifdef CONFIG_SCS_SENSOR_YL69_ENABLE
 void configure_relay_gpio(int gpio) {
     gpio_config_t config;
     memset(&config, 0, sizeof(config));
@@ -71,6 +76,7 @@ void configure_relay_gpio(int gpio) {
     // configure GPIO with the given settings
     gpio_config(&config);
 }
+#endif // CONFIG_SCS_SENSOR_YL69_ENABLE
 
 } // namespace
 

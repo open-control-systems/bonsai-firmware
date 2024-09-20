@@ -170,7 +170,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #ifdef CONFIG_SCS_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
     soil_temperature_sensor_task_.reset(new (std::nothrow) sensor::ds18b20::SensorTask(
         timer_store, task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_,
-        "soil-temp", "soil-temperature-task",
+        "soil_temp", "soil-temperature-task",
         sensor::ds18b20::SensorTask::Params {
             .read_interval =
                 core::Second * CONFIG_SCS_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
@@ -194,7 +194,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #ifdef CONFIG_SCS_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
     outside_temperature_sensor_task_.reset(new (std::nothrow) sensor::ds18b20::SensorTask(
         timer_store, task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_,
-        "outside-temp", "outside-temperature-task",
+        "outside_temp", "outside-temperature-task",
         sensor::ds18b20::SensorTask::Params {
             .read_interval = core::Second
                 * CONFIG_SCS_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,

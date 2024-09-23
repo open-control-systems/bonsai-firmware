@@ -19,10 +19,10 @@
 #include "ocs_pipeline/console_json_pipeline.h"
 #endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
 
-#include "scs/control_pipeline.h"
+#include "control_pipeline.h"
 
 namespace ocs {
-namespace scs {
+namespace bonsai {
 
 class ProjectPipeline : public core::NonCopyable<> {
 public:
@@ -46,5 +46,5 @@ private:
     std::unique_ptr<pipeline::ds18b20::HttpHandler> ds18b20_sensor_http_handler_;
 };
 
-} // namespace scs
+} // namespace bonsai
 } // namespace ocs

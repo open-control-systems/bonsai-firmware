@@ -6,9 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "scs/project_pipeline.h"
+#include "project_pipeline.h"
 
 extern "C" void app_main(void) {
-    ocs::scs::ProjectPipeline pipeline;
+    ocs::bonsai::ProjectPipeline pipeline;
     pipeline.start();
 }

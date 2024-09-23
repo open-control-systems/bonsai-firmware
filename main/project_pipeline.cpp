@@ -27,7 +27,11 @@ ProjectPipeline::ProjectPipeline() {
     json_data_pipeline_.reset(new (std::nothrow) pipeline::JsonDataPipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_timer_store(),
-        system_pipeline_->get_reboot_handler()));
+        system_pipeline_->get_reboot_handler(),
+        pipeline::RegistrationJsonFormatter::Params {
+            .fw_version = CONFIG_OCS_CORE_FW_VERSION,
+            .fw_name = CONFIG_OCS_CORE_FW_NAME,
+        }));
     configASSERT(json_data_pipeline_);
 
 #ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE

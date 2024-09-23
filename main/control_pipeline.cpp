@@ -223,7 +223,8 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
     if (soil_temperature_sensor_task_ || outside_temperature_sensor_task_) {
-        ds18b20_sensor_store_task_ = task_scheduler.add(*ds18b20_sensor_store_);
+        ds18b20_sensor_store_task_ =
+            task_scheduler.add(*ds18b20_sensor_store_, "DS18B20-store-task");
         configASSERT(ds18b20_sensor_store_task_);
 
         ds18b20_sensor_store_timer_.reset(

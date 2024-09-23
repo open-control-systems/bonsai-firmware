@@ -9,10 +9,10 @@
 #include "ocs_core/log.h"
 #include "ocs_status/code_to_str.h"
 
-#include "scs/project_pipeline.h"
+#include "project_pipeline.h"
 
 namespace ocs {
-namespace scs {
+namespace bonsai {
 
 namespace {
 
@@ -106,5 +106,5 @@ status::StatusCode ProjectPipeline::start() {
     return status::StatusCode::OK;
 }
 
-} // namespace scs
+} // namespace bonsai
 } // namespace ocs

@@ -32,7 +32,6 @@
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
 #include "ocs_core/bit_ops.h"
-#include "ocs_scheduler/high_resolution_timer.h"
 
 #include "control_pipeline.h"
 
@@ -88,8 +87,7 @@ void configure_relay_gpio(int gpio) {
 ControlPipeline::ControlPipeline(core::IClock& clock,
                                  storage::StorageBuilder& storage_builder,
                                  system::FanoutRebootHandler& reboot_handler,
-                                 scheduler::AsyncTaskScheduler& task_scheduler,
-                                 scheduler::TimerStore& timer_store,
+                                 scheduler::ITaskScheduler& task_scheduler,
                                  diagnostic::BasicCounterHolder& counter_holder,
                                  fmt::json::FanoutFormatter& telemetry_formatter) {
     adc_store_.reset(new (std::nothrow) io::AdcStore(io::AdcStore::Params {
@@ -102,14 +100,10 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     counter_storage_ = storage_builder.make("soil_counter");
     configASSERT(counter_storage_);
 
-    fanout_task_.reset(new (std::nothrow) scheduler::FanoutTask());
-    configASSERT(fanout_task_);
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
     yl69_sensor_task_.reset(new (std::nothrow) sensor::yl69::SafeSensorTask(
         clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
-        timer_store, counter_holder, "soil-YL69", "soil-YL69-sensor-task",
-        "soil-YL69-task",
+        counter_holder, "soil-YL69", "soil-YL69-sensor-task", "soil-YL69-task",
         sensor::yl69::SafeSensorTask::Params {
             .sensor =
                 sensor::yl69::Sensor::Params {
@@ -128,8 +122,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
         }));
     configASSERT(yl69_sensor_task_);
 
-    fanout_task_->add(*yl69_sensor_task_);
-
     yl69_sensor_json_formatter_.reset(new (std::nothrow) pipeline::yl69::JsonFormatter(
         yl69_sensor_task_->get_sensor(), true));
     configASSERT(yl69_sensor_json_formatter_);
@@ -141,7 +133,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
     ldr_sensor_task_.reset(new (std::nothrow) sensor::ldr::SensorTask(
-        *adc_store_, task_scheduler, timer_store, "soil-LDR", "soil-LDR-task",
+        *adc_store_, task_scheduler, "soil-LDR", "soil-LDR-task",
         sensor::ldr::SensorTask::Params {
             .sensor =
                 sensor::ldr::Sensor::Params {
@@ -154,8 +146,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 core::Second * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_READ_INTERVAL,
         }));
     configASSERT(ldr_sensor_task_);
-
-    fanout_task_->add(*ldr_sensor_task_);
 
     ldr_sensor_json_formatter_.reset(new (std::nothrow) pipeline::ldr::JsonFormatter(
         ldr_sensor_task_->get_sensor(), true));
@@ -172,8 +162,8 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
     soil_temperature_sensor_task_.reset(new (std::nothrow) sensor::ds18b20::SensorTask(
-        timer_store, task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_,
-        "soil_temp", "soil-temperature-task",
+        task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_, "soil_temp",
+        "soil-temperature-task",
         sensor::ds18b20::SensorTask::Params {
             .read_interval = core::Second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
@@ -181,8 +171,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_DATA_GPIO),
         }));
     configASSERT(soil_temperature_sensor_task_);
-
-    fanout_task_->add(*soil_temperature_sensor_task_);
 
     soil_temperature_sensor_json_formatter_.reset(
         new (std::nothrow) pipeline::ds18b20::JsonFormatter(
@@ -197,8 +185,8 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
     outside_temperature_sensor_task_.reset(new (std::nothrow) sensor::ds18b20::SensorTask(
-        timer_store, task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_,
-        "outside_temp", "outside-temperature-task",
+        task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_, "outside_temp",
+        "outside-temperature-task",
         sensor::ds18b20::SensorTask::Params {
             .read_interval = core::Second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,
@@ -206,8 +194,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO),
         }));
     configASSERT(outside_temperature_sensor_task_);
-
-    fanout_task_->add(*outside_temperature_sensor_task_);
 
     outside_temperature_sensor_json_formatter_.reset(
         new (std::nothrow) pipeline::ds18b20::JsonFormatter(
@@ -223,17 +209,9 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
     if (soil_temperature_sensor_task_ || outside_temperature_sensor_task_) {
-        ds18b20_sensor_store_task_ =
-            task_scheduler.add(*ds18b20_sensor_store_, "DS18B20-store-task");
-        configASSERT(ds18b20_sensor_store_task_);
-
-        ds18b20_sensor_store_timer_.reset(
-            new (std::nothrow) scheduler::HighResolutionTimer(*ds18b20_sensor_store_task_,
-                                                              "DS18B20-store-timer",
-                                                              core::Millisecond * 500));
-        configASSERT(ds18b20_sensor_store_timer_);
-
-        timer_store.add(*ds18b20_sensor_store_timer_);
+        configASSERT(
+            task_scheduler.add(*ds18b20_sensor_store_, "DS18B20-store-task", core::Second)
+            == status::StatusCode::OK);
     }
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
@@ -241,7 +219,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
     capacitive_sensor_task_.reset(new (std::nothrow) sensor::yl69::DefaultSensorTask(
         clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
-        timer_store, counter_holder, "soil-capacitive", "soil-capacitive-sensor-task",
+        counter_holder, "soil-capacitive", "soil-capacitive-sensor-task",
         "soil-capacitive-task",
         sensor::yl69::DefaultSensorTask::Params {
             .sensor =
@@ -256,8 +234,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
         }));
     configASSERT(capacitive_sensor_task_);
 
-    fanout_task_->add(*capacitive_sensor_task_);
-
     capacitive_sensor_json_formatter_.reset(
         new (std::nothrow)
             pipeline::yl69::JsonFormatter(capacitive_sensor_task_->get_sensor(), true));
@@ -265,10 +241,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
     telemetry_formatter.add(*capacitive_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-}
-
-status::StatusCode ControlPipeline::start() {
-    return fanout_task_->run();
 }
 
 sensor::ds18b20::Store& ControlPipeline::get_ds18b20_store() {

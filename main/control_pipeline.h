@@ -11,23 +11,21 @@
 #include <memory>
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-#include "ocs_sensor/ldr/sensor.h"
+#include "ocs_sensor/ldr/sensor_task.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-#include "ocs_sensor/yl69/sensor.h"
+#include "ocs_sensor/yl69/safe_sensor_task.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-#include "ocs_sensor/ds18b20/sensor.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
-#include "ocs_sensor/ds18b20/sensor.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
+#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
+    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
+#include "ocs_sensor/ds18b20/sensor_task.h"
+#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
+       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-#include "ocs_sensor/yl69/sensor.h"
+#include "ocs_sensor/yl69/default_sensor_task.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
 #include "ocs_core/iclock.h"
@@ -35,10 +33,7 @@
 #include "ocs_diagnostic/basic_counter_holder.h"
 #include "ocs_fmt/json/fanout_formatter.h"
 #include "ocs_io/adc_store.h"
-#include "ocs_scheduler/async_task_scheduler.h"
-#include "ocs_scheduler/fanout_task.h"
-#include "ocs_scheduler/timer_store.h"
-#include "ocs_sensor/basic_sensor_task.h"
+#include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_sensor/ds18b20/store.h"
 #include "ocs_storage/istorage.h"
 #include "ocs_storage/storage_builder.h"
@@ -54,55 +49,41 @@ public:
     ControlPipeline(core::IClock& clock,
                     storage::StorageBuilder& storage_builder,
                     system::FanoutRebootHandler& reboot_handler,
-                    scheduler::AsyncTaskScheduler& task_scheduler,
-                    scheduler::TimerStore& timer_store,
+                    scheduler::ITaskScheduler& task_scheduler,
                     diagnostic::BasicCounterHolder& counter_holder,
                     fmt::json::FanoutFormatter& telemetry_formatter);
-
-    //! Start the pipeline.
-    status::StatusCode start();
 
     sensor::ds18b20::Store& get_ds18b20_store();
 
 private:
     std::unique_ptr<io::AdcStore> adc_store_;
     std::unique_ptr<storage::IStorage> counter_storage_;
-    std::unique_ptr<scheduler::FanoutTask> fanout_task_;
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-    std::unique_ptr<sensor::BasicSensorTask<sensor::yl69::Sensor>> yl69_sensor_task_;
-    std::unique_ptr<fmt::json::IFormatter> yl69_sensor_json_formatter_;
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-    std::unique_ptr<sensor::BasicSensorTask<sensor::ldr::Sensor>> ldr_sensor_task_;
-    std::unique_ptr<fmt::json::IFormatter> ldr_sensor_json_formatter_;
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
     std::unique_ptr<storage::IStorage> ds18b20_sensor_storage_;
     std::unique_ptr<sensor::ds18b20::Store> ds18b20_sensor_store_;
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-    std::unique_ptr<sensor::BasicSensorTask<sensor::ds18b20::Sensor>>
-        soil_temperature_sensor_task_;
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
+    std::unique_ptr<sensor::yl69::SafeSensorTask> yl69_sensor_task_;
+    std::unique_ptr<fmt::json::IFormatter> yl69_sensor_json_formatter_;
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+    std::unique_ptr<sensor::ldr::SensorTask> ldr_sensor_task_;
+    std::unique_ptr<fmt::json::IFormatter> ldr_sensor_json_formatter_;
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
+    std::unique_ptr<sensor::ds18b20::SensorTask> soil_temperature_sensor_task_;
     std::unique_ptr<fmt::json::IFormatter> soil_temperature_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
-    std::unique_ptr<sensor::BasicSensorTask<sensor::ds18b20::Sensor>>
-        outside_temperature_sensor_task_;
-
+    std::unique_ptr<sensor::ds18b20::SensorTask> outside_temperature_sensor_task_;
     std::unique_ptr<fmt::json::IFormatter> outside_temperature_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
 
-    scheduler::ITask* ds18b20_sensor_store_task_ { nullptr };
-    std::unique_ptr<scheduler::ITimer> ds18b20_sensor_store_timer_;
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-    std::unique_ptr<sensor::BasicSensorTask<sensor::yl69::Sensor>>
-        capacitive_sensor_task_;
-
+    std::unique_ptr<sensor::yl69::DefaultSensorTask> capacitive_sensor_task_;
     std::unique_ptr<fmt::json::IFormatter> capacitive_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 };

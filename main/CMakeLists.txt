@@ -3,6 +3,7 @@ idf_component_register(
     "main.cpp"
     "project_pipeline.cpp"
     "control_pipeline.cpp"
+    "ds18b20_pipeline.cpp"
 
     REQUIRES
     "freertos"

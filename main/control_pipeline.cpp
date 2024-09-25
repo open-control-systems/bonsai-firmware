@@ -20,12 +20,6 @@
 #include "ocs_sensor/ldr/sensor_task.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-#include "ocs_pipeline/ds18b20/json_formatter.h"
-#include "ocs_sensor/ds18b20/sensor_task.h"
-#include "ocs_system/delayer_configuration.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 #include "ocs_pipeline/yl69/json_formatter.h"
 #include "ocs_sensor/yl69/default_sensor_task.h"
@@ -39,28 +33,6 @@ namespace ocs {
 namespace bonsai {
 
 namespace {
-
-#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
-    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
-void configure_onewire_gpio(int gpio) {
-    gpio_config_t config;
-    memset(&config, 0, sizeof(config));
-
-    // disable interrupt
-    config.intr_type = GPIO_INTR_DISABLE;
-    // output/input mode is controlled by the bus.
-    config.mode = GPIO_MODE_DISABLE;
-    // bit mask of the pins that you want to set,
-    config.pin_bit_mask = core::BitOps::mask(gpio);
-    // disable pull-down mode
-    config.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    // enable pull-up mode
-    config.pull_up_en = GPIO_PULLUP_ENABLE;
-    // configure GPIO with the given settings
-    gpio_config(&config);
-}
-#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
-       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 void configure_relay_gpio(int gpio) {
@@ -154,68 +126,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     telemetry_formatter.add(*ldr_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
-    ds18b20_sensor_storage_ = storage_builder.make("ds18b20_sensors");
-    configASSERT(ds18b20_sensor_storage_);
-
-    ds18b20_sensor_store_.reset(new (std::nothrow) sensor::ds18b20::Store(16));
-    configASSERT(ds18b20_sensor_store_);
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-    soil_temperature_sensor_task_.reset(new (std::nothrow) sensor::ds18b20::SensorTask(
-        task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_, "soil_temp",
-        "soil-temperature-task",
-        sensor::ds18b20::SensorTask::Params {
-            .read_interval = core::Second
-                * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
-            .data_pin = static_cast<gpio_num_t>(
-                CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_DATA_GPIO),
-        }));
-    configASSERT(soil_temperature_sensor_task_);
-
-    soil_temperature_sensor_json_formatter_.reset(
-        new (std::nothrow) pipeline::ds18b20::JsonFormatter(
-            soil_temperature_sensor_task_->get_sensor()));
-    configASSERT(soil_temperature_sensor_json_formatter_);
-
-    telemetry_formatter.add(*soil_temperature_sensor_json_formatter_);
-
-    configure_onewire_gpio(
-        CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_DATA_GPIO);
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
-    outside_temperature_sensor_task_.reset(new (std::nothrow) sensor::ds18b20::SensorTask(
-        task_scheduler, *ds18b20_sensor_storage_, *ds18b20_sensor_store_, "outside_temp",
-        "outside-temperature-task",
-        sensor::ds18b20::SensorTask::Params {
-            .read_interval = core::Second
-                * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,
-            .data_pin = static_cast<gpio_num_t>(
-                CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO),
-        }));
-    configASSERT(outside_temperature_sensor_task_);
-
-    outside_temperature_sensor_json_formatter_.reset(
-        new (std::nothrow) pipeline::ds18b20::JsonFormatter(
-            outside_temperature_sensor_task_->get_sensor()));
-    configASSERT(outside_temperature_sensor_json_formatter_);
-
-    telemetry_formatter.add(*outside_temperature_sensor_json_formatter_);
-
-    configure_onewire_gpio(
-        CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO);
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
-
-#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
-    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
-    if (soil_temperature_sensor_task_ || outside_temperature_sensor_task_) {
-        configASSERT(
-            task_scheduler.add(*ds18b20_sensor_store_, "DS18B20-store-task", core::Second)
-            == status::StatusCode::OK);
-    }
-#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
-       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
     capacitive_sensor_task_.reset(new (std::nothrow) sensor::yl69::DefaultSensorTask(
         clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
@@ -241,10 +151,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
     telemetry_formatter.add(*capacitive_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-}
-
-sensor::ds18b20::Store& ControlPipeline::get_ds18b20_store() {
-    return *ds18b20_sensor_store_;
 }
 
 } // namespace bonsai

@@ -15,7 +15,13 @@ namespace ocs {
 namespace bonsai {
 
 ProjectPipeline::ProjectPipeline() {
-    system_pipeline_.reset(new (std::nothrow) pipeline::SystemPipeline());
+    system_pipeline_.reset(new (std::nothrow)
+                               pipeline::SystemPipeline(pipeline::SystemPipeline::Params {
+                                   .task_scheduler =
+                                       pipeline::SystemPipeline::Params::TaskScheduler {
+                                           .delay = pdMS_TO_TICKS(200),
+                                       },
+                               }));
     configASSERT(system_pipeline_);
 
     json_data_pipeline_.reset(new (std::nothrow) pipeline::JsonDataPipeline(
@@ -52,7 +58,7 @@ ProjectPipeline::ProjectPipeline() {
 #endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
 
     http_pipeline_.reset(new (std::nothrow) pipeline::HttpPipeline(
-        system_pipeline_->get_reboot_task(),
+        system_pipeline_->get_reboot_task(), system_pipeline_->get_suspender(),
         json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
         pipeline::HttpPipeline::Params {
@@ -86,7 +92,8 @@ ProjectPipeline::ProjectPipeline() {
 
     ds18b20_sensor_http_handler_.reset(new (std::nothrow) pipeline::ds18b20::HttpHandler(
         http_pipeline_->get_server_pipeline().server(),
-        http_pipeline_->get_server_pipeline().mdns(), ds18b20_pipeline_->get_store()));
+        http_pipeline_->get_server_pipeline().mdns(), system_pipeline_->get_suspender(),
+        ds18b20_pipeline_->get_store()));
     configASSERT(ds18b20_sensor_http_handler_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)

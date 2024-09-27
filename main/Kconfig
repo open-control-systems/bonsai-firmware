@@ -101,7 +101,7 @@ menu "Bonsai Firmware Sensor Configuration"
 
         config BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL
             int "Soil temperature sensor read interval, in seconds"
-            default 3
+            default 30
             depends on BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
             help
                 How often to read data from the sensor.
@@ -123,7 +123,7 @@ menu "Bonsai Firmware Sensor Configuration"
 
         config BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL
             int "Outside temperature sensor read interval, in seconds"
-            default 10
+            default 60
             depends on BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
             help
                 How often to read data from the sensor.
@@ -145,21 +145,21 @@ menu "Bonsai Firmware Sensor Configuration"
 
         config BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_VALUE_MAX
             int "Capacitive V1.2 sensor soil dryness threshold"
-            default 600
+            default 620
             depends on BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
             help
                 Value of completely dry soil.
 
         config BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_VALUE_MIN
             int "Capacitive V1.2 sensor soil wetness threshold"
-            default 300
+            default 240
             depends on BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
             help
                 Value of completely wet soil.
 
         config BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_READ_INTERVAL
             int "Capacitive V1.2 sensor read interval, in seconds"
-            default 3
+            default 5
             depends on BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
             help
                 How often to read data from the sensor.

@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include "ocs_core/log.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_status/macros.h"
 
@@ -13,6 +14,12 @@
 
 namespace ocs {
 namespace bonsai {
+
+namespace {
+
+const char* log_tag = "project-pipeline";
+
+} // namespace
 
 ProjectPipeline::ProjectPipeline() {
     system_pipeline_.reset(new (std::nothrow)
@@ -100,7 +107,11 @@ ProjectPipeline::ProjectPipeline() {
 }
 
 status::StatusCode ProjectPipeline::start() {
-    OCS_STATUS_RETURN_ON_ERROR(http_pipeline_->start());
+    const auto code = http_pipeline_->start();
+    if (code != status::StatusCode::OK) {
+        ocs_logw(log_tag, "failed to start HTTP pipeline: %s", status::code_to_str(code));
+    }
+
     OCS_STATUS_RETURN_ON_ERROR(system_pipeline_->start());
 
     return status::StatusCode::OK;

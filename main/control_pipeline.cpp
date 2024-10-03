@@ -12,7 +12,7 @@
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 #include "ocs_pipeline/yl69/json_formatter.h"
-#include "ocs_sensor/yl69/safe_sensor_task.h"
+#include "ocs_sensor/yl69/relay_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
@@ -22,7 +22,7 @@
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 #include "ocs_pipeline/yl69/json_formatter.h"
-#include "ocs_sensor/yl69/default_sensor_task.h"
+#include "ocs_sensor/yl69/default_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
 #include "ocs_core/bit_ops.h"
@@ -60,7 +60,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                                  storage::StorageBuilder& storage_builder,
                                  system::FanoutRebootHandler& reboot_handler,
                                  scheduler::ITaskScheduler& task_scheduler,
-                                 diagnostic::BasicCounterHolder& counter_holder,
                                  fmt::json::FanoutFormatter& telemetry_formatter) {
     adc_store_.reset(new (std::nothrow) io::AdcStore(io::AdcStore::Params {
         .unit = ADC_UNIT_1,
@@ -69,14 +68,11 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     }));
     configASSERT(adc_store_);
 
-    counter_storage_ = storage_builder.make("soil_counter");
-    configASSERT(counter_storage_);
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-    yl69_sensor_task_.reset(new (std::nothrow) sensor::yl69::SafeSensorTask(
-        clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
-        counter_holder, "soil-YL69", "soil-YL69-sensor-task", "soil-YL69-task",
-        sensor::yl69::SafeSensorTask::Params {
+    yl69_sensor_pipeline_.reset(new (std::nothrow) sensor::yl69::RelayPipeline(
+        clock, *adc_store_, storage_builder, reboot_handler, task_scheduler, "soil-yl69",
+        "soil-yl69-task",
+        sensor::yl69::RelayPipeline::Params {
             .sensor =
                 sensor::yl69::Sensor::Params {
                     .value_min = CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_VALUE_MIN,
@@ -92,13 +88,19 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 (1000 * CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_POWER_ON_DELAY_INTERVAL)
                 / portTICK_PERIOD_MS,
         }));
-    configASSERT(yl69_sensor_task_);
+    configASSERT(yl69_sensor_pipeline_);
 
     yl69_sensor_json_formatter_.reset(new (std::nothrow) pipeline::yl69::JsonFormatter(
-        yl69_sensor_task_->get_sensor(), true));
+        yl69_sensor_pipeline_->get_sensor(), false));
     configASSERT(yl69_sensor_json_formatter_);
 
-    telemetry_formatter.add(*yl69_sensor_json_formatter_);
+    yl69_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
+        "soil_yl69", fmt::json::FieldFormatter::Type::Object));
+    configASSERT(yl69_sensor_field_formatter_);
+
+    yl69_sensor_field_formatter_->add(*yl69_sensor_json_formatter_);
+
+    telemetry_formatter.add(*yl69_sensor_field_formatter_);
 
     configure_relay_gpio(CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_RELAY_GPIO);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
@@ -127,11 +129,10 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-    capacitive_sensor_task_.reset(new (std::nothrow) sensor::yl69::DefaultSensorTask(
-        clock, *adc_store_, *counter_storage_, reboot_handler, task_scheduler,
-        counter_holder, "soil-capacitive", "soil-capacitive-sensor-task",
-        "soil-capacitive-task",
-        sensor::yl69::DefaultSensorTask::Params {
+    capacitive_sensor_sepipeline_.reset(new (std::nothrow) sensor::yl69::DefaultPipeline(
+        clock, *adc_store_, storage_builder, reboot_handler, task_scheduler,
+        "soil-capacitive", "soil-capacitive-task",
+        sensor::yl69::DefaultPipeline::Params {
             .sensor =
                 sensor::yl69::Sensor::Params {
                     .value_min = CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_VALUE_MIN,
@@ -142,14 +143,20 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
             .read_interval = core::Second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_READ_INTERVAL,
         }));
-    configASSERT(capacitive_sensor_task_);
+    configASSERT(capacitive_sensor_sepipeline_);
+
+    capacitive_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
+        "soil_capacitive_v1_2", fmt::json::FieldFormatter::Type::Object));
+    configASSERT(capacitive_sensor_field_formatter_);
 
     capacitive_sensor_json_formatter_.reset(
-        new (std::nothrow)
-            pipeline::yl69::JsonFormatter(capacitive_sensor_task_->get_sensor(), true));
+        new (std::nothrow) pipeline::yl69::JsonFormatter(
+            capacitive_sensor_sepipeline_->get_sensor(), false));
     configASSERT(capacitive_sensor_json_formatter_);
 
-    telemetry_formatter.add(*capacitive_sensor_json_formatter_);
+    capacitive_sensor_field_formatter_->add(*capacitive_sensor_json_formatter_);
+
+    telemetry_formatter.add(*capacitive_sensor_field_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 }
 

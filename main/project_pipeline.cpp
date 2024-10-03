@@ -85,7 +85,6 @@ ProjectPipeline::ProjectPipeline() {
     control_pipeline_.reset(new (std::nothrow) ControlPipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_reboot_handler(), system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_counter_holder(),
         json_data_pipeline_->get_telemetry_formatter()));
     configASSERT(control_pipeline_);
 

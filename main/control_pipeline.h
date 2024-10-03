@@ -15,17 +15,17 @@
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-#include "ocs_sensor/yl69/safe_sensor_task.h"
+#include "ocs_sensor/yl69/relay_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-#include "ocs_sensor/yl69/default_sensor_task.h"
+#include "ocs_sensor/yl69/default_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
 #include "ocs_core/iclock.h"
 #include "ocs_core/noncopyable.h"
-#include "ocs_diagnostic/basic_counter_holder.h"
 #include "ocs_fmt/json/fanout_formatter.h"
+#include "ocs_fmt/json/field_formatter.h"
 #include "ocs_io/adc_store.h"
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_storage/istorage.h"
@@ -43,15 +43,14 @@ public:
                     storage::StorageBuilder& storage_builder,
                     system::FanoutRebootHandler& reboot_handler,
                     scheduler::ITaskScheduler& task_scheduler,
-                    diagnostic::BasicCounterHolder& counter_holder,
                     fmt::json::FanoutFormatter& telemetry_formatter);
 
 private:
     std::unique_ptr<io::AdcStore> adc_store_;
-    std::unique_ptr<storage::IStorage> counter_storage_;
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-    std::unique_ptr<sensor::yl69::SafeSensorTask> yl69_sensor_task_;
+    std::unique_ptr<sensor::yl69::RelayPipeline> yl69_sensor_pipeline_;
+    std::unique_ptr<fmt::json::FieldFormatter> yl69_sensor_field_formatter_;
     std::unique_ptr<fmt::json::IFormatter> yl69_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
@@ -61,7 +60,8 @@ private:
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-    std::unique_ptr<sensor::yl69::DefaultSensorTask> capacitive_sensor_task_;
+    std::unique_ptr<sensor::yl69::DefaultPipeline> capacitive_sensor_sepipeline_;
+    std::unique_ptr<fmt::json::FieldFormatter> capacitive_sensor_field_formatter_;
     std::unique_ptr<fmt::json::IFormatter> capacitive_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 };

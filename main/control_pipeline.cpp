@@ -121,10 +121,16 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     configASSERT(ldr_sensor_pipeline_);
 
     ldr_sensor_json_formatter_.reset(new (std::nothrow) pipeline::ldr::JsonFormatter(
-        ldr_sensor_pipeline_->get_sensor(), true));
+        ldr_sensor_pipeline_->get_sensor(), false));
     configASSERT(ldr_sensor_json_formatter_);
 
-    telemetry_formatter.add(*ldr_sensor_json_formatter_);
+    ldr_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
+        "soil_ldr", fmt::json::FieldFormatter::Type::Object));
+    configASSERT(ldr_sensor_field_formatter_);
+
+    ldr_sensor_field_formatter_->add(*ldr_sensor_json_formatter_);
+
+    telemetry_formatter.add(*ldr_sensor_field_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE

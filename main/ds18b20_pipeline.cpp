@@ -22,6 +22,8 @@ namespace bonsai {
 
 namespace {
 
+#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
+    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 void configure_onewire_gpio(int gpio) {
     gpio_config_t config;
     memset(&config, 0, sizeof(config));
@@ -39,6 +41,8 @@ void configure_onewire_gpio(int gpio) {
     // configure GPIO with the given settings
     gpio_config(&config);
 }
+#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
+       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 
 } // namespace
 

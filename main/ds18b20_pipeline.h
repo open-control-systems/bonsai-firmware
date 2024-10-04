@@ -14,7 +14,7 @@
 #include "ocs_fmt/json/iformatter.h"
 #include "ocs_scheduler/idelay_estimator.h"
 #include "ocs_scheduler/itask_scheduler.h"
-#include "ocs_sensor/ds18b20/sensor_task.h"
+#include "ocs_sensor/ds18b20/sensor_pipeline.h"
 #include "ocs_storage/storage_builder.h"
 
 namespace ocs {
@@ -36,12 +36,12 @@ private:
     std::unique_ptr<sensor::ds18b20::Store> store_;
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
-    std::unique_ptr<sensor::ds18b20::SensorTask> soil_temperature_task_;
+    std::unique_ptr<sensor::ds18b20::SensorPipeline> soil_temperature_pipeline_;
     std::unique_ptr<fmt::json::IFormatter> soil_temperature_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
-    std::unique_ptr<sensor::ds18b20::SensorTask> outside_temperature_task_;
+    std::unique_ptr<sensor::ds18b20::SensorPipeline> outside_temperature_pipeline_;
     std::unique_ptr<fmt::json::IFormatter> outside_temperature_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
 };

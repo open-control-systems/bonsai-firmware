@@ -100,7 +100,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
         CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
 
-    configASSERT(task_scheduler.add(*store_, "DS18B20-store-task", core::Second)
+    configASSERT(task_scheduler.add(*store_, "ds18b20_store_task", core::Second)
                  == status::StatusCode::OK);
 }
 

@@ -17,7 +17,7 @@ namespace bonsai {
 
 namespace {
 
-const char* log_tag = "project-pipeline";
+const char* log_tag = "project_pipeline";
 
 } // namespace
 

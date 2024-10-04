@@ -159,7 +159,7 @@ menu "Bonsai Firmware Sensor Configuration"
 
         config BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_READ_INTERVAL
             int "Capacitive V1.2 sensor read interval, in seconds"
-            default 5
+            default 300
             depends on BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
             help
                 How often to read data from the sensor.

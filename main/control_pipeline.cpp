@@ -106,7 +106,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
     ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::SensorPipeline(
-        *adc_store_, task_scheduler, "soil-ldr", "soil-ldr-task",
+        *adc_store_, task_scheduler, "soil-ldr",
         sensor::ldr::SensorPipeline::Params {
             .sensor =
                 sensor::ldr::Sensor::Params {

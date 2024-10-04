@@ -17,7 +17,6 @@
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 #include "ocs_pipeline/ldr/json_formatter.h"
-#include "ocs_sensor/ldr/sensor_task.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
@@ -106,9 +105,9 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-    ldr_sensor_task_.reset(new (std::nothrow) sensor::ldr::SensorTask(
-        *adc_store_, task_scheduler, "soil-LDR", "soil-LDR-task",
-        sensor::ldr::SensorTask::Params {
+    ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::SensorPipeline(
+        *adc_store_, task_scheduler, "soil-ldr", "soil-ldr-task",
+        sensor::ldr::SensorPipeline::Params {
             .sensor =
                 sensor::ldr::Sensor::Params {
                     .value_min = CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_VALUE_MIN,
@@ -119,10 +118,10 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
             .read_interval =
                 core::Second * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_READ_INTERVAL,
         }));
-    configASSERT(ldr_sensor_task_);
+    configASSERT(ldr_sensor_pipeline_);
 
     ldr_sensor_json_formatter_.reset(new (std::nothrow) pipeline::ldr::JsonFormatter(
-        ldr_sensor_task_->get_sensor(), true));
+        ldr_sensor_pipeline_->get_sensor(), true));
     configASSERT(ldr_sensor_json_formatter_);
 
     telemetry_formatter.add(*ldr_sensor_json_formatter_);

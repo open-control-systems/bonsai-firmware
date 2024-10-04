@@ -11,7 +11,7 @@
 #include <memory>
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-#include "ocs_sensor/ldr/sensor_task.h"
+#include "ocs_sensor/ldr/sensor_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
@@ -55,7 +55,7 @@ private:
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-    std::unique_ptr<sensor::ldr::SensorTask> ldr_sensor_task_;
+    std::unique_ptr<sensor::ldr::SensorPipeline> ldr_sensor_pipeline_;
     std::unique_ptr<fmt::json::IFormatter> ldr_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 

@@ -135,7 +135,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
     capacitive_sensor_sepipeline_.reset(new (std::nothrow) sensor::yl69::DefaultPipeline(
         clock, *adc_store_, storage_builder, reboot_handler, task_scheduler,
-        "soil-capacitive", "soil-capacitive-task",
+        "soil-capacitive",
         sensor::yl69::DefaultPipeline::Params {
             .sensor =
                 sensor::yl69::Sensor::Params {

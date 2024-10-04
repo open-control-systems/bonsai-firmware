@@ -13,8 +13,7 @@
 #include "driver/gpio.h"
 
 #include "ocs_core/bit_ops.h"
-#include "ocs_fmt/json/cjson_object_formatter.h"
-#include "ocs_fmt/json/func_formatter.h"
+#include "ocs_pipeline/ds18b20/json_formatter.h"
 
 #include "ds18b20_pipeline.h"
 
@@ -59,7 +58,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
     soil_temperature_pipeline_.reset(new (std::nothrow) sensor::ds18b20::SensorPipeline(
-        task_scheduler, *storage_, *store_, "soil-temp",
+        task_scheduler, *storage_, *store_, "soil_temp",
         sensor::ds18b20::SensorPipeline::Params {
             .read_interval = core::Second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
@@ -69,16 +68,8 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     configASSERT(soil_temperature_pipeline_);
 
     soil_temperature_json_formatter_.reset(
-        new (std::nothrow) fmt::json::FuncFormatter([this](cJSON* json) {
-            fmt::json::CjsonObjectFormatter formatter(json);
-
-            if (!formatter.add_number_cs(
-                    "soil_temp", soil_temperature_pipeline_->get_sensor().get_data())) {
-                return status::StatusCode::NoMem;
-            }
-
-            return status::StatusCode::OK;
-        }));
+        new (std::nothrow)
+            pipeline::ds18b20::JsonFormatter(soil_temperature_pipeline_->get_sensor()));
     configASSERT(soil_temperature_json_formatter_);
 
     telemetry_formatter.add(*soil_temperature_json_formatter_);
@@ -89,7 +80,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
     outside_temperature_pipeline_.reset(new (std::nothrow) sensor::ds18b20::SensorPipeline(
-        task_scheduler, *storage_, *store_, "outside-temp",
+        task_scheduler, *storage_, *store_, "outside_temp",
         sensor::ds18b20::SensorPipeline::Params {
             .read_interval = core::Second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,
@@ -98,17 +89,9 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
         }));
     configASSERT(outside_temperature_pipeline_);
 
-    outside_temperature_json_formatter_.reset(new (
-        std::nothrow) fmt::json::FuncFormatter([this](cJSON* json) {
-        fmt::json::CjsonObjectFormatter formatter(json);
-
-        if (!formatter.add_number_cs(
-                "outside_temp", outside_temperature_pipeline_->get_sensor().get_data())) {
-            return status::StatusCode::NoMem;
-        }
-
-        return status::StatusCode::OK;
-    }));
+    outside_temperature_json_formatter_.reset(
+        new (std::nothrow) pipeline::ds18b20::JsonFormatter(
+            outside_temperature_pipeline_->get_sensor()));
     configASSERT(outside_temperature_json_formatter_);
 
     telemetry_formatter.add(*outside_temperature_json_formatter_);

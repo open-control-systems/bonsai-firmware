@@ -105,7 +105,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
     ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::SensorPipeline(
-        *adc_store_, task_scheduler, "soil-ldr",
+        *adc_store_, task_scheduler, "soil_ldr",
         sensor::ldr::SensorPipeline::Params {
             .sensor =
                 sensor::ldr::Sensor::Params {
@@ -135,7 +135,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
     capacitive_sensor_sepipeline_.reset(new (std::nothrow) sensor::yl69::DefaultPipeline(
         clock, *adc_store_, storage_builder, reboot_handler, task_scheduler,
-        "soil-capacitive",
+        "soil_capacitive",
         sensor::yl69::DefaultPipeline::Params {
             .sensor =
                 sensor::yl69::Sensor::Params {
@@ -150,7 +150,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     configASSERT(capacitive_sensor_sepipeline_);
 
     capacitive_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
-        "soil_capacitive_v1_2", fmt::json::FieldFormatter::Type::Object));
+        "soil_capacitive", fmt::json::FieldFormatter::Type::Object));
     configASSERT(capacitive_sensor_field_formatter_);
 
     capacitive_sensor_json_formatter_.reset(

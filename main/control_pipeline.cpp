@@ -70,7 +70,6 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
     yl69_sensor_pipeline_.reset(new (std::nothrow) sensor::yl69::RelayPipeline(
         clock, *adc_store_, storage_builder, reboot_handler, task_scheduler, "soil-yl69",
-        "soil-yl69-task",
         sensor::yl69::RelayPipeline::Params {
             .sensor =
                 sensor::yl69::Sensor::Params {

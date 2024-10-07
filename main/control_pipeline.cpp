@@ -80,7 +80,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 },
             .fsm_block =
                 control::FsmBlockPipeline::Params {
-                    .state_save_interval = core::Minute * 30,
+                    .state_save_interval = core::Hour * 2,
                     .state_interval_resolution = core::Second,
                 },
             .read_interval =
@@ -151,7 +151,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 },
             .fsm_block =
                 control::FsmBlockPipeline::Params {
-                    .state_save_interval = core::Minute * 30,
+                    .state_save_interval = core::Hour * 2,
                     .state_interval_resolution = core::Second,
                 },
             .read_interval = core::Second

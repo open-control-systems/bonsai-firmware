@@ -78,6 +78,11 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                     .adc_channel = static_cast<adc_channel_t>(
                         CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ADC_CHANNEL),
                 },
+            .fsm_block =
+                control::FsmBlockPipeline::Params {
+                    .state_save_interval = core::Minute * 30,
+                    .state_interval_resolution = core::Second,
+                },
             .read_interval =
                 core::Second * CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_READ_INTERVAL,
             .relay_gpio =
@@ -143,6 +148,11 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                     .value_max = CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_VALUE_MAX,
                     .adc_channel = static_cast<adc_channel_t>(
                         CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ADC_CHANNEL),
+                },
+            .fsm_block =
+                control::FsmBlockPipeline::Params {
+                    .state_save_interval = core::Minute * 30,
+                    .state_interval_resolution = core::Second,
                 },
             .read_interval = core::Second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_READ_INTERVAL,

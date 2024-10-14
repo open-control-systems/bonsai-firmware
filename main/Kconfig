@@ -1,4 +1,33 @@
 menu "Bonsai Firmware Sensor Configuration"
+    menu "I2C Master Configuration"
+        config BONSAI_FIRMWARE_I2C_MASTER_SDA_GPIO
+            int "I2C master SDA GPIO"
+            default 21
+            help
+                I2C master SDA GPIO.
+
+        config BONSAI_FIRMWARE_I2C_MASTER_SCL_GPIO
+            int "I2C master SCL GPIO"
+            default 22
+            help
+                I2C master SCL GPIO.
+    endmenu
+
+    menu "SHT41 Sensor Configuration"
+        config BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+            bool "Enable SHT41 sensor"
+            default n
+            help
+                Enable SHT41 sensor.
+
+        config BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL
+            int "SHT41 sensor read interval, in seconds"
+            default 60
+            depends on BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+            help
+                How often to read data from the sensor.
+    endmenu
+
     menu "YL-69 Sensor Configuration"
         config BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
             bool "Enable YL-69 sensor"

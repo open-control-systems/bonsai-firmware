@@ -22,10 +22,15 @@
 #include "ocs_sensor/yl69/default_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+#include "ocs_sensor/sht41/sensor_pipeline.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+
 #include "ocs_core/iclock.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_fmt/json/fanout_formatter.h"
 #include "ocs_fmt/json/field_formatter.h"
+#include "ocs_i2c/istore.h"
 #include "ocs_io/adc_store.h"
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_storage/istorage.h"
@@ -47,6 +52,7 @@ public:
 
 private:
     std::unique_ptr<io::AdcStore> adc_store_;
+    std::unique_ptr<i2c::IStore> i2c_master_store_;
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
     std::unique_ptr<sensor::yl69::RelayPipeline> yl69_sensor_pipeline_;
@@ -65,6 +71,12 @@ private:
     std::unique_ptr<fmt::json::FieldFormatter> capacitive_sensor_field_formatter_;
     std::unique_ptr<fmt::json::IFormatter> capacitive_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+    std::unique_ptr<sensor::sht41::SensorPipeline> sht41_sensor_pipeline_;
+    std::unique_ptr<fmt::json::FieldFormatter> sht41_sensor_field_formatter_;
+    std::unique_ptr<fmt::json::IFormatter> sht41_sensor_json_formatter_;
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 };
 
 } // namespace bonsai

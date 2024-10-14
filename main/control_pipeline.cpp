@@ -24,7 +24,12 @@
 #include "ocs_sensor/yl69/default_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+#include "ocs_pipeline/sht41/json_formatter.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+
 #include "ocs_core/bit_ops.h"
+#include "ocs_i2c/master_store.h"
 
 #include "control_pipeline.h"
 
@@ -66,6 +71,12 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
         .bitwidth = ADC_BITWIDTH_10,
     }));
     configASSERT(adc_store_);
+
+    i2c_master_store_.reset(new (std::nothrow) i2c::MasterStore(i2c::MasterStore::Params {
+        .sda = static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SDA_GPIO),
+        .scl = static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SCL_GPIO),
+    }));
+    configASSERT(i2c_master_store_);
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
     yl69_sensor_pipeline_.reset(new (std::nothrow) sensor::yl69::RelayPipeline(
@@ -172,6 +183,28 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
 
     telemetry_formatter.add(*capacitive_sensor_field_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+    sht41_sensor_pipeline_.reset(new (std::nothrow) sensor::sht41::SensorPipeline(
+        *i2c_master_store_, task_scheduler,
+        sensor::sht41::SensorPipeline::Params {
+            .read_interval =
+                core::Second * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL,
+        }));
+    configASSERT(sht41_sensor_pipeline_);
+
+    sht41_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
+        "SHT41", fmt::json::FieldFormatter::Type::Object));
+    configASSERT(sht41_sensor_field_formatter_);
+
+    sht41_sensor_json_formatter_.reset(new (std::nothrow) pipeline::sht41::JsonFormatter(
+        sht41_sensor_pipeline_->get_sensor(), false));
+    configASSERT(sht41_sensor_json_formatter_);
+
+    sht41_sensor_field_formatter_->add(*sht41_sensor_json_formatter_);
+
+    telemetry_formatter.add(*sht41_sensor_field_formatter_);
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 }
 
 } // namespace bonsai

@@ -44,7 +44,7 @@ menu "Bonsai Firmware Sensor Configuration"
 
         config BONSAI_FIRMWARE_SENSOR_YL69_VALUE_MAX
             int "YL-69 sensor soil dryness threshold"
-            default 700
+            default 900
             depends on BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
             help
                 Value of completely dry soil.

@@ -174,7 +174,7 @@ menu "Bonsai Firmware Sensor Configuration"
 
         config BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_VALUE_MAX
             int "Capacitive V1.2 sensor soil dryness threshold"
-            default 620
+            default 540
             depends on BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
             help
                 Value of completely dry soil.

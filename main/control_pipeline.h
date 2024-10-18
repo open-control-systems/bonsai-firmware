@@ -33,6 +33,7 @@
 #include "ocs_i2c/istore.h"
 #include "ocs_io/adc_store.h"
 #include "ocs_scheduler/itask_scheduler.h"
+#include "ocs_spi/istore.h"
 #include "ocs_storage/istorage.h"
 #include "ocs_storage/storage_builder.h"
 #include "ocs_system/fanout_reboot_handler.h"
@@ -53,6 +54,7 @@ public:
 private:
     std::unique_ptr<io::AdcStore> adc_store_;
     std::unique_ptr<i2c::IStore> i2c_master_store_;
+    std::unique_ptr<spi::IStore> spi_master_store_;
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
     std::unique_ptr<sensor::yl69::RelayPipeline> yl69_sensor_pipeline_;

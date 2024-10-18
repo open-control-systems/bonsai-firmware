@@ -13,6 +13,63 @@ menu "Bonsai Firmware Sensor Configuration"
                 I2C master SCL GPIO.
     endmenu
 
+    menu "SPI Master Configuration"
+        config BONSAI_FIRMWARE_SPI_MASTER_MOSI_GPIO
+            int "SPI master MOSI GPIO"
+            default 23
+            help
+                SPI master MOSI GPIO.
+
+        config BONSAI_FIRMWARE_SPI_MASTER_MISO_GPIO
+            int "SPI master MISO GPIO"
+            default 19
+            help
+                SPI master MISO GPIO.
+
+        config BONSAI_FIRMWARE_SPI_MASTER_SCLK_GPIO
+            int "SPI master SCLK GPIO"
+            default 18
+            help
+                SPI master SCLK GPIO.
+
+        config BONSAI_FIRMWARE_SPI_MASTER_MAX_TRANSFER_SIZE
+            int "SPI master max transfer size, in bytes"
+            default 32
+            help
+                Maximum number of bytes transferred within a single SPI transaction.
+    endmenu
+
+    menu "BME280 Sensor Configuration"
+        config BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
+            bool "Enable BME280 sensor"
+            default n
+            help
+                Enable BME280 sensor.
+
+        config BONSAI_FIRMWARE_SENSOR_BME280_READ_INTERVAL
+            int "BME280 sensor read interval, in seconds"
+            default 60
+            depends on BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
+            help
+                How often to read data from the sensor.
+
+        menu "BME280 Sensor SPI Configuration"
+            config BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE
+                bool "Enable SPI mode for BME280 sensor"
+                default n
+                depends on BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
+                help
+                    Enable SPI mode for BME280 sensor.
+
+            config BONSAI_FIRMWARE_SENSOR_BME280_CS_GPIO
+                int "CS (chip select) GPIO for BME280 sensor"
+                default 5
+                depends on BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE
+                help
+                    CS (chip select) GPIO for BME280 sensor in SPI mode.
+        endmenu
+    endmenu
+
     menu "SHT41 Sensor Configuration"
         config BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
             bool "Enable SHT41 sensor"

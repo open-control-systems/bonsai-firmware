@@ -48,14 +48,14 @@ ProjectPipeline::ProjectPipeline() {
         pipeline::ConsoleJsonPipeline::Params {
             .telemetry =
                 pipeline::ConsoleJsonPipeline::DataParams {
-                    .interval = core::Second
+                    .interval = core::Duration::second
                         * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_INTERVAL,
                     .buffer_size =
                         CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
                 pipeline::ConsoleJsonPipeline::DataParams {
-                    .interval = core::Second
+                    .interval = core::Duration::second
                         * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_REGISTRATION_INTERVAL,
                     .buffer_size =
                         CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_REGISTRATION_BUFFER_SIZE,

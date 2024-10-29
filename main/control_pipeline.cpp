@@ -107,11 +107,11 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 },
             .fsm_block =
                 control::FsmBlockPipeline::Params {
-                    .state_save_interval = core::Hour * 2,
-                    .state_interval_resolution = core::Second,
+                    .state_save_interval = core::Duration::hour * 2,
+                    .state_interval_resolution = core::Duration::second,
                 },
             .read_interval =
-                core::Second * CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_READ_INTERVAL,
+                core::Duration::second * CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_READ_INTERVAL,
             .relay_gpio =
                 static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_RELAY_GPIO),
             .power_on_delay_interval =
@@ -147,7 +147,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                         CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ADC_CHANNEL),
                 },
             .read_interval =
-                core::Second * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_READ_INTERVAL,
+                core::Duration::second * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_READ_INTERVAL,
         }));
     configASSERT(ldr_sensor_pipeline_);
 
@@ -178,10 +178,10 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                 },
             .fsm_block =
                 control::FsmBlockPipeline::Params {
-                    .state_save_interval = core::Hour * 2,
-                    .state_interval_resolution = core::Second,
+                    .state_save_interval = core::Duration::hour * 2,
+                    .state_interval_resolution = core::Duration::second,
                 },
-            .read_interval = core::Second
+            .read_interval = core::Duration::second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_READ_INTERVAL,
         }));
     configASSERT(capacitive_sensor_sepipeline_);
@@ -204,8 +204,8 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     sht41_sensor_pipeline_.reset(new (std::nothrow) sensor::sht41::SensorPipeline(
         *i2c_master_store_, task_scheduler,
         sensor::sht41::SensorPipeline::Params {
-            .read_interval =
-                core::Second * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL,
+            .read_interval = core::Duration::second
+                * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL,
         }));
     configASSERT(sht41_sensor_pipeline_);
 
@@ -228,8 +228,8 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
         new (std::nothrow) sensor::bme280::SpiSensorPipeline(
             task_scheduler, *spi_master_store_,
             sensor::bme280::SpiSensorPipeline::Params {
-                .read_interval =
-                    CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_READ_INTERVAL * core::Second,
+                .read_interval = CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_READ_INTERVAL
+                    * core::Duration::second,
                 .cs_gpio =
                     static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_CS_GPIO),
                 .sensor =

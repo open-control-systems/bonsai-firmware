@@ -1,0 +1,50 @@
+name: Build Bonsai Firmware
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-esp:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_PATH: project
+      IDF_PATH: esp-idf
+      IDF_VERSION: v5.3.1
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.PROJECT_PATH }}
+          submodules: recursive
+
+      - name: Setup Prerequisites
+        uses: ./project/ocs-esp-components/.github/actions/basic_env
+        with:
+          PROJECT_ID: bonsai-firmware
+
+      - name: Setup ESP-IDF
+        uses: ./project/ocs-esp-components/.github/actions/esp32_env
+        with:
+          IDF_PATH: ${{ env.IDF_PATH }}
+          IDF_VERSION: ${{ env.IDF_VERSION }}
+
+      - name: Perform All Checks
+        uses: ./project/ocs-esp-components/.github/actions/basic_checks
+        with:
+          PROJECT_PATH: ${{ env.PROJECT_PATH }}
+          OCS_PATH: ${{ env.PROJECT_PATH }}/ocs-esp-components
+
+      - name: Build Project
+        uses: ./project/ocs-esp-components/.github/actions/esp32_build
+        with:
+          IDF_PATH: ${{ env.IDF_PATH }}
+          PROJECT_PATH: ${{ env.PROJECT_PATH }}
+
+      - name: Upload Artifacts
+        uses: ./project/ocs-esp-components/.github/actions/esp32_upload
+        with:
+          PROJECT_PATH: ${{ env.PROJECT_PATH }}
+          PROJECT_ID: artifacts-bonsai

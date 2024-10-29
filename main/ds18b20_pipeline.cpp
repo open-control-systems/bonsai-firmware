@@ -60,7 +60,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     soil_temperature_pipeline_.reset(new (std::nothrow) sensor::ds18b20::SensorPipeline(
         task_scheduler, *storage_, *store_, "soil_temp",
         sensor::ds18b20::SensorPipeline::Params {
-            .read_interval = core::Second
+            .read_interval = core::Duration::second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
             .data_pin = static_cast<gpio_num_t>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_DATA_GPIO),
@@ -82,7 +82,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     outside_temperature_pipeline_.reset(new (std::nothrow) sensor::ds18b20::SensorPipeline(
         task_scheduler, *storage_, *store_, "outside_temp",
         sensor::ds18b20::SensorPipeline::Params {
-            .read_interval = core::Second
+            .read_interval = core::Duration::second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,
             .data_pin = static_cast<gpio_num_t>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO),
@@ -100,7 +100,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
         CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE
 
-    configASSERT(task_scheduler.add(*store_, "ds18b20_store_task", core::Second)
+    configASSERT(task_scheduler.add(*store_, "ds18b20_store_task", core::Duration::second)
                  == status::StatusCode::OK);
 }
 

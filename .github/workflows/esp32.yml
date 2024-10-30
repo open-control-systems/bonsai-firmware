@@ -35,7 +35,7 @@ jobs:
         uses: ./project/ocs-esp-components/.github/actions/basic_checks
         with:
           PROJECT_PATH: ${{ env.PROJECT_PATH }}
-          OCS_PATH: ${{ env.PROJECT_PATH }}/ocs-esp-components
+          OCS_COMPONENTS_PATH: ${{ env.PROJECT_PATH }}/ocs-esp-components
 
       - name: Build Project
         uses: ./project/ocs-esp-components/.github/actions/esp32_build

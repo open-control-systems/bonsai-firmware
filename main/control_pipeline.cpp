@@ -121,16 +121,10 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     configASSERT(yl69_sensor_pipeline_);
 
     yl69_sensor_json_formatter_.reset(new (std::nothrow) pipeline::yl69::JsonFormatter(
-        yl69_sensor_pipeline_->get_sensor(), false));
+        yl69_sensor_pipeline_->get_sensor()));
     configASSERT(yl69_sensor_json_formatter_);
 
-    yl69_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
-        "soil_yl69", fmt::json::FieldFormatter::Type::Object));
-    configASSERT(yl69_sensor_field_formatter_);
-
-    yl69_sensor_field_formatter_->add(*yl69_sensor_json_formatter_);
-
-    telemetry_formatter.add(*yl69_sensor_field_formatter_);
+    telemetry_formatter.add(*yl69_sensor_json_formatter_);
 
     configure_relay_gpio(CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_RELAY_GPIO);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
@@ -152,16 +146,10 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     configASSERT(ldr_sensor_pipeline_);
 
     ldr_sensor_json_formatter_.reset(new (std::nothrow) pipeline::ldr::JsonFormatter(
-        ldr_sensor_pipeline_->get_sensor(), false));
+        ldr_sensor_pipeline_->get_sensor()));
     configASSERT(ldr_sensor_json_formatter_);
 
-    ldr_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
-        "soil_ldr", fmt::json::FieldFormatter::Type::Object));
-    configASSERT(ldr_sensor_field_formatter_);
-
-    ldr_sensor_field_formatter_->add(*ldr_sensor_json_formatter_);
-
-    telemetry_formatter.add(*ldr_sensor_field_formatter_);
+    telemetry_formatter.add(*ldr_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
@@ -186,18 +174,12 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
         }));
     configASSERT(capacitive_sensor_sepipeline_);
 
-    capacitive_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
-        "soil_capacitive", fmt::json::FieldFormatter::Type::Object));
-    configASSERT(capacitive_sensor_field_formatter_);
-
     capacitive_sensor_json_formatter_.reset(
-        new (std::nothrow) pipeline::yl69::JsonFormatter(
-            capacitive_sensor_sepipeline_->get_sensor(), false));
+        new (std::nothrow)
+            pipeline::yl69::JsonFormatter(capacitive_sensor_sepipeline_->get_sensor()));
     configASSERT(capacitive_sensor_json_formatter_);
 
-    capacitive_sensor_field_formatter_->add(*capacitive_sensor_json_formatter_);
-
-    telemetry_formatter.add(*capacitive_sensor_field_formatter_);
+    telemetry_formatter.add(*capacitive_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
@@ -209,17 +191,11 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
         }));
     configASSERT(sht41_sensor_pipeline_);
 
-    sht41_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
-        "SHT41", fmt::json::FieldFormatter::Type::Object));
-    configASSERT(sht41_sensor_field_formatter_);
-
     sht41_sensor_json_formatter_.reset(new (std::nothrow) pipeline::sht41::JsonFormatter(
-        sht41_sensor_pipeline_->get_sensor(), false));
+        sht41_sensor_pipeline_->get_sensor()));
     configASSERT(sht41_sensor_json_formatter_);
 
-    sht41_sensor_field_formatter_->add(*sht41_sensor_json_formatter_);
-
-    telemetry_formatter.add(*sht41_sensor_field_formatter_);
+    telemetry_formatter.add(*sht41_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
@@ -249,18 +225,12 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
     configASSERT(bme280_spi_sensor_pipeline_);
 
     bme280_sensor_json_formatter_.reset(
-        new (std::nothrow) pipeline::bme280::JsonFormatter(
-            bme280_spi_sensor_pipeline_->get_sensor(), false));
+        new (std::nothrow)
+            pipeline::bme280::JsonFormatter(bme280_spi_sensor_pipeline_->get_sensor()));
     configASSERT(bme280_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE
 
-    bme280_sensor_field_formatter_.reset(new (std::nothrow) fmt::json::FieldFormatter(
-        "BME280", fmt::json::FieldFormatter::Type::Object));
-    configASSERT(bme280_sensor_field_formatter_);
-
-    bme280_sensor_field_formatter_->add(*bme280_sensor_json_formatter_);
-
-    telemetry_formatter.add(*bme280_sensor_field_formatter_);
+    telemetry_formatter.add(*bme280_sensor_json_formatter_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 }
 

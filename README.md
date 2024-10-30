@@ -1,3 +1,7 @@
+# Bonsai Firmware
+
+[![Build Bonsai Firmware](https://github.com/open-control-systems/bonsai-firmware/actions/workflows/esp32.yml/badge.svg)](https://github.com/open-control-systems/bonsai-firmware/actions/workflows/esp32.yml)
+
 # Introduction
 
 This project is designed to monitor soil moisture levels using an ESP32 board and a soil moisture sensor. The setup includes periodic readings and controlled power management for the sensor to increase its longevity. For more details, see the [article](https://dshil.net/blog/soil_control_system/).

@@ -59,3 +59,9 @@ jobs:
           PROJECT_PATH: ${{ env.PROJECT_PATH }}
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
           CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+
+      - name: Upload Artifacts
+        uses: ./project/ocs-esp-components/.github/actions/esp32_upload
+        with:
+          PROJECT_PATH: ${{ env.PROJECT_PATH }}
+          PROJECT_ID: artifacts-bonsai-build-all

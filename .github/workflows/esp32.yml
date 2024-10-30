@@ -42,9 +42,3 @@ jobs:
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           PROJECT_PATH: ${{ env.PROJECT_PATH }}
-
-      - name: Upload Artifacts
-        uses: ./project/ocs-esp-components/.github/actions/esp32_upload
-        with:
-          PROJECT_PATH: ${{ env.PROJECT_PATH }}
-          PROJECT_ID: artifacts-bonsai

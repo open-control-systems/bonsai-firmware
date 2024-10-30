@@ -13,6 +13,7 @@ jobs:
       PROJECT_PATH: project
       IDF_PATH: esp-idf
       IDF_VERSION: v5.3.1
+      CONFIGURATION_PATH_CCACHE: .env/ccache
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -24,6 +25,7 @@ jobs:
         uses: ./project/ocs-esp-components/.github/actions/basic_env
         with:
           PROJECT_ID: bonsai-firmware
+          CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
 
       - name: Setup ESP-IDF
         uses: ./project/ocs-esp-components/.github/actions/esp32_env
@@ -42,3 +44,4 @@ jobs:
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           PROJECT_PATH: ${{ env.PROJECT_PATH }}
+          CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}

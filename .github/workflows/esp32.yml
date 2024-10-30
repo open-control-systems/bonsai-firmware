@@ -14,6 +14,7 @@ jobs:
       IDF_PATH: esp-idf
       IDF_VERSION: v5.3.1
       CONFIGURATION_PATH_CCACHE: .env/ccache
+      CONFIGURATION_PATH_BUILD_ALL: .env/esp32_configuration_build_all
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -39,9 +40,22 @@ jobs:
           PROJECT_PATH: ${{ env.PROJECT_PATH }}
           OCS_COMPONENTS_PATH: ${{ env.PROJECT_PATH }}/ocs-esp-components
 
-      - name: Build Project
+      - name: Prepare Configuration for Build All
+        run: |
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+        shell: bash
+
+      - name: Build All
         uses: ./project/ocs-esp-components/.github/actions/esp32_build
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           PROJECT_PATH: ${{ env.PROJECT_PATH }}
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
+          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BUILD_ALL }}

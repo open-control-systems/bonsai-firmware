@@ -33,7 +33,6 @@ jobs:
       - name: Setup Prerequisites
         uses: ./project/ocs-esp-components/.github/actions/basic_env
         with:
-          PROJECT_ID: bonsai-firmware
           OCS_COMPONENTS_PATH: ${{ env.PROJECT_PATH }}/ocs-esp-components
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
 

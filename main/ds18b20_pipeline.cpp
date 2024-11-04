@@ -13,7 +13,7 @@
 #include "driver/gpio.h"
 
 #include "ocs_core/bit_ops.h"
-#include "ocs_pipeline/ds18b20/json_formatter.h"
+#include "ocs_pipeline/jsonfmt/ds18b20_sensor_formatter.h"
 
 #include "ds18b20_pipeline.h"
 
@@ -68,8 +68,8 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     configASSERT(soil_temperature_pipeline_);
 
     soil_temperature_json_formatter_.reset(
-        new (std::nothrow)
-            pipeline::ds18b20::JsonFormatter(soil_temperature_pipeline_->get_sensor()));
+        new (std::nothrow) pipeline::jsonfmt::DS18B20SensorFormatter(
+            soil_temperature_pipeline_->get_sensor()));
     configASSERT(soil_temperature_json_formatter_);
 
     telemetry_formatter.add(*soil_temperature_json_formatter_);
@@ -90,7 +90,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     configASSERT(outside_temperature_pipeline_);
 
     outside_temperature_json_formatter_.reset(
-        new (std::nothrow) pipeline::ds18b20::JsonFormatter(
+        new (std::nothrow) pipeline::jsonfmt::DS18B20SensorFormatter(
             outside_temperature_pipeline_->get_sensor()));
     configASSERT(outside_temperature_json_formatter_);
 

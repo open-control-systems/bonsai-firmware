@@ -31,30 +31,30 @@ ProjectPipeline::ProjectPipeline() {
                                }));
     configASSERT(system_pipeline_);
 
-    json_data_pipeline_.reset(new (std::nothrow) pipeline::JsonDataPipeline(
+    json_data_pipeline_.reset(new (std::nothrow) pipeline::jsonfmt::DataPipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_reboot_handler(),
-        pipeline::RegistrationJsonFormatter::Params {
+        pipeline::jsonfmt::RegistrationFormatter::Params {
             .fw_version = CONFIG_OCS_CORE_FW_VERSION,
             .fw_name = CONFIG_OCS_CORE_FW_NAME,
         }));
     configASSERT(json_data_pipeline_);
 
 #ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
-    console_pipeline_.reset(new (std::nothrow) pipeline::ConsoleJsonPipeline(
+    console_pipeline_.reset(new (std::nothrow) pipeline::jsonfmt::ConsolePipeline(
         system_pipeline_->get_task_scheduler(),
         json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
-        pipeline::ConsoleJsonPipeline::Params {
+        pipeline::jsonfmt::ConsolePipeline::Params {
             .telemetry =
-                pipeline::ConsoleJsonPipeline::DataParams {
+                pipeline::jsonfmt::ConsolePipeline::DataParams {
                     .interval = core::Duration::second
                         * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_INTERVAL,
                     .buffer_size =
                         CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
-                pipeline::ConsoleJsonPipeline::DataParams {
+                pipeline::jsonfmt::ConsolePipeline::DataParams {
                     .interval = core::Duration::second
                         * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_REGISTRATION_INTERVAL,
                     .buffer_size =
@@ -64,18 +64,18 @@ ProjectPipeline::ProjectPipeline() {
     configASSERT(console_pipeline_);
 #endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
 
-    http_pipeline_.reset(new (std::nothrow) pipeline::HttpPipeline(
+    http_pipeline_.reset(new (std::nothrow) pipeline::httpserver::HttpPipeline(
         system_pipeline_->get_reboot_task(), system_pipeline_->get_suspender(),
         json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
-        pipeline::HttpPipeline::Params {
+        pipeline::httpserver::HttpPipeline::Params {
             .telemetry =
-                pipeline::HttpPipeline::DataParams {
+                pipeline::httpserver::HttpPipeline::DataParams {
                     .buffer_size =
                         CONFIG_OCS_PIPELINE_HTTP_PIPELINE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
-                pipeline::HttpPipeline::DataParams {
+                pipeline::httpserver::HttpPipeline::DataParams {
                     .buffer_size =
                         CONFIG_OCS_PIPELINE_HTTP_PIPELINE_REGISTRATION_BUFFER_SIZE,
                 },
@@ -96,10 +96,11 @@ ProjectPipeline::ProjectPipeline() {
         json_data_pipeline_->get_telemetry_formatter()));
     configASSERT(ds18b20_pipeline_);
 
-    ds18b20_sensor_http_handler_.reset(new (std::nothrow) pipeline::ds18b20::HttpHandler(
-        http_pipeline_->get_server_pipeline().server(),
-        http_pipeline_->get_server_pipeline().mdns(), system_pipeline_->get_suspender(),
-        ds18b20_pipeline_->get_store()));
+    ds18b20_sensor_http_handler_.reset(
+        new (std::nothrow) pipeline::httpserver::DS18B20Handler(
+            http_pipeline_->get_server_pipeline().server(),
+            http_pipeline_->get_server_pipeline().mdns(),
+            system_pipeline_->get_suspender(), ds18b20_pipeline_->get_store()));
     configASSERT(ds18b20_sensor_http_handler_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)

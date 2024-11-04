@@ -22,13 +22,13 @@ const char* log_tag = "project_pipeline";
 } // namespace
 
 ProjectPipeline::ProjectPipeline() {
-    system_pipeline_.reset(new (std::nothrow)
-                               pipeline::SystemPipeline(pipeline::SystemPipeline::Params {
-                                   .task_scheduler =
-                                       pipeline::SystemPipeline::Params::TaskScheduler {
-                                           .delay = pdMS_TO_TICKS(200),
-                                       },
-                               }));
+    system_pipeline_.reset(new (std::nothrow) pipeline::basic::SystemPipeline(
+        pipeline::basic::SystemPipeline::Params {
+            .task_scheduler =
+                pipeline::basic::SystemPipeline::Params::TaskScheduler {
+                    .delay = pdMS_TO_TICKS(200),
+                },
+        }));
     configASSERT(system_pipeline_);
 
     json_data_pipeline_.reset(new (std::nothrow) pipeline::jsonfmt::DataPipeline(
@@ -40,7 +40,7 @@ ProjectPipeline::ProjectPipeline() {
         }));
     configASSERT(json_data_pipeline_);
 
-#ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
+#ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
     console_pipeline_.reset(new (std::nothrow) pipeline::jsonfmt::ConsolePipeline(
         system_pipeline_->get_task_scheduler(),
         json_data_pipeline_->get_telemetry_formatter(),
@@ -49,20 +49,19 @@ ProjectPipeline::ProjectPipeline() {
             .telemetry =
                 pipeline::jsonfmt::ConsolePipeline::DataParams {
                     .interval = core::Duration::second
-                        * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_INTERVAL,
-                    .buffer_size =
-                        CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_TELEMETRY_BUFFER_SIZE,
+                        * CONFIG_BONSAI_FIRMWARE_CONSOLE_TELEMETRY_INTERVAL,
+                    .buffer_size = CONFIG_BONSAI_FIRMWARE_CONSOLE_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
                 pipeline::jsonfmt::ConsolePipeline::DataParams {
                     .interval = core::Duration::second
-                        * CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_REGISTRATION_INTERVAL,
+                        * CONFIG_BONSAI_FIRMWARE_CONSOLE_REGISTRATION_INTERVAL,
                     .buffer_size =
-                        CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_REGISTRATION_BUFFER_SIZE,
+                        CONFIG_BONSAI_FIRMWARE_CONSOLE_REGISTRATION_BUFFER_SIZE,
                 },
         }));
     configASSERT(console_pipeline_);
-#endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
+#endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
     http_pipeline_.reset(new (std::nothrow) pipeline::httpserver::HttpPipeline(
         system_pipeline_->get_reboot_task(), system_pipeline_->get_suspender(),
@@ -71,13 +70,11 @@ ProjectPipeline::ProjectPipeline() {
         pipeline::httpserver::HttpPipeline::Params {
             .telemetry =
                 pipeline::httpserver::HttpPipeline::DataParams {
-                    .buffer_size =
-                        CONFIG_OCS_PIPELINE_HTTP_PIPELINE_TELEMETRY_BUFFER_SIZE,
+                    .buffer_size = CONFIG_BONSAI_FIRMWARE_HTTP_TELEMETRY_BUFFER_SIZE,
                 },
             .registration =
                 pipeline::httpserver::HttpPipeline::DataParams {
-                    .buffer_size =
-                        CONFIG_OCS_PIPELINE_HTTP_PIPELINE_REGISTRATION_BUFFER_SIZE,
+                    .buffer_size = CONFIG_BONSAI_FIRMWARE_HTTP_REGISTRATION_BUFFER_SIZE,
                 },
         }));
     configASSERT(http_pipeline_);

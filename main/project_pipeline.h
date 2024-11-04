@@ -11,17 +11,17 @@
 #include <memory>
 
 #include "ocs_core/noncopyable.h"
-#include "ocs_pipeline/http_pipeline.h"
-#include "ocs_pipeline/json_data_pipeline.h"
+#include "ocs_pipeline/httpserver/http_pipeline.h"
+#include "ocs_pipeline/jsonfmt/data_pipeline.h"
 #include "ocs_pipeline/system_pipeline.h"
 
 #ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
-#include "ocs_pipeline/console_json_pipeline.h"
+#include "ocs_pipeline/jsonfmt/console_pipeline.h"
 #endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
-#include "ocs_pipeline/ds18b20/http_handler.h"
+#include "ocs_pipeline/httpserver/ds18b20_handler.h"
 
 #include "ds18b20_pipeline.h"
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
@@ -42,19 +42,19 @@ public:
 
 private:
     std::unique_ptr<pipeline::SystemPipeline> system_pipeline_;
-    std::unique_ptr<pipeline::JsonDataPipeline> json_data_pipeline_;
+    std::unique_ptr<pipeline::jsonfmt::DataPipeline> json_data_pipeline_;
 
 #ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
-    std::unique_ptr<pipeline::ConsoleJsonPipeline> console_pipeline_;
+    std::unique_ptr<pipeline::jsonfmt::ConsolePipeline> console_pipeline_;
 #endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
 
-    std::unique_ptr<pipeline::HttpPipeline> http_pipeline_;
+    std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
     std::unique_ptr<ControlPipeline> control_pipeline_;
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
     std::unique_ptr<DS18B20Pipeline> ds18b20_pipeline_;
-    std::unique_ptr<pipeline::ds18b20::HttpHandler> ds18b20_sensor_http_handler_;
+    std::unique_ptr<pipeline::httpserver::DS18B20Handler> ds18b20_sensor_http_handler_;
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 };

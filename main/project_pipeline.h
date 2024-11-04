@@ -11,13 +11,13 @@
 #include <memory>
 
 #include "ocs_core/noncopyable.h"
+#include "ocs_pipeline/basic/system_pipeline.h"
 #include "ocs_pipeline/httpserver/http_pipeline.h"
 #include "ocs_pipeline/jsonfmt/data_pipeline.h"
-#include "ocs_pipeline/system_pipeline.h"
 
-#ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
+#ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 #include "ocs_pipeline/jsonfmt/console_pipeline.h"
-#endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
+#endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
@@ -41,12 +41,12 @@ public:
     status::StatusCode start();
 
 private:
-    std::unique_ptr<pipeline::SystemPipeline> system_pipeline_;
+    std::unique_ptr<pipeline::basic::SystemPipeline> system_pipeline_;
     std::unique_ptr<pipeline::jsonfmt::DataPipeline> json_data_pipeline_;
 
-#ifdef CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
+#ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
     std::unique_ptr<pipeline::jsonfmt::ConsolePipeline> console_pipeline_;
-#endif // CONFIG_OCS_PIPELINE_CONSOLE_PIPELINE_ENABLE
+#endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
     std::unique_ptr<ControlPipeline> control_pipeline_;

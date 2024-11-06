@@ -30,10 +30,11 @@
 #include "ocs_pipeline/jsonfmt/bme280_sensor_formatter.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 
-#include "ocs_core/bit_ops.h"
-#include "ocs_i2c/master_store.h"
-#include "ocs_spi/master_store.h"
-#include "ocs_spi/types.h"
+#include "ocs_algo/bit_ops.h"
+#include "ocs_io/adc/default_store.h"
+#include "ocs_io/i2c/master_store.h"
+#include "ocs_io/spi/master_store.h"
+#include "ocs_io/spi/types.h"
 
 #include "control_pipeline.h"
 
@@ -52,7 +53,7 @@ void configure_relay_gpio(int gpio) {
     // set as output mode
     config.mode = GPIO_MODE_OUTPUT;
     // bit mask of the pins that you want to set,
-    config.pin_bit_mask = core::BitOps::mask(gpio);
+    config.pin_bit_mask = algo::BitOps::mask(gpio);
     // enable pull-down mode
     config.pull_down_en = GPIO_PULLDOWN_ENABLE;
     // disable pull-up mode
@@ -69,26 +70,29 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                                  system::FanoutRebootHandler& reboot_handler,
                                  scheduler::ITaskScheduler& task_scheduler,
                                  fmt::json::FanoutFormatter& telemetry_formatter) {
-    adc_store_.reset(new (std::nothrow) io::AdcStore(io::AdcStore::Params {
-        .unit = ADC_UNIT_1,
-        .atten = ADC_ATTEN_DB_12,
-        .bitwidth = ADC_BITWIDTH_10,
-    }));
+    adc_store_.reset(new (std::nothrow)
+                         io::adc::DefaultStore(io::adc::DefaultStore::Params {
+                             .unit = ADC_UNIT_1,
+                             .atten = ADC_ATTEN_DB_12,
+                             .bitwidth = ADC_BITWIDTH_10,
+                         }));
     configASSERT(adc_store_);
 
-    i2c_master_store_.reset(new (std::nothrow) i2c::MasterStore(i2c::MasterStore::Params {
-        .sda = static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SDA_GPIO),
-        .scl = static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SCL_GPIO),
+    i2c_master_store_.reset(new (
+        std::nothrow) io::i2c::MasterStore(io::i2c::MasterStore::Params {
+        .sda = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SDA_GPIO),
+        .scl = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SCL_GPIO),
     }));
     configASSERT(i2c_master_store_);
 
-    spi_master_store_.reset(new (std::nothrow) spi::MasterStore(spi::MasterStore::Params {
-        .mosi = static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MOSI_GPIO),
-        .miso = static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MISO_GPIO),
-        .sclk = static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_SCLK_GPIO),
-        .max_transfer_size =
-            static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MAX_TRANSFER_SIZE),
-        .host_id = spi::VSPI,
+    spi_master_store_.reset(new (
+        std::nothrow) io::spi::MasterStore(io::spi::MasterStore::Params {
+        .mosi = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MOSI_GPIO),
+        .miso = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MISO_GPIO),
+        .sclk = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_SCLK_GPIO),
+        .max_transfer_size = static_cast<io::gpio::Gpio>(
+            CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MAX_TRANSFER_SIZE),
+        .host_id = io::spi::VSPI,
     }));
     configASSERT(spi_master_store_);
 
@@ -103,7 +107,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                         .value_min = CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_VALUE_MIN,
                         .value_max = CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_VALUE_MAX,
                     },
-                .adc_channel = static_cast<adc_channel_t>(
+                .adc_channel = static_cast<io::adc::Channel>(
                     CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ADC_CHANNEL),
                 .fsm_block =
                     control::FsmBlockPipeline::Params {
@@ -112,7 +116,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                     },
                 .read_interval = core::Duration::second
                     * CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_READ_INTERVAL,
-                .relay_gpio = static_cast<gpio_num_t>(
+                .relay_gpio = static_cast<io::gpio::Gpio>(
                     CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_RELAY_GPIO),
                 .power_on_delay_interval =
                     (1000 * CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_POWER_ON_DELAY_INTERVAL)
@@ -139,8 +143,8 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                     .value_min = CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_VALUE_MIN,
                     .value_max = CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_VALUE_MAX,
                 },
-            .adc_channel =
-                static_cast<adc_channel_t>(CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ADC_CHANNEL),
+            .adc_channel = static_cast<io::adc::Channel>(
+                CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ADC_CHANNEL),
             .read_interval =
                 core::Duration::second * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_READ_INTERVAL,
         }));
@@ -167,7 +171,7 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
                         .value_max =
                             CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_VALUE_MAX,
                     },
-                .adc_channel = static_cast<adc_channel_t>(
+                .adc_channel = static_cast<io::adc::Channel>(
                     CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ADC_CHANNEL),
                 .fsm_block =
                     control::FsmBlockPipeline::Params {
@@ -212,8 +216,8 @@ ControlPipeline::ControlPipeline(core::IClock& clock,
             sensor::bme280::SpiSensorPipeline::Params {
                 .read_interval = CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_READ_INTERVAL
                     * core::Duration::second,
-                .cs_gpio =
-                    static_cast<gpio_num_t>(CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_CS_GPIO),
+                .cs_gpio = static_cast<io::gpio::Gpio>(
+                    CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_CS_GPIO),
                 .sensor =
                     sensor::bme280::Sensor::Params {
                         .operation_mode = sensor::bme280::Sensor::OperationMode::Forced,

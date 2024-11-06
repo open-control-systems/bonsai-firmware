@@ -33,10 +33,10 @@
 #include "ocs_core/iclock.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_fmt/json/fanout_formatter.h"
-#include "ocs_i2c/istore.h"
-#include "ocs_io/adc_store.h"
+#include "ocs_io/adc/istore.h"
+#include "ocs_io/i2c/istore.h"
+#include "ocs_io/spi/istore.h"
 #include "ocs_scheduler/itask_scheduler.h"
-#include "ocs_spi/istore.h"
 #include "ocs_storage/istorage.h"
 #include "ocs_storage/storage_builder.h"
 #include "ocs_system/fanout_reboot_handler.h"
@@ -55,9 +55,9 @@ public:
                     fmt::json::FanoutFormatter& telemetry_formatter);
 
 private:
-    std::unique_ptr<io::AdcStore> adc_store_;
-    std::unique_ptr<i2c::IStore> i2c_master_store_;
-    std::unique_ptr<spi::IStore> spi_master_store_;
+    std::unique_ptr<io::adc::IStore> adc_store_;
+    std::unique_ptr<io::i2c::IStore> i2c_master_store_;
+    std::unique_ptr<io::spi::IStore> spi_master_store_;
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
     std::unique_ptr<sensor::soil::AnalogRelaySensorPipeline> yl69_sensor_pipeline_;

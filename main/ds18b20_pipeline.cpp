@@ -10,9 +10,7 @@
 
 #include "freertos/FreeRTOSConfig.h"
 
-#include "driver/gpio.h"
-
-#include "ocs_core/bit_ops.h"
+#include "ocs_algo/bit_ops.h"
 #include "ocs_pipeline/jsonfmt/ds18b20_sensor_formatter.h"
 
 #include "ds18b20_pipeline.h"
@@ -33,7 +31,7 @@ void configure_onewire_gpio(int gpio) {
     // output/input mode is controlled by the bus.
     config.mode = GPIO_MODE_DISABLE;
     // bit mask of the pins that you want to set,
-    config.pin_bit_mask = core::BitOps::mask(gpio);
+    config.pin_bit_mask = algo::BitOps::mask(gpio);
     // disable pull-down mode
     config.pull_down_en = GPIO_PULLDOWN_DISABLE;
     // enable pull-up mode
@@ -62,7 +60,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
         sensor::ds18b20::SensorPipeline::Params {
             .read_interval = core::Duration::second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
-            .data_pin = static_cast<gpio_num_t>(
+            .data_pin = static_cast<io::gpio::Gpio>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_DATA_GPIO),
         }));
     configASSERT(soil_temperature_pipeline_);
@@ -84,7 +82,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
         sensor::ds18b20::SensorPipeline::Params {
             .read_interval = core::Duration::second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,
-            .data_pin = static_cast<gpio_num_t>(
+            .data_pin = static_cast<io::gpio::Gpio>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO),
         }));
     configASSERT(outside_temperature_pipeline_);

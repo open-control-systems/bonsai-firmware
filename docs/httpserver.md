@@ -8,6 +8,43 @@ All examples below are run from the terminal and use the [httpie](https://httpie
 http "bonsai-firmware.local/telemetry"
 ```
 
+The response may be formatted differently depending on how the firmware has been configured:
+
+- Flat formatting
+
+```json
+{
+    "c_sys_lifetime": 4293423,
+    "c_sys_uptime": 78,
+    "outside_temp": 26.25,
+    "sensor_bme280_humidity": 27.54,
+    "sensor_bme280_pressure": 1022.82,
+    "sensor_bme280_temperature": 24.81,
+    "sensor_ldr_lightness": 100,
+    "sensor_ldr_raw": 977,
+    "sensor_ldr_voltage": 3060,
+    "sensor_sht41_humidity": 0,
+    "sensor_sht41_temperature": 0,
+    "sensor_soil_curr_status": "Dry",
+    "sensor_soil_curr_status_dur": 78,
+    "sensor_soil_moisture": 24,
+    "sensor_soil_prev_status": "Depletion",
+    "sensor_soil_prev_status_dur": 1,
+    "sensor_soil_raw": 466,
+    "sensor_soil_status_len": 75,
+    "sensor_soil_status_pos": 1,
+    "sensor_soil_voltage": 1653,
+    "sensor_soil_write_count": 1854,
+    "soil_temp": 23,
+    "system_memory_heap": 186720,
+    "system_memory_heap_internal": 186632,
+    "system_memory_heap_min": 185844,
+    "system_reset_reason": "RST_SW"
+}
+```
+
+- Nested formatting:
+
 ```json
 {
     "BME280": {

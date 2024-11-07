@@ -1,0 +1,3 @@
+## Firmware Configuration Options
+
+- CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL

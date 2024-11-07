@@ -20,22 +20,22 @@ jobs:
       #  - https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#permissions
       actions: write
     env:
-      PROJECT_PATH: project
+      SOURCE_PATH: project
       IDF_PATH: esp-idf
       IDF_VERSION: v5.3.1
       CONFIGURATION_PATH_CCACHE: .env/ccache
-      CONFIGURATION_PATH_BUILD_ALL: .env/esp32_configuration_build_all
+      CONFIGURATION_PATH_BONSAI_GROWLAB: .env/bonsai_growlab_configuration
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          path: ${{ env.PROJECT_PATH }}
+          path: ${{ env.SOURCE_PATH }}
           submodules: recursive
 
       - name: Setup Prerequisites
         uses: ./project/ocs-esp-components/.github/actions/basic_env
         with:
-          OCS_COMPONENTS_PATH: ${{ env.PROJECT_PATH }}/ocs-esp-components
+          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/ocs-esp-components
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
 
       - name: Setup ESP-IDF
@@ -44,35 +44,35 @@ jobs:
           IDF_PATH: ${{ env.IDF_PATH }}
           IDF_VERSION: ${{ env.IDF_VERSION }}
 
-      - name: Perform All Checks
+      - name: bonsai-growlab perform all checks
         uses: ./project/ocs-esp-components/.github/actions/basic_checks
         with:
-          PROJECT_PATH: ${{ env.PROJECT_PATH }}
-          OCS_COMPONENTS_PATH: ${{ env.PROJECT_PATH }}/ocs-esp-components
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
+          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/ocs-esp-components
 
-      - name: Prepare Configuration for Build All
+      - name: bonsai-growlab prepare configuration
         run: |
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
-          echo "CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
         shell: bash
 
-      - name: Build All
+      - name: bonsai-growlab build
         uses: ./project/ocs-esp-components/.github/actions/esp32_build
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
-          PROJECT_PATH: ${{ env.PROJECT_PATH }}
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
-          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BUILD_ALL }}
+          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
-      - name: Upload Artifacts
+      - name: bonsai-growlab upload
         uses: ./project/ocs-esp-components/.github/actions/esp32_upload
         with:
-          PROJECT_PATH: ${{ env.PROJECT_PATH }}
-          PROJECT_ID: artifacts-bonsai-build-all
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
+          PROJECT_ID: bonsai-growlab

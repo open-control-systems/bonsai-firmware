@@ -2,13 +2,13 @@ menu "Bonsai Firmware Configuration"
     menu "HTTP Server Configuration"
         config BONSAI_FIRMWARE_HTTP_TELEMETRY_BUFFER_SIZE
             int "Buffer size to hold the formatted telemetry JSON data"
-            default 512
+            default 1024
             help
                 Buffer size to hold the formatted telemetry JSON data, in bytes.
 
         config BONSAI_FIRMWARE_HTTP_REGISTRATION_BUFFER_SIZE
             int "Buffer size to hold the formatted registration JSON data"
-            default 256
+            default 512
             help
                 Buffer size to hold the formatted registration JSON data, in bytes.
     endmenu

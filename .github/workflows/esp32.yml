@@ -55,6 +55,7 @@ jobs:
         uses: ./project/ocs-esp-components/.github/actions/format_build_version
 
       - name: bonsai-growlab prepare configuration
+        shell: bash
         run: |
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
@@ -67,8 +68,6 @@ jobs:
           echo "CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-growlab\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-
-        shell: bash
 
       - name: bonsai-growlab build
         uses: ./project/ocs-esp-components/.github/actions/esp32_build

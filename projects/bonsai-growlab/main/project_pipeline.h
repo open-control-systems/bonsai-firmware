@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "ocs_core/noncopyable.h"
+#include "ocs_io/adc/istore.h"
 #include "ocs_pipeline/basic/system_pipeline.h"
 #include "ocs_pipeline/httpserver/http_pipeline.h"
 #include "ocs_pipeline/jsonfmt/data_pipeline.h"
@@ -26,6 +27,12 @@
 #include "ds18b20_pipeline.h"
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
+
+#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE)                            \
+    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
+#include "soil_pipeline.h"
+#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE) ||
+       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
 
 #include "control_pipeline.h"
 
@@ -49,7 +56,16 @@ private:
 #endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
+
+    std::unique_ptr<io::adc::IStore> adc_store_;
+
     std::unique_ptr<ControlPipeline> control_pipeline_;
+
+#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE)                            \
+    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
+    std::unique_ptr<SoilPipeline> soil_pipeline_;
+#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE) ||
+       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)

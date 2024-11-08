@@ -14,14 +14,6 @@
 #include "ocs_sensor/ldr/sensor_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-#include "ocs_sensor/soil/analog_relay_sensor_pipeline.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-#include "ocs_sensor/soil/analog_sensor_pipeline.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 #include "ocs_sensor/sht41/sensor_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
@@ -48,31 +40,21 @@ namespace bonsai {
 class ControlPipeline : public core::NonCopyable<> {
 public:
     //! Initialize.
-    ControlPipeline(core::IClock& clock,
+    ControlPipeline(io::adc::IStore& adc_store,
+                    core::IClock& clock,
                     storage::StorageBuilder& storage_builder,
                     system::FanoutRebootHandler& reboot_handler,
                     scheduler::ITaskScheduler& task_scheduler,
                     fmt::json::FanoutFormatter& telemetry_formatter);
 
 private:
-    std::unique_ptr<io::adc::IStore> adc_store_;
     std::unique_ptr<io::i2c::IStore> i2c_master_store_;
     std::unique_ptr<io::spi::IStore> spi_master_store_;
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
-    std::unique_ptr<sensor::soil::AnalogRelaySensorPipeline> yl69_sensor_pipeline_;
-    std::unique_ptr<fmt::json::IFormatter> yl69_sensor_json_formatter_;
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_YL69_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
     std::unique_ptr<sensor::ldr::SensorPipeline> ldr_sensor_pipeline_;
     std::unique_ptr<fmt::json::IFormatter> ldr_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
-    std::unique_ptr<sensor::soil::AnalogSensorPipeline> capacitive_sensor_sepipeline_;
-    std::unique_ptr<fmt::json::IFormatter> capacitive_sensor_json_formatter_;
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_CAPACITIVE_V1_2_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
     std::unique_ptr<sensor::sht41::SensorPipeline> sht41_sensor_pipeline_;

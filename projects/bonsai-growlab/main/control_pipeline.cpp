@@ -22,7 +22,6 @@
 #include "ocs_pipeline/jsonfmt/bme280_sensor_formatter.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 
-#include "ocs_algo/bit_ops.h"
 #include "ocs_io/i2c/master_store.h"
 #include "ocs_io/spi/master_store.h"
 #include "ocs_io/spi/types.h"

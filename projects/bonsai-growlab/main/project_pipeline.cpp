@@ -7,6 +7,7 @@
  */
 
 #include "ocs_core/log.h"
+#include "ocs_io/adc/default_store.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_status/macros.h"
 
@@ -79,11 +80,31 @@ ProjectPipeline::ProjectPipeline() {
         }));
     configASSERT(http_pipeline_);
 
+    adc_store_.reset(new (std::nothrow)
+                         io::adc::DefaultStore(io::adc::DefaultStore::Params {
+                             .unit = ADC_UNIT_1,
+                             .atten = ADC_ATTEN_DB_12,
+                             .bitwidth = ADC_BITWIDTH_10,
+                         }));
+    configASSERT(adc_store_);
+
     control_pipeline_.reset(new (std::nothrow) ControlPipeline(
-        system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
-        system_pipeline_->get_reboot_handler(), system_pipeline_->get_task_scheduler(),
+        *adc_store_, system_pipeline_->get_clock(),
+        system_pipeline_->get_storage_builder(), system_pipeline_->get_reboot_handler(),
+        system_pipeline_->get_task_scheduler(),
         json_data_pipeline_->get_telemetry_formatter()));
     configASSERT(control_pipeline_);
+
+#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE)                            \
+    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
+    soil_pipeline_.reset(new (std::nothrow) SoilPipeline(
+        *adc_store_, system_pipeline_->get_clock(),
+        system_pipeline_->get_storage_builder(), system_pipeline_->get_reboot_handler(),
+        system_pipeline_->get_task_scheduler(),
+        json_data_pipeline_->get_telemetry_formatter()));
+    configASSERT(soil_pipeline_);
+#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE) ||
+       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)

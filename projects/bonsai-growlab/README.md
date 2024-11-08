@@ -16,8 +16,10 @@ bonsai-growlab is a highly configurable R&D firmware for various experiments and
 
 **Supported Sensors**
 
-- YL-69 soil moisture [sensor](../../docs/sensors/yl69.md)
-- Capacitive soil moisture [sensor](../../docs/sensors/capacitive_v1_2.md)
+- Soil analog relay [sensor](../../docs/sensors/soil_analog_relay.md):
+    - YL-69 Soil Moisture Sensor
+- Soil analog [sensor](../../docs/sensors/soil_analog.md):
+    - Capacitive Soil Moisture Sensor V1.2
 - DS18B20 temperature [sensor](../../docs/sensors/ds18b20.md)
 - SHT41 [sensor](../../docs/sensors/sht41.md)
 - BME280 [sensor](../../docs/sensors/bme280.md)

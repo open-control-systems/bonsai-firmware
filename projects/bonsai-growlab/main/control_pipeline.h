@@ -14,10 +14,6 @@
 #include "ocs_sensor/ldr/sensor_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
-#include "ocs_sensor/sht41/sensor_pipeline.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE
 #include "ocs_sensor/bme280/spi_sensor_pipeline.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE
@@ -26,7 +22,6 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_fmt/json/fanout_formatter.h"
 #include "ocs_io/adc/istore.h"
-#include "ocs_io/i2c/istore.h"
 #include "ocs_io/spi/istore.h"
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_storage/istorage.h"
@@ -48,18 +43,12 @@ public:
                     fmt::json::FanoutFormatter& telemetry_formatter);
 
 private:
-    std::unique_ptr<io::i2c::IStore> i2c_master_store_;
     std::unique_ptr<io::spi::IStore> spi_master_store_;
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
     std::unique_ptr<sensor::ldr::SensorPipeline> ldr_sensor_pipeline_;
     std::unique_ptr<fmt::json::IFormatter> ldr_sensor_json_formatter_;
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
-    std::unique_ptr<sensor::sht41::SensorPipeline> sht41_sensor_pipeline_;
-    std::unique_ptr<fmt::json::IFormatter> sht41_sensor_json_formatter_;
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE

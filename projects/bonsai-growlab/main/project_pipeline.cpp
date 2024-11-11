@@ -11,7 +11,7 @@
 #include "ocs_status/code_to_str.h"
 #include "ocs_status/macros.h"
 
-#include "project_pipeline.h"
+#include "main/project_pipeline.h"
 
 namespace ocs {
 namespace bonsai {
@@ -88,12 +88,25 @@ ProjectPipeline::ProjectPipeline() {
                          }));
     configASSERT(adc_store_);
 
+    i2c_master_store_pipeline_.reset(new (
+        std::nothrow) io::i2c::MasterStorePipeline(io::i2c::IStore::Params {
+        .sda = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SDA_GPIO),
+        .scl = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SCL_GPIO),
+    }));
+
     control_pipeline_.reset(new (std::nothrow) ControlPipeline(
         *adc_store_, system_pipeline_->get_clock(),
         system_pipeline_->get_storage_builder(), system_pipeline_->get_reboot_handler(),
         system_pipeline_->get_task_scheduler(),
         json_data_pipeline_->get_telemetry_formatter()));
     configASSERT(control_pipeline_);
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
+    sht41_pipeline_.reset(new (std::nothrow) SHT41Pipeline(
+        i2c_master_store_pipeline_->get_store(), system_pipeline_->get_task_scheduler(),
+        json_data_pipeline_->get_telemetry_formatter()));
+    configASSERT(sht41_pipeline_);
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE)                            \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)

@@ -5,6 +5,7 @@ idf_component_register(
     "control_pipeline.cpp"
     "ds18b20_pipeline.cpp"
     "soil_pipeline.cpp"
+    "sht41_pipeline.cpp"
 
     REQUIRES
     "freertos"
@@ -20,5 +21,5 @@ idf_component_register(
     "ocs_pipeline"
 
     INCLUDE_DIRS
-    "."
+    ".."
 )

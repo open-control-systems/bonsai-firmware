@@ -12,10 +12,14 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_fmt/json/fanout_formatter.h"
 #include "ocs_fmt/json/iformatter.h"
+#include "ocs_http/server.h"
+#include "ocs_net/mdns_provider.h"
+#include "ocs_pipeline/httpserver/ds18b20_handler.h"
 #include "ocs_scheduler/idelay_estimator.h"
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_sensor/ds18b20/sensor_pipeline.h"
 #include "ocs_storage/storage_builder.h"
+#include "ocs_system/isuspender.h"
 
 namespace ocs {
 namespace bonsai {
@@ -26,14 +30,15 @@ public:
     DS18B20Pipeline(core::IClock& clock,
                     storage::StorageBuilder& storage_builder,
                     scheduler::ITaskScheduler& task_scheduler,
-                    fmt::json::FanoutFormatter& telemetry_formatter);
-
-    //! Return the underlying sensors store.
-    sensor::ds18b20::Store& get_store();
+                    fmt::json::FanoutFormatter& telemetry_formatter,
+                    system::ISuspender& suspender,
+                    http::Server& http_server,
+                    net::MdnsProvider& mdns_provider);
 
 private:
     std::unique_ptr<storage::IStorage> storage_;
     std::unique_ptr<sensor::ds18b20::Store> store_;
+    std::unique_ptr<pipeline::httpserver::DS18B20Handler> sensor_http_handler_;
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
     std::unique_ptr<sensor::ds18b20::SensorPipeline> soil_temperature_pipeline_;

@@ -124,15 +124,10 @@ ProjectPipeline::ProjectPipeline() {
     ds18b20_pipeline_.reset(new (std::nothrow) DS18B20Pipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_telemetry_formatter()));
+        json_data_pipeline_->get_telemetry_formatter(), system_pipeline_->get_suspender(),
+        http_pipeline_->get_server_pipeline().server(),
+        http_pipeline_->get_server_pipeline().mdns()));
     configASSERT(ds18b20_pipeline_);
-
-    ds18b20_sensor_http_handler_.reset(
-        new (std::nothrow) pipeline::httpserver::DS18B20Handler(
-            http_pipeline_->get_server_pipeline().server(),
-            http_pipeline_->get_server_pipeline().mdns(),
-            system_pipeline_->get_suspender(), ds18b20_pipeline_->get_store()));
-    configASSERT(ds18b20_sensor_http_handler_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 }

@@ -24,7 +24,7 @@ SHT41Pipeline::SHT41Pipeline(io::i2c::IStore& i2c_store,
         sensor::sht41::SensorPipeline::Params {
             .read_interval = core::Duration::second
                 * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL,
-            .measure_command = sensor::sht41::Sensor::Command::MeasureHighPrecision,
+            .measure_command = sensor::sht41::Sensor::Command::MeasureLowPrecision,
         }));
     configASSERT(sensor_pipeline_);
 

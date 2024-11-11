@@ -15,7 +15,10 @@ namespace bonsai {
 
 SHT41Pipeline::SHT41Pipeline(io::i2c::IStore& i2c_store,
                              scheduler::ITaskScheduler& task_scheduler,
-                             fmt::json::FanoutFormatter& telemetry_formatter) {
+                             scheduler::AsyncFuncScheduler& func_scheduler,
+                             fmt::json::FanoutFormatter& telemetry_formatter,
+                             http::Server& http_server,
+                             net::MdnsProvider& mdns_provider) {
     sensor_pipeline_.reset(new (std::nothrow) sensor::sht41::SensorPipeline(
         i2c_store, task_scheduler,
         sensor::sht41::SensorPipeline::Params {
@@ -31,6 +34,10 @@ SHT41Pipeline::SHT41Pipeline(io::i2c::IStore& i2c_store,
     configASSERT(sensor_json_formatter_);
 
     telemetry_formatter.add(*sensor_json_formatter_);
+
+    sensor_http_handler_.reset(new (std::nothrow) pipeline::httpserver::SHT41Handler(
+        func_scheduler, http_server, mdns_provider, sensor_pipeline_->get_sensor()));
+    configASSERT(sensor_http_handler_);
 }
 
 } // namespace bonsai

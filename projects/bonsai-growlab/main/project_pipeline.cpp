@@ -104,7 +104,10 @@ ProjectPipeline::ProjectPipeline() {
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
     sht41_pipeline_.reset(new (std::nothrow) SHT41Pipeline(
         i2c_master_store_pipeline_->get_store(), system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_telemetry_formatter()));
+        system_pipeline_->get_func_scheduler(),
+        json_data_pipeline_->get_telemetry_formatter(),
+        http_pipeline_->get_server_pipeline().server(),
+        http_pipeline_->get_server_pipeline().mdns()));
     configASSERT(sht41_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 

@@ -47,12 +47,19 @@ void configure_onewire_gpio(int gpio) {
 DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
                                  storage::StorageBuilder& storage_builder,
                                  scheduler::ITaskScheduler& task_scheduler,
-                                 fmt::json::FanoutFormatter& telemetry_formatter) {
+                                 fmt::json::FanoutFormatter& telemetry_formatter,
+                                 system::ISuspender& suspender,
+                                 http::Server& http_server,
+                                 net::MdnsProvider& mdns_provider) {
     storage_ = storage_builder.make("ds18b20_sensors");
     configASSERT(storage_);
 
     store_.reset(new (std::nothrow) sensor::ds18b20::Store(8));
     configASSERT(store_);
+
+    sensor_http_handler_.reset(new (std::nothrow) pipeline::httpserver::DS18B20Handler(
+        http_server, mdns_provider, suspender, *store_));
+    configASSERT(sensor_http_handler_);
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE
     soil_temperature_pipeline_.reset(new (std::nothrow) sensor::ds18b20::SensorPipeline(
@@ -100,10 +107,6 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
 
     configASSERT(task_scheduler.add(*store_, "ds18b20_store_task", core::Duration::second)
                  == status::StatusCode::OK);
-}
-
-sensor::ds18b20::Store& DS18B20Pipeline::get_store() {
-    return *store_;
 }
 
 } // namespace bonsai

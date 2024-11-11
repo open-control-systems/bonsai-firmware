@@ -14,6 +14,7 @@
 #include "ocs_fmt/json/fanout_formatter.h"
 #include "ocs_fmt/json/iformatter.h"
 #include "ocs_io/i2c/istore.h"
+#include "ocs_pipeline/httpserver/sht41_handler.h"
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_sensor/sht41/sensor_pipeline.h"
 
@@ -25,11 +26,15 @@ public:
     //! Initialize.
     SHT41Pipeline(io::i2c::IStore& i2c_store,
                   scheduler::ITaskScheduler& task_scheduler,
-                  fmt::json::FanoutFormatter& telemetry_formatter);
+                  scheduler::AsyncFuncScheduler& func_scheduler,
+                  fmt::json::FanoutFormatter& telemetry_formatter,
+                  http::Server& server,
+                  net::MdnsProvider& mdns_provider);
 
 private:
     std::unique_ptr<sensor::sht41::SensorPipeline> sensor_pipeline_;
     std::unique_ptr<fmt::json::IFormatter> sensor_json_formatter_;
+    std::unique_ptr<pipeline::httpserver::SHT41Handler> sensor_http_handler_;
 };
 
 } // namespace bonsai

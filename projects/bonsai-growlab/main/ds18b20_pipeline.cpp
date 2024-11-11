@@ -13,7 +13,7 @@
 #include "ocs_algo/bit_ops.h"
 #include "ocs_pipeline/jsonfmt/ds18b20_sensor_formatter.h"
 
-#include "ds18b20_pipeline.h"
+#include "main/ds18b20_pipeline.h"
 
 namespace ocs {
 namespace bonsai {

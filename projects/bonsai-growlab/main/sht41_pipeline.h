@@ -17,6 +17,7 @@
 #include "ocs_pipeline/httpserver/sht41_handler.h"
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_sensor/sht41/sensor_pipeline.h"
+#include "ocs_storage/storage_builder.h"
 
 namespace ocs {
 namespace bonsai {
@@ -27,6 +28,7 @@ public:
     SHT41Pipeline(io::i2c::IStore& i2c_store,
                   scheduler::ITaskScheduler& task_scheduler,
                   scheduler::AsyncFuncScheduler& func_scheduler,
+                  storage::StorageBuilder& storage_builder,
                   fmt::json::FanoutFormatter& telemetry_formatter,
                   http::Server& server,
                   net::MdnsProvider& mdns_provider);

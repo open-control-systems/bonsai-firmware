@@ -156,6 +156,7 @@ Rebooting...
 **Sensors APIs**
 
 - [DS18B20](sensors/ds18b20.md#HTTP-API)
+- [SHT41](sensors/sht41.md#HTTP-API)
 
 ## Firmware Configuration Options
 

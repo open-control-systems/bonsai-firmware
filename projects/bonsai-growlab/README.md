@@ -8,23 +8,23 @@ bonsai-growlab is a highly configurable R&D firmware for various experiments and
 
 **Features**
 
-- Soil status [monitoring](../../docs/soil_monitor.md)
-- System status [monitoring](../../docs/system_monitor.md)
+- Soil status [monitoring](../../control-components/docs/soil_monitor.md)
+- System status [monitoring](../../control-components/docs/system_monitor.md)
 - Graceful rebooting process
-- Builtin [HTTP server](../../docs/httpserver.md) for continuous monitoring of many environmental parameters (humidity, temperature, soil moisture, light)
-- [mDNS](../../docs/mdns.md) to simplify application network discovery
+- Builtin [HTTP server](../../control-components/docs/httpserver.md) for continuous monitoring of many environmental parameters (humidity, temperature, soil moisture, light)
+- [mDNS](../../control-components/docs/mdns.md) to simplify application network discovery
 
 **Supported Sensors**
 
-- Soil analog relay [sensor](../../docs/sensors/soil_analog_relay.md):
+- Soil analog relay [sensor](../../control-components/docs/sensors/soil_analog_relay.md):
     - YL-69 Soil Moisture Sensor
-- Soil analog [sensor](../../docs/sensors/soil_analog.md):
+- Soil analog [sensor](../../control-components/docs/sensors/soil_analog.md):
     - Capacitive Soil Moisture Sensor V1.2
-- DS18B20 temperature [sensor](../../docs/sensors/ds18b20.md)
-- SHT41 [sensor](../../docs/sensors/sht41.md)
-- BME280 [sensor](../../docs/sensors/bme280.md)
-- LDR [sensor](../../docs/sensors/ldr.md)
+- DS18B20 temperature [sensor](../../control-components/docs/sensors/ds18b20.md)
+- SHT41 [sensor](../../control-components/docs/sensors/sht41.md)
+- BME280 [sensor](../../control-components/docs/sensors/bme280.md)
+- LDR [sensor](../../control-components/docs/sensors/ldr.md)
 
 **Installation Instructions**
 
-- ESP32 [instructions](../../docs/install/esp32.md)
+- [ESP32](../../docs/install/esp32.md)

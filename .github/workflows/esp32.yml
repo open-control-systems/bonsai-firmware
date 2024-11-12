@@ -33,26 +33,26 @@ jobs:
           submodules: recursive
 
       - name: Setup Prerequisites
-        uses: ./project/ocs-esp-components/.github/actions/basic_env
+        uses: ./project/control-components/.github/actions/basic_env
         with:
-          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/ocs-esp-components
+          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
 
       - name: Setup ESP-IDF
-        uses: ./project/ocs-esp-components/.github/actions/esp32_env
+        uses: ./project/control-components/.github/actions/esp32_env
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           IDF_VERSION: ${{ env.IDF_VERSION }}
 
       - name: bonsai-growlab perform all checks
-        uses: ./project/ocs-esp-components/.github/actions/basic_checks
+        uses: ./project/control-components/.github/actions/basic_checks
         with:
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
-          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/ocs-esp-components
+          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
 
       - name: Format firmware build version
         id: version_formatter
-        uses: ./project/ocs-esp-components/.github/actions/format_build_version
+        uses: ./project/control-components/.github/actions/format_build_version
 
       - name: bonsai-growlab prepare configuration
         shell: bash
@@ -70,7 +70,7 @@ jobs:
           echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-growlab\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
       - name: bonsai-growlab build
-        uses: ./project/ocs-esp-components/.github/actions/esp32_build
+        uses: ./project/control-components/.github/actions/esp32_build
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
@@ -78,7 +78,7 @@ jobs:
           CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
       - name: bonsai-growlab upload
-        uses: ./project/ocs-esp-components/.github/actions/esp32_upload
+        uses: ./project/control-components/.github/actions/esp32_upload
         with:
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
           PROJECT_ID: bonsai-growlab

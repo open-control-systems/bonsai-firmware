@@ -26,33 +26,38 @@ jobs:
       CONFIGURATION_PATH_CCACHE: .env/ccache
       CONFIGURATION_PATH_BONSAI_GROWLAB: .env/bonsai_growlab_configuration
     steps:
-      - name: Checkout Repository
+      - name: checkout repository
         uses: actions/checkout@v4
         with:
           path: ${{ env.SOURCE_PATH }}
           submodules: recursive
 
-      - name: Setup Prerequisites
-        uses: ./project/control-components/.github/actions/basic_env
-        with:
-          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
-          CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
-
-      - name: Setup ESP-IDF
-        uses: ./project/control-components/.github/actions/esp32_env
+      - name: esp32 setup env
+        uses: ./project/control-components/.github/actions/esp32/env
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           IDF_VERSION: ${{ env.IDF_VERSION }}
 
-      - name: bonsai-growlab perform all checks
-        uses: ./project/control-components/.github/actions/basic_checks
+      - name: system setup env
+        uses: ./project/control-components/.github/actions/system/env
+
+      - name: system setup ccache
+        uses: ./project/control-components/.github/actions/system/ccache
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}
+          CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
+          CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
+
+      - name: core format firmware build version
+        id: version_formatter
+        uses: ./project/control-components/.github/actions/core/version
+
+      - name: bonsai-growlab check formatting
+        uses: ./project/control-components/.github/actions/core/fmt
         with:
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
-          OCS_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
-
-      - name: Format firmware build version
-        id: version_formatter
-        uses: ./project/control-components/.github/actions/format_build_version
+          CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
 
       - name: bonsai-growlab prepare configuration
         shell: bash
@@ -70,7 +75,7 @@ jobs:
           echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-growlab\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
       - name: bonsai-growlab build
-        uses: ./project/control-components/.github/actions/esp32_build
+        uses: ./project/control-components/.github/actions/esp32/project
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
@@ -78,7 +83,7 @@ jobs:
           CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
       - name: bonsai-growlab upload
-        uses: ./project/control-components/.github/actions/esp32_upload
+        uses: ./project/control-components/.github/actions/esp32/upload
         with:
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
           PROJECT_ID: bonsai-growlab

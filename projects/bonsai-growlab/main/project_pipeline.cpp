@@ -105,9 +105,8 @@ ProjectPipeline::ProjectPipeline() {
     sht41_pipeline_.reset(new (std::nothrow) SHT41Pipeline(
         i2c_master_store_pipeline_->get_store(), system_pipeline_->get_task_scheduler(),
         system_pipeline_->get_func_scheduler(), system_pipeline_->get_storage_builder(),
-        json_data_pipeline_->get_telemetry_formatter(),
-        http_pipeline_->get_server_pipeline().server(),
-        http_pipeline_->get_server_pipeline().mdns()));
+        json_data_pipeline_->get_telemetry_formatter(), http_pipeline_->get_server(),
+        http_pipeline_->get_mdns_provider()));
     configASSERT(sht41_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 
@@ -128,8 +127,7 @@ ProjectPipeline::ProjectPipeline() {
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(),
         json_data_pipeline_->get_telemetry_formatter(), system_pipeline_->get_suspender(),
-        http_pipeline_->get_server_pipeline().server(),
-        http_pipeline_->get_server_pipeline().mdns()));
+        http_pipeline_->get_server(), http_pipeline_->get_mdns_provider()));
     configASSERT(ds18b20_pipeline_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)

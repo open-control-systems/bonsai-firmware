@@ -13,11 +13,11 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_io/adc/istore.h"
 #include "ocs_io/i2c/master_store_pipeline.h"
+#include "ocs_net/mdns_pipeline.h"
 #include "ocs_pipeline/basic/system_pipeline.h"
 #include "ocs_pipeline/httpserver/http_pipeline.h"
 #include "ocs_pipeline/jsonfmt/data_pipeline.h"
-#include "ocs_pipeline/network/mdns_pipeline.h"
-#include "ocs_pipeline/network/network_pipeline.h"
+#include "ocs_pipeline/network/local_network_json_pipeline.h"
 
 #ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 #include "ocs_pipeline/jsonfmt/console_pipeline.h"
@@ -60,9 +60,8 @@ private:
     std::unique_ptr<pipeline::jsonfmt::ConsolePipeline> console_pipeline_;
 #endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
-    std::unique_ptr<pipeline::network::INetworkSelector> network_selector_;
-    std::unique_ptr<pipeline::network::NetworkPipeline> network_pipeline_;
-    std::unique_ptr<pipeline::network::MdnsPipeline> mdns_pipeline_;
+    std::unique_ptr<pipeline::network::LocalNetworkJsonPipeline> network_json_pipeline_;
+    std::unique_ptr<net::MdnsPipeline> mdns_pipeline_;
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
 
     std::unique_ptr<io::adc::IStore> adc_store_;

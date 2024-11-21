@@ -8,7 +8,7 @@
 
 #include "ocs_core/log.h"
 #include "ocs_io/adc/default_store.h"
-#include "ocs_pipeline/network/local_network_selector.h"
+#include "ocs_pipeline/network/local_network_pipeline.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_status/macros.h"
 
@@ -62,21 +62,22 @@ ProjectPipeline::ProjectPipeline() {
     configASSERT(console_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
-    network_selector_.reset(new (std::nothrow) pipeline::network::LocalNetworkSelector(
-        system_pipeline_->get_storage_builder(), system_pipeline_->get_device_info()));
-    configASSERT(network_selector_);
+    network_json_pipeline_.reset(
+        new (std::nothrow) pipeline::network::LocalNetworkJsonPipeline(
+            system_pipeline_->get_storage_builder(),
+            json_data_pipeline_->get_registration_formatter(),
+            system_pipeline_->get_device_info()));
+    configASSERT(network_json_pipeline_);
 
-    network_pipeline_.reset(new (std::nothrow)
-                                pipeline::network::NetworkPipeline(*network_selector_));
-    configASSERT(network_pipeline_);
-
-    mdns_pipeline_.reset(new (std::nothrow) pipeline::network::MdnsPipeline());
+    mdns_pipeline_.reset(new (std::nothrow) net::MdnsPipeline(
+        system_pipeline_->get_device_info().get_fw_name(),
+        system_pipeline_->get_device_info().get_fw_description()));
     configASSERT(mdns_pipeline_);
 
     http_pipeline_.reset(new (std::nothrow) pipeline::httpserver::HttpPipeline(
         system_pipeline_->get_reboot_task(), system_pipeline_->get_suspender(),
-        network_selector_->get_network(), mdns_pipeline_->get_provider(),
-        json_data_pipeline_->get_telemetry_formatter(),
+        network_json_pipeline_->get_network_pipeline().get_fanout_handler(),
+        mdns_pipeline_->get_driver(), json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
         pipeline::httpserver::HttpPipeline::Params {
             .telemetry =
@@ -116,7 +117,7 @@ ProjectPipeline::ProjectPipeline() {
         i2c_master_store_pipeline_->get_store(), system_pipeline_->get_task_scheduler(),
         system_pipeline_->get_func_scheduler(), system_pipeline_->get_storage_builder(),
         json_data_pipeline_->get_telemetry_formatter(), http_pipeline_->get_server(),
-        mdns_pipeline_->get_provider()));
+        mdns_pipeline_->get_driver()));
     configASSERT(sht41_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 
@@ -137,14 +138,14 @@ ProjectPipeline::ProjectPipeline() {
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(),
         json_data_pipeline_->get_telemetry_formatter(), system_pipeline_->get_suspender(),
-        http_pipeline_->get_server(), mdns_pipeline_->get_provider()));
+        http_pipeline_->get_server(), mdns_pipeline_->get_driver()));
     configASSERT(ds18b20_pipeline_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 }
 
 status::StatusCode ProjectPipeline::start() {
-    auto code = network_pipeline_->start();
+    auto code = network_json_pipeline_->get_network_pipeline().start();
     if (code == status::StatusCode::OK) {
         code = mdns_pipeline_->start();
         if (code != status::StatusCode::OK) {

@@ -31,7 +31,7 @@ public:
                   storage::StorageBuilder& storage_builder,
                   fmt::json::FanoutFormatter& telemetry_formatter,
                   http::Server& server,
-                  net::MdnsProvider& mdns_provider);
+                  net::IMdnsDriver& mdns_driver);
 
 private:
     std::unique_ptr<sensor::sht41::SensorPipeline> sensor_pipeline_;

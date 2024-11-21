@@ -19,7 +19,7 @@ SHT41Pipeline::SHT41Pipeline(io::i2c::IStore& i2c_store,
                              storage::StorageBuilder& storage_builder,
                              fmt::json::FanoutFormatter& telemetry_formatter,
                              http::Server& http_server,
-                             net::MdnsProvider& mdns_provider) {
+                             net::IMdnsDriver& mdns_driver) {
     sensor_pipeline_.reset(new (std::nothrow) sensor::sht41::SensorPipeline(
         i2c_store, task_scheduler, storage_builder,
         sensor::sht41::SensorPipeline::Params {
@@ -38,7 +38,7 @@ SHT41Pipeline::SHT41Pipeline(io::i2c::IStore& i2c_store,
     telemetry_formatter.add(*sensor_json_formatter_);
 
     sensor_http_handler_.reset(new (std::nothrow) pipeline::httpserver::SHT41Handler(
-        func_scheduler, http_server, mdns_provider, sensor_pipeline_->get_sensor()));
+        func_scheduler, http_server, mdns_driver, sensor_pipeline_->get_sensor()));
     configASSERT(sensor_http_handler_);
 }
 

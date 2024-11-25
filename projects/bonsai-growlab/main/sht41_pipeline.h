@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "ocs_core/noncopyable.h"
+#include "ocs_core/time.h"
 #include "ocs_fmt/json/fanout_formatter.h"
 #include "ocs_fmt/json/iformatter.h"
 #include "ocs_io/i2c/istore.h"
@@ -31,7 +32,8 @@ public:
                   storage::StorageBuilder& storage_builder,
                   fmt::json::FanoutFormatter& telemetry_formatter,
                   http::Server& server,
-                  net::IMdnsDriver& mdns_driver);
+                  net::IMdnsDriver& mdns_driver,
+                  core::Time read_interval);
 
 private:
     std::unique_ptr<sensor::sht41::SensorPipeline> sensor_pipeline_;

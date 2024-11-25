@@ -19,12 +19,12 @@ SHT41Pipeline::SHT41Pipeline(io::i2c::IStore& i2c_store,
                              storage::StorageBuilder& storage_builder,
                              fmt::json::FanoutFormatter& telemetry_formatter,
                              http::Server& http_server,
-                             net::IMdnsDriver& mdns_driver) {
+                             net::IMdnsDriver& mdns_driver,
+                             core::Time read_interval) {
     sensor_pipeline_.reset(new (std::nothrow) sensor::sht41::SensorPipeline(
         i2c_store, task_scheduler, storage_builder,
         sensor::sht41::SensorPipeline::Params {
-            .read_interval = core::Duration::second
-                * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL,
+            .read_interval = read_interval,
             .measure_command = sensor::sht41::Sensor::Command::MeasureLowPrecision,
             .heating_command = sensor::sht41::Sensor::Command::ActivateHeater_20mW_100ms,
         }));

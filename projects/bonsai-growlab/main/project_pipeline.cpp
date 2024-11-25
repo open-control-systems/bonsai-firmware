@@ -117,7 +117,8 @@ ProjectPipeline::ProjectPipeline() {
         i2c_master_store_pipeline_->get_store(), system_pipeline_->get_task_scheduler(),
         system_pipeline_->get_func_scheduler(), system_pipeline_->get_storage_builder(),
         json_data_pipeline_->get_telemetry_formatter(), http_pipeline_->get_server(),
-        mdns_pipeline_->get_driver()));
+        mdns_pipeline_->get_driver(),
+        core::Duration::second * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL));
     configASSERT(sht41_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
 

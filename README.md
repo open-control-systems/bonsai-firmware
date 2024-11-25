@@ -2,7 +2,7 @@
 
 bonsai-firmware is a collection of applications designed to help you grow healthy plants. See the list below to choose the right one for your needs:
 
-- [bonsai-growlab](projects/bonsai-growlab/README.md): Indoor lab setup for controlled experiments and research on plant growth. Continuous monitoring of many environmental parameters (humidity, temperature, soil moisture, light), data logging.
+- [bonsai-growlab-local](projects/bonsai-growlab-local/README.md): Indoor lab setup for controlled experiments and research on plant growth. Continuous monitoring of many environmental parameters (humidity, temperature, soil moisture, light) with a local HTTP web server and mDNS service.
 
 ## Build Status
 

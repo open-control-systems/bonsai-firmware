@@ -91,6 +91,10 @@ ProjectPipeline::ProjectPipeline() {
         }));
     configASSERT(http_pipeline_);
 
+    web_gui_pipeline_.reset(new (std::nothrow) pipeline::httpserver::WebGuiPipeline(
+        http_pipeline_->get_server(), mdns_pipeline_->get_driver()));
+    configASSERT(web_gui_pipeline_);
+
     adc_store_.reset(new (std::nothrow)
                          io::adc::DefaultStore(io::adc::DefaultStore::Params {
                              .unit = ADC_UNIT_1,

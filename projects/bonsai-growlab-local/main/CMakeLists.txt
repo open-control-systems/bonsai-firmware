@@ -23,3 +23,12 @@ idf_component_register(
     INCLUDE_DIRS
     ".."
 )
+
+set(WEB_GUI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../web-gui")
+set(WEB_GUI_BUILD_DIR "${WEB_GUI_SRC_DIR}/dist")
+
+if(EXISTS ${WEB_GUI_BUILD_DIR})
+    spiffs_create_partition_image(web_gui ${WEB_GUI_BUILD_DIR} FLASH_IN_PROJECT)
+else()
+    message(FATAL_ERROR "${WEB_GUI_BUILD_DIR} doesn't exist. Please run 'npm run build' in ${WEB_GUI_SRC_DIR}")
+endif()

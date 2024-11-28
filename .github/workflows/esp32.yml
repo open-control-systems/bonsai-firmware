@@ -32,6 +32,11 @@ jobs:
           path: ${{ env.SOURCE_PATH }}
           submodules: recursive
 
+      - name: node.js setup env
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: esp32 setup env
         uses: ./project/control-components/.github/actions/esp32/env
         with:
@@ -75,6 +80,19 @@ jobs:
           echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-growlab-local\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
           echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Indoor lab setup for controlled experiments and research on plant growth\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
           echo "CONFIG_FREERTOS_USE_TRACE_FACILITY=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
+
+      - name: bonsai-growlab-local web GUI build
+        shell: bash
+        run: |
+          cd ${{ env.SOURCE_PATH }}/projects/bonsai-growlab-local/web-gui
+          npm install
+          npm run build
+          npx eslint --fix .
+
+          if [ -n "$(git status --porcelain .)" ]; then
+            echo "Please run 'npx run eslint --fix .' and commit the updated files."
+            exit 1
+          fi
 
       - name: bonsai-growlab-local build
         uses: ./project/control-components/.github/actions/esp32/project

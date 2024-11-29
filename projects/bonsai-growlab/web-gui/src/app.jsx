@@ -4,7 +4,7 @@ import { Telemetry } from "./telemetry.jsx";
 import { Registration } from "./registration.jsx";
 
 // Base URL.
-const API_BASE_URL = "";
+const API_BASE_URL = "api/v1";
 
 // Default interval to fetch the telemetry data, 10 seconds.
 const TELEMETRY_FETCH_INTERVAL = 10 * 1000;

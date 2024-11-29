@@ -13,7 +13,6 @@
 #include "ocs_fmt/json/fanout_formatter.h"
 #include "ocs_fmt/json/iformatter.h"
 #include "ocs_http/server.h"
-#include "ocs_net/imdns_driver.h"
 #include "ocs_pipeline/httpserver/ds18b20_handler.h"
 #include "ocs_scheduler/idelay_estimator.h"
 #include "ocs_scheduler/itask_scheduler.h"
@@ -32,8 +31,7 @@ public:
                     scheduler::ITaskScheduler& task_scheduler,
                     fmt::json::FanoutFormatter& telemetry_formatter,
                     system::ISuspender& suspender,
-                    http::Server& http_server,
-                    net::IMdnsDriver& mdns_driver);
+                    http::Server& http_server);
 
 private:
     std::unique_ptr<storage::IStorage> storage_;

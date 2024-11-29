@@ -32,7 +32,6 @@ public:
                   storage::StorageBuilder& storage_builder,
                   fmt::json::FanoutFormatter& telemetry_formatter,
                   http::Server& server,
-                  net::IMdnsDriver& mdns_driver,
                   core::Time read_interval);
 
 private:

@@ -17,11 +17,11 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      "/telemetry": {
+      "/api/v1/telemetry": {
         target: "http://192.168.4.1",
         changeOrigin: true, // Fixes cross-origin issues
       },
-      "/registration": {
+      "/api/v1/registration": {
         target: "http://192.168.4.1",
         changeOrigin: true, // Fix cross-origin issues
       },

@@ -64,7 +64,6 @@ private:
     std::unique_ptr<pipeline::network::LocalNetworkJsonPipeline> network_json_pipeline_;
     std::unique_ptr<net::MdnsPipeline> mdns_pipeline_;
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
-    std::unique_ptr<pipeline::httpserver::WebGuiPipeline> web_gui_pipeline_;
 
     std::unique_ptr<io::adc::IStore> adc_store_;
     std::unique_ptr<io::i2c::MasterStorePipeline> i2c_master_store_pipeline_;
@@ -86,6 +85,8 @@ private:
     std::unique_ptr<DS18B20Pipeline> ds18b20_pipeline_;
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
+
+    std::unique_ptr<pipeline::httpserver::WebGuiPipeline> web_gui_pipeline_;
 };
 
 } // namespace bonsai

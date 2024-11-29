@@ -1,8 +1,8 @@
 ## Introduction
 
-bonsai-firmware is a collection of applications designed to help you grow healthy plants. See the list below to choose the right one for your needs:
+`bonsai-firmware` is an agro-tech toolkit, a collection of embedded systems for healthy plant growth. See the list below to choose the right one for your needs:
 
-- [bonsai-growlab-local](projects/bonsai-growlab-local/README.md): Indoor lab setup for controlled experiments and research on plant growth. Continuous monitoring of many environmental parameters (humidity, temperature, soil moisture, light) with a local HTTP web server and mDNS service.
+- [bonsai-growlab-local](projects/bonsai-growlab-local/README.md): Indoor lab setup for controlled experiments and research on plant growth. Continuous monitoring of many environmental parameters (humidity, temperature, soil moisture, light) with a local HTTP web server, mDNS service and Web GUI.
 
 ## Build Status
 

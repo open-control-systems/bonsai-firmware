@@ -24,7 +24,7 @@ jobs:
       IDF_PATH: esp-idf
       IDF_VERSION: v5.3.1
       CONFIGURATION_PATH_CCACHE: .env/ccache
-      CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL: .env/bonsai_growlab_local_configuration
+      CONFIGURATION_PATH_BONSAI_GROWLAB: .env/bonsai_growlab_configuration
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -58,33 +58,33 @@ jobs:
         id: version_formatter
         uses: ./project/control-components/.github/actions/core/version
 
-      - name: bonsai-growlab-local check formatting
+      - name: bonsai-growlab check formatting
         uses: ./project/control-components/.github/actions/core/fmt
         with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab-local
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
           CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
 
-      - name: bonsai-growlab-local prepare configuration
+      - name: bonsai-growlab prepare configuration
         shell: bash
         run: |
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-growlab-local\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai GrowLab Firmware\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
-          echo "CONFIG_FREERTOS_USE_TRACE_FACILITY=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-growlab\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai GrowLab Firmware\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          echo "CONFIG_FREERTOS_USE_TRACE_FACILITY=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
-      - name: bonsai-growlab-local web GUI build
+      - name: bonsai-growlab web GUI build
         shell: bash
         run: |
-          cd ${{ env.SOURCE_PATH }}/projects/bonsai-growlab-local/web-gui
+          cd ${{ env.SOURCE_PATH }}/projects/bonsai-growlab/web-gui
           npm install
           npm run build
           npm run fmt
@@ -94,16 +94,16 @@ jobs:
             exit 1
           fi
 
-      - name: bonsai-growlab-local build
+      - name: bonsai-growlab build
         uses: ./project/control-components/.github/actions/esp32/project
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab-local
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
-          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB_LOCAL }}
+          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
-      - name: bonsai-growlab-local upload
+      - name: bonsai-growlab upload
         uses: ./project/control-components/.github/actions/esp32/upload
         with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab-local
-          PROJECT_ID: bonsai-growlab-local
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
+          PROJECT_ID: bonsai-growlab

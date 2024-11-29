@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "preview": "vite preview",
-    "build": "vite build"
+    "build": "vite build",
+    "fmt": "npx eslint --fix ."
   },
   "dependencies": {
     "preact": "^10.24.3"

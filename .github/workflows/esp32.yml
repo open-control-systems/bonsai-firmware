@@ -87,10 +87,10 @@ jobs:
           cd ${{ env.SOURCE_PATH }}/projects/bonsai-growlab-local/web-gui
           npm install
           npm run build
-          npx eslint --fix .
+          npm run fmt
 
           if [ -n "$(git status --porcelain .)" ]; then
-            echo "Please run 'npx run eslint --fix .' and commit the updated files."
+            echo "Please run 'npm run fmt' and commit the updated files."
             exit 1
           fi
 

@@ -91,6 +91,10 @@ ProjectPipeline::ProjectPipeline() {
         }));
     configASSERT(http_pipeline_);
 
+    web_gui_pipeline_.reset(new (std::nothrow) pipeline::httpserver::WebGuiPipeline(
+        http_pipeline_->get_server()));
+    configASSERT(web_gui_pipeline_);
+
     adc_store_.reset(new (std::nothrow)
                          io::adc::DefaultStore(io::adc::DefaultStore::Params {
                              .unit = ADC_UNIT_1,
@@ -142,10 +146,6 @@ ProjectPipeline::ProjectPipeline() {
     configASSERT(ds18b20_pipeline_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
-
-    web_gui_pipeline_.reset(new (std::nothrow) pipeline::httpserver::WebGuiPipeline(
-        http_pipeline_->get_server()));
-    configASSERT(web_gui_pipeline_);
 }
 
 status::StatusCode ProjectPipeline::start() {

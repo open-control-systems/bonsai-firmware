@@ -16,6 +16,7 @@
 #include "ocs_net/mdns_pipeline.h"
 #include "ocs_pipeline/basic/system_pipeline.h"
 #include "ocs_pipeline/httpserver/http_pipeline.h"
+#include "ocs_pipeline/httpserver/time_pipeline.h"
 #include "ocs_pipeline/httpserver/web_gui_pipeline.h"
 #include "ocs_pipeline/jsonfmt/data_pipeline.h"
 #include "ocs_pipeline/network/local_network_json_pipeline.h"
@@ -64,6 +65,7 @@ private:
     std::unique_ptr<pipeline::network::LocalNetworkJsonPipeline> network_json_pipeline_;
     std::unique_ptr<net::MdnsPipeline> mdns_pipeline_;
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
+    std::unique_ptr<pipeline::httpserver::TimePipeline> time_pipeline_;
 
     std::unique_ptr<io::adc::IStore> adc_store_;
     std::unique_ptr<io::i2c::MasterStorePipeline> i2c_master_store_pipeline_;

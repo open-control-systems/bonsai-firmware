@@ -91,6 +91,12 @@ ProjectPipeline::ProjectPipeline() {
         }));
     configASSERT(http_pipeline_);
 
+    // Time valid since 2024/12/03.
+    time_pipeline_.reset(new (std::nothrow) pipeline::httpserver::TimePipeline(
+        http_pipeline_->get_server(), json_data_pipeline_->get_telemetry_formatter(),
+        json_data_pipeline_->get_registration_formatter(), 1733215816));
+    configASSERT(time_pipeline_);
+
     adc_store_.reset(new (std::nothrow)
                          io::adc::DefaultStore(io::adc::DefaultStore::Params {
                              .unit = ADC_UNIT_1,

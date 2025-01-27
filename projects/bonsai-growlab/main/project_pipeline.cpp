@@ -79,6 +79,7 @@ ProjectPipeline::ProjectPipeline() {
         network_json_pipeline_->get_network_pipeline().get_fanout_handler(),
         mdns_pipeline_->get_driver(), json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
+        system_pipeline_->get_device_info(),
         pipeline::httpserver::HttpPipeline::Params {
             .telemetry =
                 pipeline::httpserver::HttpPipeline::DataParams {

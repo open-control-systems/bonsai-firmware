@@ -13,8 +13,10 @@
 #include "ocs_core/noncopyable.h"
 #include "ocs_io/adc/istore.h"
 #include "ocs_io/i2c/master_store_pipeline.h"
-#include "ocs_net/mdns_pipeline.h"
+#include "ocs_net/basic_mdns_server.h"
+#include "ocs_net/mdns_service.h"
 #include "ocs_pipeline/basic/system_pipeline.h"
+#include "ocs_pipeline/config/mdns_config.h"
 #include "ocs_pipeline/httpserver/http_pipeline.h"
 #include "ocs_pipeline/httpserver/time_pipeline.h"
 #include "ocs_pipeline/httpserver/web_gui_pipeline.h"
@@ -63,7 +65,12 @@ private:
 #endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
     std::unique_ptr<pipeline::network::LocalNetworkJsonPipeline> network_json_pipeline_;
-    std::unique_ptr<net::MdnsPipeline> mdns_pipeline_;
+
+    storage::StorageBuilder::IStoragePtr mdns_config_storage_;
+    std::unique_ptr<pipeline::config::MdnsConfig> mdns_config_;
+    std::unique_ptr<net::MdnsService> http_mdns_service_;
+    std::unique_ptr<net::BasicMdnsServer> mdns_server_;
+
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
     std::unique_ptr<pipeline::httpserver::TimePipeline> time_pipeline_;
 

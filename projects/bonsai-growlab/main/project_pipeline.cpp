@@ -6,8 +6,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include "ocs_algo/mdns_ops.h"
 #include "ocs_core/log.h"
 #include "ocs_io/adc/default_store.h"
+#include "ocs_net/default_mdns_server.h"
 #include "ocs_pipeline/network/local_network_pipeline.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_status/macros.h"
@@ -69,17 +71,37 @@ ProjectPipeline::ProjectPipeline() {
             system_pipeline_->get_device_info()));
     configASSERT(network_json_pipeline_);
 
-    mdns_pipeline_.reset(new (std::nothrow) net::MdnsPipeline(
-        system_pipeline_->get_device_info().get_fw_name(),
-        system_pipeline_->get_device_info().get_fw_description()));
-    configASSERT(mdns_pipeline_);
+    mdns_config_storage_ = system_pipeline_->get_storage_builder().make("mdns_config");
+    configASSERT(mdns_config_storage_);
+
+    mdns_config_.reset(new (std::nothrow) pipeline::config::MdnsConfig(
+        *mdns_config_storage_, system_pipeline_->get_device_info()));
+    configASSERT(mdns_config_);
+
+    http_mdns_service_.reset(new (std::nothrow) net::MdnsService(
+        "Bonsai GrowLab HTTP Service", net::MdnsService::ServiceType::Http,
+        net::MdnsService::Proto::Tcp, "local", mdns_config_->get_hostname(),
+        CONFIG_OCS_HTTP_SERVER_PORT));
+    configASSERT(http_mdns_service_);
+
+    http_mdns_service_->add_txt_record("api", CONFIG_OCS_HTTP_SERVER_API_BASE_PATH);
+
+    algo::MdnsOps::enable_autodiscovery(*http_mdns_service_,
+                                        CONFIG_OCS_HTTP_SERVER_API_BASE_PATH);
+
+    mdns_server_.reset(new (std::nothrow)
+                           net::DefaultMdnsServer(mdns_config_->get_hostname()));
+    configASSERT(mdns_server_);
+    configASSERT(system_pipeline_->get_suspender().add(*mdns_server_, "mdns_server")
+                 == status::StatusCode::OK);
+
+    mdns_server_->add(*http_mdns_service_);
 
     http_pipeline_.reset(new (std::nothrow) pipeline::httpserver::HttpPipeline(
-        system_pipeline_->get_reboot_task(), system_pipeline_->get_suspender(),
+        system_pipeline_->get_reboot_task(),
         network_json_pipeline_->get_network_pipeline().get_fanout_handler(),
-        mdns_pipeline_->get_driver(), json_data_pipeline_->get_telemetry_formatter(),
-        json_data_pipeline_->get_registration_formatter(),
-        system_pipeline_->get_device_info(),
+        json_data_pipeline_->get_telemetry_formatter(),
+        json_data_pipeline_->get_registration_formatter(), *mdns_config_,
         pipeline::httpserver::HttpPipeline::Params {
             .telemetry =
                 pipeline::httpserver::HttpPipeline::DataParams {
@@ -88,6 +110,11 @@ ProjectPipeline::ProjectPipeline() {
             .registration =
                 pipeline::httpserver::HttpPipeline::DataParams {
                     .buffer_size = CONFIG_BONSAI_FIRMWARE_HTTP_REGISTRATION_BUFFER_SIZE,
+                },
+            .server =
+                http::Server::Params {
+                    .server_port = CONFIG_OCS_HTTP_SERVER_PORT,
+                    .max_uri_handlers = CONFIG_OCS_HTTP_SERVER_MAX_URI_HANDLERS,
                 },
         }));
     configASSERT(http_pipeline_);
@@ -158,9 +185,9 @@ ProjectPipeline::ProjectPipeline() {
 status::StatusCode ProjectPipeline::start() {
     auto code = network_json_pipeline_->get_network_pipeline().start();
     if (code == status::StatusCode::OK) {
-        code = mdns_pipeline_->start();
+        code = mdns_server_->start();
         if (code != status::StatusCode::OK) {
-            ocs_logw(log_tag, "failed to start mDNS pipeline: %s",
+            ocs_logw(log_tag, "failed to start mDNS server: %s",
                      status::code_to_str(code));
         }
     } else {

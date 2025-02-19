@@ -14,14 +14,17 @@
 #include "ocs_io/adc/istore.h"
 #include "ocs_io/i2c/master_store_pipeline.h"
 #include "ocs_net/basic_mdns_server.h"
+#include "ocs_net/fanout_network_handler.h"
+#include "ocs_net/mdns_config.h"
 #include "ocs_net/mdns_service.h"
+#include "ocs_pipeline/basic/select_network_pipeline.h"
 #include "ocs_pipeline/basic/system_pipeline.h"
-#include "ocs_pipeline/config/mdns_config.h"
+#include "ocs_pipeline/httpserver/ap_network_handler.h"
 #include "ocs_pipeline/httpserver/http_pipeline.h"
+#include "ocs_pipeline/httpserver/sta_network_handler.h"
 #include "ocs_pipeline/httpserver/time_pipeline.h"
 #include "ocs_pipeline/httpserver/web_gui_pipeline.h"
 #include "ocs_pipeline/jsonfmt/data_pipeline.h"
-#include "ocs_pipeline/network/local_network_json_pipeline.h"
 
 #ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 #include "ocs_pipeline/jsonfmt/console_pipeline.h"
@@ -48,7 +51,7 @@
 namespace ocs {
 namespace bonsai {
 
-class ProjectPipeline : public core::NonCopyable<> {
+class ProjectPipeline : private system::ISuspendHandler, private core::NonCopyable<> {
 public:
     //! Initialize.
     ProjectPipeline();
@@ -57,6 +60,11 @@ public:
     status::StatusCode start();
 
 private:
+    status::StatusCode handle_suspend() override;
+    status::StatusCode handle_resume() override;
+
+    static constexpr const char* mdns_config_storage_id_ = "mdns_config";
+
     std::unique_ptr<pipeline::basic::SystemPipeline> system_pipeline_;
     std::unique_ptr<pipeline::jsonfmt::DataPipeline> json_data_pipeline_;
 
@@ -64,15 +72,21 @@ private:
     std::unique_ptr<pipeline::jsonfmt::ConsolePipeline> console_pipeline_;
 #endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
-    std::unique_ptr<pipeline::network::LocalNetworkJsonPipeline> network_json_pipeline_;
+    std::unique_ptr<net::FanoutNetworkHandler> fanout_network_handler_;
 
     storage::StorageBuilder::IStoragePtr mdns_config_storage_;
-    std::unique_ptr<pipeline::config::MdnsConfig> mdns_config_;
+    std::unique_ptr<net::MdnsConfig> mdns_config_;
     std::unique_ptr<net::MdnsService> http_mdns_service_;
     std::unique_ptr<net::BasicMdnsServer> mdns_server_;
 
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
     std::unique_ptr<pipeline::httpserver::TimePipeline> time_pipeline_;
+
+    std::unique_ptr<pipeline::basic::SelectNetworkPipeline> network_pipeline_;
+    std::unique_ptr<fmt::json::IFormatter> ap_network_formatter_;
+    std::unique_ptr<pipeline::httpserver::ApNetworkHandler> ap_network_handler_;
+    std::unique_ptr<fmt::json::IFormatter> sta_network_formatter_;
+    std::unique_ptr<pipeline::httpserver::StaNetworkHandler> sta_network_handler_;
 
     std::unique_ptr<io::adc::IStore> adc_store_;
     std::unique_ptr<io::i2c::MasterStorePipeline> i2c_master_store_pipeline_;

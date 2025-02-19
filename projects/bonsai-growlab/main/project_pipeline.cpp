@@ -10,7 +10,8 @@
 #include "ocs_core/log.h"
 #include "ocs_io/adc/default_store.h"
 #include "ocs_net/default_mdns_server.h"
-#include "ocs_pipeline/network/local_network_pipeline.h"
+#include "ocs_pipeline/jsonfmt/ap_network_formatter.h"
+#include "ocs_pipeline/jsonfmt/sta_network_formatter.h"
 #include "ocs_status/code_to_str.h"
 #include "ocs_status/macros.h"
 
@@ -34,6 +35,9 @@ ProjectPipeline::ProjectPipeline() {
                 },
         }));
     configASSERT(system_pipeline_);
+
+    configASSERT(system_pipeline_->get_suspender().add(*this, "project_pipeline")
+                 == status::StatusCode::OK);
 
     json_data_pipeline_.reset(new (std::nothrow) pipeline::jsonfmt::DataPipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
@@ -64,17 +68,14 @@ ProjectPipeline::ProjectPipeline() {
     configASSERT(console_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
-    network_json_pipeline_.reset(
-        new (std::nothrow) pipeline::network::LocalNetworkJsonPipeline(
-            system_pipeline_->get_storage_builder(),
-            json_data_pipeline_->get_registration_formatter(),
-            system_pipeline_->get_device_info()));
-    configASSERT(network_json_pipeline_);
+    fanout_network_handler_.reset(new (std::nothrow) net::FanoutNetworkHandler());
+    configASSERT(fanout_network_handler_);
 
-    mdns_config_storage_ = system_pipeline_->get_storage_builder().make("mdns_config");
+    mdns_config_storage_ =
+        system_pipeline_->get_storage_builder().make(mdns_config_storage_id_);
     configASSERT(mdns_config_storage_);
 
-    mdns_config_.reset(new (std::nothrow) pipeline::config::MdnsConfig(
+    mdns_config_.reset(new (std::nothrow) net::MdnsConfig(
         *mdns_config_storage_, system_pipeline_->get_device_info()));
     configASSERT(mdns_config_);
 
@@ -92,16 +93,13 @@ ProjectPipeline::ProjectPipeline() {
     mdns_server_.reset(new (std::nothrow)
                            net::DefaultMdnsServer(mdns_config_->get_hostname()));
     configASSERT(mdns_server_);
-    configASSERT(system_pipeline_->get_suspender().add(*mdns_server_, "mdns_server")
-                 == status::StatusCode::OK);
 
     mdns_server_->add(*http_mdns_service_);
 
     http_pipeline_.reset(new (std::nothrow) pipeline::httpserver::HttpPipeline(
-        system_pipeline_->get_reboot_task(),
-        network_json_pipeline_->get_network_pipeline().get_fanout_handler(),
+        system_pipeline_->get_reboot_task(), *fanout_network_handler_, *mdns_config_,
         json_data_pipeline_->get_telemetry_formatter(),
-        json_data_pipeline_->get_registration_formatter(), *mdns_config_,
+        json_data_pipeline_->get_registration_formatter(),
         pipeline::httpserver::HttpPipeline::Params {
             .telemetry =
                 pipeline::httpserver::HttpPipeline::DataParams {
@@ -124,6 +122,40 @@ ProjectPipeline::ProjectPipeline() {
         http_pipeline_->get_server(), json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(), 1733215816));
     configASSERT(time_pipeline_);
+
+    network_pipeline_.reset(new (std::nothrow) pipeline::basic::SelectNetworkPipeline(
+        system_pipeline_->get_storage_builder(), *fanout_network_handler_,
+        system_pipeline_->get_rebooter(), system_pipeline_->get_device_info()));
+    configASSERT(network_pipeline_);
+
+    if (auto network = network_pipeline_->get_ap_network(); network) {
+        ap_network_formatter_.reset(new (std::nothrow)
+                                        pipeline::jsonfmt::ApNetworkFormatter(*network));
+        configASSERT(ap_network_formatter_);
+
+        json_data_pipeline_->get_registration_formatter().add(*ap_network_formatter_);
+
+        configASSERT(network_pipeline_->get_ap_config());
+
+        ap_network_handler_.reset(
+            new (std::nothrow) pipeline::httpserver::ApNetworkHandler(
+                http_pipeline_->get_server(), *network_pipeline_->get_ap_config(),
+                system_pipeline_->get_reboot_task()));
+        configASSERT(ap_network_handler_);
+    }
+
+    if (auto network = network_pipeline_->get_sta_network(); network) {
+        sta_network_formatter_.reset(
+            new (std::nothrow) pipeline::jsonfmt::StaNetworkFormatter(*network));
+        configASSERT(sta_network_formatter_);
+
+        json_data_pipeline_->get_registration_formatter().add(*sta_network_formatter_);
+    }
+
+    sta_network_handler_.reset(new (std::nothrow) pipeline::httpserver::StaNetworkHandler(
+        http_pipeline_->get_server(), network_pipeline_->get_sta_config(),
+        system_pipeline_->get_reboot_task()));
+    configASSERT(sta_network_handler_);
 
     adc_store_.reset(new (std::nothrow)
                          io::adc::DefaultStore(io::adc::DefaultStore::Params {
@@ -182,8 +214,16 @@ ProjectPipeline::ProjectPipeline() {
     configASSERT(web_gui_pipeline_);
 }
 
+status::StatusCode ProjectPipeline::handle_suspend() {
+    return mdns_server_->stop();
+}
+
+status::StatusCode ProjectPipeline::handle_resume() {
+    return mdns_server_->start();
+}
+
 status::StatusCode ProjectPipeline::start() {
-    auto code = network_json_pipeline_->get_network_pipeline().start();
+    auto code = network_pipeline_->get_runner().start();
     if (code == status::StatusCode::OK) {
         code = mdns_server_->start();
         if (code != status::StatusCode::OK) {
@@ -191,8 +231,7 @@ status::StatusCode ProjectPipeline::start() {
                      status::code_to_str(code));
         }
     } else {
-        ocs_logw(log_tag, "failed to start network pipeline: %s",
-                 status::code_to_str(code));
+        ocs_logw(log_tag, "failed to start network: %s", status::code_to_str(code));
     }
 
     OCS_STATUS_RETURN_ON_ERROR(system_pipeline_->start());

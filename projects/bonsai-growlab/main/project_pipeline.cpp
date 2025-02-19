@@ -79,8 +79,11 @@ ProjectPipeline::ProjectPipeline() {
         *mdns_config_storage_, system_pipeline_->get_device_info()));
     configASSERT(mdns_config_);
 
+    const auto mdns_instance_name =
+        std::string("Bonsai GrowLab HTTP Service (") + mdns_config_->get_hostname() + ")";
+
     http_mdns_service_.reset(new (std::nothrow) net::MdnsService(
-        "Bonsai GrowLab HTTP Service", net::MdnsService::ServiceType::Http,
+        mdns_instance_name.c_str(), net::MdnsService::ServiceType::Http,
         net::MdnsService::Proto::Tcp, "local", mdns_config_->get_hostname(),
         CONFIG_OCS_HTTP_SERVER_PORT));
     configASSERT(http_mdns_service_);

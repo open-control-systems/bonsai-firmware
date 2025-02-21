@@ -2,9 +2,7 @@ idf_component_register(
     SRCS
     "main.cpp"
     "project_pipeline.cpp"
-    "control_pipeline.cpp"
     "ds18b20_pipeline.cpp"
-    "soil_pipeline.cpp"
     "sht41_pipeline.cpp"
 
     REQUIRES

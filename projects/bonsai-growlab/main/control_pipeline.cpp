@@ -10,9 +10,9 @@
 
 #include "sdkconfig.h"
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
 #include "ocs_pipeline/jsonfmt/ldr_analog_sensor_formatter.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 #include "ocs_pipeline/jsonfmt/bme280_sensor_formatter.h"
@@ -43,7 +43,7 @@ ControlPipeline::ControlPipeline(io::adc::IStore& adc_store,
     }));
     configASSERT(spi_master_store_);
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
     ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::AnalogSensorPipeline(
         adc_store, task_scheduler, "soil_ldr",
         sensor::ldr::AnalogSensorPipeline::Params {
@@ -65,7 +65,7 @@ ControlPipeline::ControlPipeline(io::adc::IStore& adc_store,
     configASSERT(ldr_sensor_json_formatter_);
 
     telemetry_formatter.add(*ldr_sensor_json_formatter_);
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE

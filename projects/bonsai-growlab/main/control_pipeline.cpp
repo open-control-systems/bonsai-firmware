@@ -10,9 +10,9 @@
 
 #include "sdkconfig.h"
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-#include "ocs_pipeline/jsonfmt/ldr_sensor_formatter.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
+#include "ocs_pipeline/jsonfmt/ldr_analog_sensor_formatter.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 #include "ocs_pipeline/jsonfmt/bme280_sensor_formatter.h"
@@ -43,29 +43,29 @@ ControlPipeline::ControlPipeline(io::adc::IStore& adc_store,
     }));
     configASSERT(spi_master_store_);
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
-    ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::SensorPipeline(
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
+    ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::AnalogSensorPipeline(
         adc_store, task_scheduler, "soil_ldr",
-        sensor::ldr::SensorPipeline::Params {
+        sensor::ldr::AnalogSensorPipeline::Params {
             .sensor =
-                sensor::ldr::Sensor::Params {
-                    .value_min = CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_VALUE_MIN,
-                    .value_max = CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_VALUE_MAX,
+                sensor::ldr::AnalogSensor::Params {
+                    .value_min = CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MIN,
+                    .value_max = CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MAX,
                 },
             .adc_channel = static_cast<io::adc::Channel>(
-                CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ADC_CHANNEL),
-            .read_interval =
-                core::Duration::second * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_READ_INTERVAL,
+                CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ADC_CHANNEL),
+            .read_interval = core::Duration::second
+                * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_READ_INTERVAL,
         }));
     configASSERT(ldr_sensor_pipeline_);
 
-    ldr_sensor_json_formatter_.reset(
-        new (std::nothrow)
-            pipeline::jsonfmt::LdrSensorFormatter(ldr_sensor_pipeline_->get_sensor()));
+    ldr_sensor_json_formatter_.reset(new (std::nothrow)
+                                         pipeline::jsonfmt::LdrAnalogSensorFormatter(
+                                             ldr_sensor_pipeline_->get_sensor()));
     configASSERT(ldr_sensor_json_formatter_);
 
     telemetry_formatter.add(*ldr_sensor_json_formatter_);
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ANALOG_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE

@@ -224,37 +224,37 @@ menu "Bonsai Firmware Configuration"
         endmenu
 
         menu "LDR Sensor Configuration"
-            config BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+            config BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
                 bool "Enable LDR sensor"
                 default y
                 help
                     Enable LDR sensor.
 
-            config BONSAI_FIRMWARE_SENSOR_LDR_ADC_CHANNEL
+            config BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ADC_CHANNEL
                 int "LDR sensor ADC channel"
                 default 5
-                depends on BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+                depends on BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
                 help
                     ADC channel to read the LDR value.
 
-            config BONSAI_FIRMWARE_SENSOR_LDR_VALUE_MAX
+            config BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MAX
                 int "LDR sensor complete lightness value"
                 default 950
-                depends on BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+                depends on BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
                 help
                     Value of complete lightness.
 
-            config BONSAI_FIRMWARE_SENSOR_LDR_VALUE_MIN
+            config BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MIN
                 int "LDR sensor complete darkness value"
                 default 50
-                depends on BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+                depends on BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
                 help
                     Value of complete darkness.
 
-            config BONSAI_FIRMWARE_SENSOR_LDR_READ_INTERVAL
+            config BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_READ_INTERVAL
                 int "LDR sensor read interval, in seconds"
                 default 5
-                depends on BONSAI_FIRMWARE_SENSOR_LDR_ENABLE
+                depends on BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
                 help
                     How often to read the lightness value.
         endmenu

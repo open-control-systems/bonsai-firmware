@@ -6,9 +6,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include "ocs_algo/bit_ops.h"
 #include "ocs_algo/mdns_ops.h"
 #include "ocs_core/log.h"
 #include "ocs_io/adc/default_store.h"
+#include "ocs_io/spi/master_store.h"
+#include "ocs_io/spi/types.h"
 #include "ocs_net/default_mdns_server.h"
 #include "ocs_pipeline/jsonfmt/ap_network_formatter.h"
 #include "ocs_pipeline/jsonfmt/sta_network_formatter.h"
@@ -17,10 +20,50 @@
 
 #include "main/project_pipeline.h"
 
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
+#include "ocs_pipeline/jsonfmt/ldr_analog_sensor_formatter.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
+#include "ocs_pipeline/jsonfmt/ldr_analog_sensor_formatter.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
+#include "ocs_pipeline/jsonfmt/soil_analog_sensor_formatter.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
+#include "ocs_pipeline/jsonfmt/soil_analog_sensor_formatter.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
+#include "ocs_pipeline/jsonfmt/bme280_sensor_formatter.h"
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
+
 namespace ocs {
 namespace bonsai {
 
 namespace {
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
+void configure_relay_gpio(int gpio) {
+    gpio_config_t config;
+    memset(&config, 0, sizeof(config));
+
+    // disable interrupt
+    config.intr_type = GPIO_INTR_DISABLE;
+    // set as output mode
+    config.mode = GPIO_MODE_OUTPUT;
+    // bit mask of the pins that you want to set,
+    config.pin_bit_mask = algo::BitOps::mask(gpio);
+    // enable pull-down mode
+    config.pull_down_en = GPIO_PULLDOWN_ENABLE;
+    // disable pull-up mode
+    config.pull_up_en = GPIO_PULLUP_DISABLE;
+    // configure GPIO with the given settings
+    gpio_config(&config);
+}
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
 
 const char* log_tag = "project_pipeline";
 
@@ -174,12 +217,171 @@ ProjectPipeline::ProjectPipeline() {
         .scl = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_I2C_MASTER_SCL_GPIO),
     }));
 
-    control_pipeline_.reset(new (std::nothrow) ControlPipeline(
-        *adc_store_, system_pipeline_->get_clock(),
+    spi_master_store_.reset(new (
+        std::nothrow) io::spi::MasterStore(io::spi::MasterStore::Params {
+        .mosi = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MOSI_GPIO),
+        .miso = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MISO_GPIO),
+        .sclk = static_cast<io::gpio::Gpio>(CONFIG_BONSAI_FIRMWARE_SPI_MASTER_SCLK_GPIO),
+        .max_transfer_size = static_cast<io::gpio::Gpio>(
+            CONFIG_BONSAI_FIRMWARE_SPI_MASTER_MAX_TRANSFER_SIZE),
+        .host_id = io::spi::VSPI,
+    }));
+    configASSERT(spi_master_store_);
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE
+    bme280_spi_sensor_pipeline_.reset(
+        new (std::nothrow) sensor::bme280::SpiSensorPipeline(
+            system_pipeline_->get_task_scheduler(), *spi_master_store_,
+            sensor::bme280::SpiSensorPipeline::Params {
+                .read_interval = CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_READ_INTERVAL
+                    * core::Duration::second,
+                .cs_gpio = static_cast<io::gpio::Gpio>(
+                    CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_CS_GPIO),
+                .sensor =
+                    sensor::bme280::Sensor::Params {
+                        .operation_mode = sensor::bme280::Sensor::OperationMode::Forced,
+                        .pressure_oversampling =
+                            sensor::bme280::Sensor::OversamplingMode::One,
+                        .temperature_oversampling =
+                            sensor::bme280::Sensor::OversamplingMode::One,
+                        .humidity_oversampling =
+                            sensor::bme280::Sensor::OversamplingMode::One,
+                        .pressure_resolution = 2,
+                        .pressure_decimal_places = 2,
+                        .humidity_decimal_places = 2,
+                    },
+            }));
+    configASSERT(bme280_spi_sensor_pipeline_);
+
+    bme280_sensor_json_formatter_.reset(
+        new (std::nothrow) pipeline::jsonfmt::BME280SensorFormatter(
+            bme280_spi_sensor_pipeline_->get_sensor()));
+    configASSERT(bme280_sensor_json_formatter_);
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE
+
+    json_data_pipeline_->get_telemetry_formatter().add(*bme280_sensor_json_formatter_);
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE
+
+    analog_config_storage_ =
+        system_pipeline_->get_storage_builder().make(analog_config_storage_id_);
+    configASSERT(analog_config_storage_);
+
+    analog_config_store_.reset(new (std::nothrow) sensor::AnalogConfigStore());
+    configASSERT(analog_config_store_);
+
+    analog_config_store_handler_.reset(
+        new (std::nothrow) pipeline::httpserver::AnalogConfigStoreHandler(
+            system_pipeline_->get_func_scheduler(), http_pipeline_->get_server(),
+            *analog_config_store_));
+    configASSERT(analog_config_store_handler_);
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
+    ldr_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
+        *analog_config_storage_, CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MIN,
+        CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MAX, ldr_sensor_id_));
+    configASSERT(ldr_sensor_config_);
+
+    analog_config_store_->add(*ldr_sensor_config_);
+
+    ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::AnalogSensorPipeline(
+        *adc_store_, system_pipeline_->get_task_scheduler(), *ldr_sensor_config_,
+        ldr_sensor_id_,
+        sensor::ldr::AnalogSensorPipeline::Params {
+            .adc_channel = static_cast<io::adc::Channel>(
+                CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ADC_CHANNEL),
+            .read_interval = core::Duration::second
+                * CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_READ_INTERVAL,
+        }));
+    configASSERT(ldr_sensor_pipeline_);
+
+    ldr_sensor_json_formatter_.reset(new (std::nothrow)
+                                         pipeline::jsonfmt::LdrAnalogSensorFormatter(
+                                             ldr_sensor_pipeline_->get_sensor()));
+    configASSERT(ldr_sensor_json_formatter_);
+
+    json_data_pipeline_->get_telemetry_formatter().add(*ldr_sensor_json_formatter_);
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
+    soil_relay_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
+        *analog_config_storage_,
+        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MIN,
+        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MAX,
+        soil_relay_sensor_id_));
+    configASSERT(soil_relay_sensor_config_);
+
+    analog_config_store_->add(*soil_relay_sensor_config_);
+
+    soil_relay_sensor_pipeline_.reset(
+        new (std::nothrow) sensor::soil::AnalogRelaySensorPipeline(
+            system_pipeline_->get_clock(), *adc_store_,
+            system_pipeline_->get_storage_builder(),
+            system_pipeline_->get_reboot_handler(),
+            system_pipeline_->get_task_scheduler(), *soil_relay_sensor_config_,
+            soil_relay_sensor_id_,
+            sensor::soil::AnalogRelaySensorPipeline::Params {
+                .adc_channel = static_cast<io::adc::Channel>(
+                    CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ADC_CHANNEL),
+                .fsm_block =
+                    control::FsmBlockPipeline::Params {
+                        .state_save_interval = core::Duration::hour * 2,
+                        .state_interval_resolution = core::Duration::second,
+                    },
+                .read_interval = core::Duration::second
+                    * CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_READ_INTERVAL,
+                .relay_gpio = static_cast<io::gpio::Gpio>(
+                    CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_GPIO),
+                .power_on_delay_interval =
+                    (1000
+                     * CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_POWER_ON_DELAY_INTERVAL)
+                    / portTICK_PERIOD_MS,
+            }));
+    configASSERT(soil_relay_sensor_pipeline_);
+
+    soil_relay_sensor_json_formatter_.reset(
+        new (std::nothrow) pipeline::jsonfmt::SoilAnalogSensorFormatter(
+            soil_relay_sensor_pipeline_->get_sensor()));
+    configASSERT(soil_relay_sensor_json_formatter_);
+
+    json_data_pipeline_->get_telemetry_formatter().add(
+        *soil_relay_sensor_json_formatter_);
+
+    configure_relay_gpio(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_GPIO);
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
+
+#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
+    soil_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
+        *analog_config_storage_, CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MIN,
+        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MAX, soil_sensor_id_));
+    configASSERT(soil_sensor_config_);
+
+    analog_config_store_->add(*soil_sensor_config_);
+
+    soil_sensor_pipeline_.reset(new (std::nothrow) sensor::soil::AnalogSensorPipeline(
+        system_pipeline_->get_clock(), *adc_store_,
         system_pipeline_->get_storage_builder(), system_pipeline_->get_reboot_handler(),
-        system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_telemetry_formatter()));
-    configASSERT(control_pipeline_);
+        system_pipeline_->get_task_scheduler(), *soil_sensor_config_, soil_sensor_id_,
+        sensor::soil::AnalogSensorPipeline::Params {
+            .adc_channel = static_cast<io::adc::Channel>(
+                CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ADC_CHANNEL),
+            .fsm_block =
+                control::FsmBlockPipeline::Params {
+                    .state_save_interval = core::Duration::hour * 2,
+                    .state_interval_resolution = core::Duration::second,
+                },
+            .read_interval = core::Duration::second
+                * CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_READ_INTERVAL,
+        }));
+    configASSERT(soil_sensor_pipeline_);
+
+    soil_sensor_json_formatter_.reset(new (std::nothrow)
+                                          pipeline::jsonfmt::SoilAnalogSensorFormatter(
+                                              soil_sensor_pipeline_->get_sensor()));
+    configASSERT(soil_sensor_json_formatter_);
+
+    json_data_pipeline_->get_telemetry_formatter().add(*soil_sensor_json_formatter_);
+#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
     sht41_pipeline_.reset(new (std::nothrow) SHT41Pipeline(
@@ -189,17 +391,6 @@ ProjectPipeline::ProjectPipeline() {
         core::Duration::second * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL));
     configASSERT(sht41_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
-
-#if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE)                            \
-    || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
-    soil_pipeline_.reset(new (std::nothrow) SoilPipeline(
-        *adc_store_, system_pipeline_->get_clock(),
-        system_pipeline_->get_storage_builder(), system_pipeline_->get_reboot_handler(),
-        system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_telemetry_formatter()));
-    configASSERT(soil_pipeline_);
-#endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE) ||
-       // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE)
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)

@@ -9,7 +9,8 @@
 #include "ocs_algo/bit_ops.h"
 #include "ocs_algo/mdns_ops.h"
 #include "ocs_core/log.h"
-#include "ocs_io/adc/default_store.h"
+#include "ocs_io/adc/target_esp32/line_fitting_converter.h"
+#include "ocs_io/adc/target_esp32/oneshot_store.h"
 #include "ocs_io/spi/master_store.h"
 #include "ocs_io/spi/types.h"
 #include "ocs_net/default_mdns_server.h"
@@ -70,6 +71,12 @@ const char* log_tag = "project_pipeline";
 } // namespace
 
 ProjectPipeline::ProjectPipeline() {
+    delayer_ = system::make_delayer(system::DelayerStrategy::Default);
+    configASSERT(delayer_);
+
+    fanout_suspender_.reset(new (std::nothrow) system::FanoutSuspender());
+    configASSERT(fanout_suspender_);
+
     system_pipeline_.reset(new (std::nothrow) pipeline::basic::SystemPipeline(
         pipeline::basic::SystemPipeline::Params {
             .task_scheduler =
@@ -79,7 +86,7 @@ ProjectPipeline::ProjectPipeline() {
         }));
     configASSERT(system_pipeline_);
 
-    configASSERT(system_pipeline_->get_suspender().add(*this, "project_pipeline")
+    configASSERT(fanout_suspender_->add(*this, "project_pipeline")
                  == status::StatusCode::OK);
 
     json_data_pipeline_.reset(new (std::nothrow) pipeline::jsonfmt::DataPipeline(
@@ -203,13 +210,13 @@ ProjectPipeline::ProjectPipeline() {
         system_pipeline_->get_reboot_task()));
     configASSERT(sta_network_handler_);
 
-    adc_store_.reset(new (std::nothrow)
-                         io::adc::DefaultStore(io::adc::DefaultStore::Params {
-                             .unit = ADC_UNIT_1,
-                             .atten = ADC_ATTEN_DB_12,
-                             .bitwidth = ADC_BITWIDTH_10,
-                         }));
+    adc_store_.reset(new (std::nothrow) io::adc::OneshotStore(ADC_UNIT_1, ADC_ATTEN_DB_12,
+                                                              ADC_BITWIDTH_10));
     configASSERT(adc_store_);
+
+    adc_converter_.reset(new (std::nothrow) io::adc::LineFittingConverter(
+        ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_BITWIDTH_10));
+    configASSERT(adc_converter_);
 
     i2c_master_store_pipeline_.reset(new (
         std::nothrow) io::i2c::MasterStorePipeline(io::i2c::IStore::Params {
@@ -242,11 +249,11 @@ ProjectPipeline::ProjectPipeline() {
                     sensor::bme280::Sensor::Params {
                         .operation_mode = sensor::bme280::Sensor::OperationMode::Forced,
                         .pressure_oversampling =
-                            sensor::bme280::Sensor::OversamplingMode::One,
+                            sensor::bme280::Sensor::OversamplingMode::Mode_1,
                         .temperature_oversampling =
-                            sensor::bme280::Sensor::OversamplingMode::One,
+                            sensor::bme280::Sensor::OversamplingMode::Mode_1,
                         .humidity_oversampling =
-                            sensor::bme280::Sensor::OversamplingMode::One,
+                            sensor::bme280::Sensor::OversamplingMode::Mode_1,
                         .pressure_resolution = 2,
                         .pressure_decimal_places = 2,
                         .humidity_decimal_places = 2,
@@ -279,14 +286,15 @@ ProjectPipeline::ProjectPipeline() {
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
     ldr_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
         *analog_config_storage_, CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MIN,
-        CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MAX, ldr_sensor_id_));
+        CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MAX, ADC_BITWIDTH_10,
+        sensor::AnalogConfig::OversamplingMode::Mode_64, ldr_sensor_id_));
     configASSERT(ldr_sensor_config_);
 
     analog_config_store_->add(*ldr_sensor_config_);
 
     ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::AnalogSensorPipeline(
-        *adc_store_, system_pipeline_->get_task_scheduler(), *ldr_sensor_config_,
-        ldr_sensor_id_,
+        *delayer_, *adc_store_, *adc_converter_, system_pipeline_->get_task_scheduler(),
+        *ldr_sensor_config_, ldr_sensor_id_,
         sensor::ldr::AnalogSensorPipeline::Params {
             .adc_channel = static_cast<io::adc::Channel>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ADC_CHANNEL),
@@ -307,16 +315,16 @@ ProjectPipeline::ProjectPipeline() {
     soil_relay_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
         *analog_config_storage_,
         CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MIN,
-        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MAX,
-        soil_relay_sensor_id_));
+        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MAX, ADC_BITWIDTH_10,
+        sensor::AnalogConfig::OversamplingMode::Mode_64, soil_relay_sensor_id_));
     configASSERT(soil_relay_sensor_config_);
 
     analog_config_store_->add(*soil_relay_sensor_config_);
 
     soil_relay_sensor_pipeline_.reset(
         new (std::nothrow) sensor::soil::AnalogRelaySensorPipeline(
-            system_pipeline_->get_clock(), *adc_store_,
-            system_pipeline_->get_storage_builder(),
+            system_pipeline_->get_clock(), *adc_store_, *adc_converter_,
+            system_pipeline_->get_storage_builder(), *delayer_,
             system_pipeline_->get_reboot_handler(),
             system_pipeline_->get_task_scheduler(), *soil_relay_sensor_config_,
             soil_relay_sensor_id_,
@@ -353,15 +361,17 @@ ProjectPipeline::ProjectPipeline() {
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
     soil_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
         *analog_config_storage_, CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MIN,
-        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MAX, soil_sensor_id_));
+        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MAX, ADC_BITWIDTH_10,
+        sensor::AnalogConfig::OversamplingMode::Mode_64, soil_sensor_id_));
     configASSERT(soil_sensor_config_);
 
     analog_config_store_->add(*soil_sensor_config_);
 
     soil_sensor_pipeline_.reset(new (std::nothrow) sensor::soil::AnalogSensorPipeline(
-        system_pipeline_->get_clock(), *adc_store_,
-        system_pipeline_->get_storage_builder(), system_pipeline_->get_reboot_handler(),
-        system_pipeline_->get_task_scheduler(), *soil_sensor_config_, soil_sensor_id_,
+        system_pipeline_->get_clock(), *adc_store_, *adc_converter_,
+        system_pipeline_->get_storage_builder(), *delayer_,
+        system_pipeline_->get_reboot_handler(), system_pipeline_->get_task_scheduler(),
+        *soil_sensor_config_, soil_sensor_id_,
         sensor::soil::AnalogSensorPipeline::Params {
             .adc_channel = static_cast<io::adc::Channel>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ADC_CHANNEL),
@@ -397,7 +407,7 @@ ProjectPipeline::ProjectPipeline() {
     ds18b20_pipeline_.reset(new (std::nothrow) DS18B20Pipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_telemetry_formatter(), system_pipeline_->get_suspender(),
+        json_data_pipeline_->get_telemetry_formatter(), *delayer_, *fanout_suspender_,
         http_pipeline_->get_server()));
     configASSERT(ds18b20_pipeline_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||

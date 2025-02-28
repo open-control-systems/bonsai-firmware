@@ -153,14 +153,14 @@ menu "Bonsai Firmware Configuration"
 
             config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MAX
                 int "Soil dryness threshold"
-                default 900
+                default 2300
                 depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
                 help
                     Value of completely dry soil.
 
             config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MIN
                 int "Soil wetness threshold"
-                default 300
+                default 900
                 depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
                 help
                     Value of completely wet soil.
@@ -203,14 +203,14 @@ menu "Bonsai Firmware Configuration"
 
             config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MAX
                 int "Soil dryness threshold"
-                default 540
+                default 2300
                 depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
                 help
                     Value of completely dry soil.
 
             config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MIN
                 int "Soil wetness threshold"
-                default 240
+                default 900
                 depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
                 help
                     Value of completely wet soil.

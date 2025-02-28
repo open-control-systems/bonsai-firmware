@@ -211,11 +211,11 @@ ProjectPipeline::ProjectPipeline() {
     configASSERT(sta_network_handler_);
 
     adc_store_.reset(new (std::nothrow) io::adc::OneshotStore(ADC_UNIT_1, ADC_ATTEN_DB_12,
-                                                              ADC_BITWIDTH_10));
+                                                              ADC_BITWIDTH_12));
     configASSERT(adc_store_);
 
     adc_converter_.reset(new (std::nothrow) io::adc::LineFittingConverter(
-        ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_BITWIDTH_10));
+        ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_BITWIDTH_12));
     configASSERT(adc_converter_);
 
     i2c_master_store_pipeline_.reset(new (
@@ -286,7 +286,7 @@ ProjectPipeline::ProjectPipeline() {
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
     ldr_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
         *analog_config_storage_, CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MIN,
-        CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MAX, ADC_BITWIDTH_10,
+        CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_VALUE_MAX, ADC_BITWIDTH_12,
         sensor::AnalogConfig::OversamplingMode::Mode_64, ldr_sensor_id_));
     configASSERT(ldr_sensor_config_);
 
@@ -315,7 +315,7 @@ ProjectPipeline::ProjectPipeline() {
     soil_relay_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
         *analog_config_storage_,
         CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MIN,
-        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MAX, ADC_BITWIDTH_10,
+        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MAX, ADC_BITWIDTH_12,
         sensor::AnalogConfig::OversamplingMode::Mode_64, soil_relay_sensor_id_));
     configASSERT(soil_relay_sensor_config_);
 
@@ -361,7 +361,7 @@ ProjectPipeline::ProjectPipeline() {
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
     soil_sensor_config_.reset(new (std::nothrow) sensor::AnalogConfig(
         *analog_config_storage_, CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MIN,
-        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MAX, ADC_BITWIDTH_10,
+        CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_VALUE_MAX, ADC_BITWIDTH_12,
         sensor::AnalogConfig::OversamplingMode::Mode_64, soil_sensor_id_));
     configASSERT(soil_sensor_config_);
 

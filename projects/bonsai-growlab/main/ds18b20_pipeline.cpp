@@ -48,12 +48,13 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
                                  storage::StorageBuilder& storage_builder,
                                  scheduler::ITaskScheduler& task_scheduler,
                                  fmt::json::FanoutFormatter& telemetry_formatter,
+                                 system::IDelayer& delayer,
                                  system::ISuspender& suspender,
                                  http::Server& http_server) {
     storage_ = storage_builder.make("ds18b20_sensors");
     configASSERT(storage_);
 
-    store_.reset(new (std::nothrow) sensor::ds18b20::Store(8));
+    store_.reset(new (std::nothrow) sensor::ds18b20::Store(delayer, 8));
     configASSERT(store_);
 
     sensor_http_handler_.reset(new (std::nothrow) pipeline::httpserver::DS18B20Handler(
@@ -64,10 +65,10 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     soil_temperature_pipeline_.reset(new (std::nothrow) sensor::ds18b20::SensorPipeline(
         task_scheduler, *storage_, *store_, "soil_temp",
         sensor::ds18b20::SensorPipeline::Params {
-            .read_interval = core::Duration::second
-                * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
             .data_pin = static_cast<io::gpio::Gpio>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_DATA_GPIO),
+            .read_interval = core::Duration::second
+                * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_READ_INTERVAL,
         }));
     configASSERT(soil_temperature_pipeline_);
 
@@ -86,10 +87,10 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     outside_temperature_pipeline_.reset(new (std::nothrow) sensor::ds18b20::SensorPipeline(
         task_scheduler, *storage_, *store_, "outside_temp",
         sensor::ds18b20::SensorPipeline::Params {
-            .read_interval = core::Duration::second
-                * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,
             .data_pin = static_cast<io::gpio::Gpio>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_DATA_GPIO),
+            .read_interval = core::Duration::second
+                * CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_READ_INTERVAL,
         }));
     configASSERT(outside_temperature_pipeline_);
 

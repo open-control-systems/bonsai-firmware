@@ -30,6 +30,7 @@ public:
                     storage::StorageBuilder& storage_builder,
                     scheduler::ITaskScheduler& task_scheduler,
                     fmt::json::FanoutFormatter& telemetry_formatter,
+                    system::IDelayer& delayer,
                     system::ISuspender& suspender,
                     http::Server& http_server);
 

@@ -32,7 +32,9 @@
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_sensor/analog_config_store.h"
 #include "ocs_storage/storage_builder.h"
+#include "ocs_system/delayer_configuration.h"
 #include "ocs_system/fanout_reboot_handler.h"
+#include "ocs_system/fanout_suspender.h"
 
 #ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 #include "ocs_pipeline/jsonfmt/console_pipeline.h"
@@ -83,6 +85,9 @@ private:
     static constexpr const char* mdns_config_storage_id_ = "mdns_config";
     static constexpr const char* analog_config_storage_id_ = "analog_config";
 
+    system::IDelayerPtr delayer_;
+    std::unique_ptr<system::FanoutSuspender> fanout_suspender_;
+
     std::unique_ptr<pipeline::basic::SystemPipeline> system_pipeline_;
     std::unique_ptr<pipeline::jsonfmt::DataPipeline> json_data_pipeline_;
 
@@ -107,6 +112,7 @@ private:
     std::unique_ptr<pipeline::httpserver::StaNetworkHandler> sta_network_handler_;
 
     std::unique_ptr<io::adc::IStore> adc_store_;
+    std::unique_ptr<io::adc::IConverter> adc_converter_;
     std::unique_ptr<io::i2c::MasterStorePipeline> i2c_master_store_pipeline_;
 
     std::unique_ptr<io::spi::IStore> spi_master_store_;

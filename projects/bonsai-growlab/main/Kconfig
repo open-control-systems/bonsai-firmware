@@ -217,7 +217,7 @@ menu "Bonsai Firmware Configuration"
 
             config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_READ_INTERVAL
                 int "Read interval, in seconds"
-                default 300
+                default 5
                 depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
                 help
                     How often to read data from the sensor.

@@ -101,56 +101,6 @@ menu "Bonsai Firmware Configuration"
                     How often to read data from the sensor.
         endmenu
 
-        menu "Soil Analog Relay Sensor Configuration"
-            config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
-                bool "Enable sensor"
-                default n
-                help
-                    Enable soil analog relay sensor.
-
-            config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ADC_CHANNEL
-                int "ADC channel"
-                default 6
-                depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
-                help
-                    ADC channel to read the soil moisture values.
-
-            config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MAX
-                int "Soil dryness threshold"
-                default 2300
-                depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
-                help
-                    Value of completely dry soil.
-
-            config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_VALUE_MIN
-                int "Soil wetness threshold"
-                default 900
-                depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
-                help
-                    Value of completely wet soil.
-
-            config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_GPIO
-                int "GPIO to control the relay"
-                default 26
-                depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
-                help
-                    GPIO to control the relay.
-
-            config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_READ_INTERVAL
-                int "Read interval, in seconds"
-                default 86400
-                depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
-                help
-                    How often to read data from the sensor.
-
-            config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_POWER_ON_DELAY_INTERVAL
-                int "Power on delay interval, in seconds"
-                default 1
-                depends on BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
-                help
-                    How long to wait after the relay is energized.
-        endmenu
-
         menu "Soil Analog Sensor Configuration"
             config BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE
                 bool "Enable sensor"

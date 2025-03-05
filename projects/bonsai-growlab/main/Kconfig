@@ -13,42 +13,6 @@ menu "Bonsai Firmware Configuration"
                 Buffer size to hold the formatted registration JSON data, in bytes.
     endmenu
 
-    menu "Console Configuration"
-        config BONSAI_FIRMWARE_CONSOLE_ENABLE
-            bool "Periodically dump data to the console"
-            default n
-            help
-                Enable periodic dumping of telemetry and registration data to the console.
-
-        config BONSAI_FIRMWARE_CONSOLE_TELEMETRY_INTERVAL
-            int "How often to dump the telemetry data to the console"
-            default 10
-            depends on BONSAI_FIRMWARE_CONSOLE_ENABLE
-            help
-                How often telemetry data is dumped to the console, in seconds.
-
-        config BONSAI_FIRMWARE_CONSOLE_TELEMETRY_BUFFER_SIZE
-            int "Buffer size to hold the formatted telemetry JSON data"
-            default 512
-            depends on BONSAI_FIRMWARE_CONSOLE_ENABLE
-            help
-                Buffer size to hold the formatted telemetry JSON data, in bytes.
-
-        config BONSAI_FIRMWARE_CONSOLE_REGISTRATION_INTERVAL
-            int "How often to dump the registration data to the console"
-            default 20
-            depends on BONSAI_FIRMWARE_CONSOLE_ENABLE
-            help
-                How often registration data is dumped to the console, in seconds.
-
-        config BONSAI_FIRMWARE_CONSOLE_REGISTRATION_BUFFER_SIZE
-            int "Buffer size to hold the formatted registration JSON data"
-            default 512
-            depends on BONSAI_FIRMWARE_CONSOLE_ENABLE
-            help
-                Buffer size to hold the formatted registration JSON data, in bytes.
-    endmenu
-
     menu "I2C Master Configuration"
         config BONSAI_FIRMWARE_I2C_MASTER_SDA_GPIO
             int "I2C master SDA GPIO"

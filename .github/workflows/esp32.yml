@@ -78,6 +78,7 @@ jobs:
       - name: bonsai-zero-ar-1 prepare configuration
         shell: bash
         run: |
+          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
           echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-zero-ar-1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
           echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai Zero Analog Relay 1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
 

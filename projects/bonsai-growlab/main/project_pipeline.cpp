@@ -27,10 +27,6 @@
 #include "ocs_pipeline/jsonfmt/ldr_analog_sensor_formatter.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
 
-#ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
-#include "ocs_pipeline/jsonfmt/ldr_analog_sensor_formatter.h"
-#endif // CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
-
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE
 #include "ocs_pipeline/jsonfmt/soil_analog_sensor_formatter.h"
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE

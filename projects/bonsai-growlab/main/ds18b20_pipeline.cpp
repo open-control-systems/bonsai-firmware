@@ -48,9 +48,9 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
                                  storage::StorageBuilder& storage_builder,
                                  scheduler::ITaskScheduler& task_scheduler,
                                  fmt::json::FanoutFormatter& telemetry_formatter,
-                                 system::IDelayer& delayer,
+                                 system::IRtDelayer& delayer,
                                  system::ISuspender& suspender,
-                                 http::Server& http_server) {
+                                 http::IRouter& router) {
     storage_ = storage_builder.make("ds18b20_sensors");
     configASSERT(storage_);
 
@@ -58,7 +58,7 @@ DS18B20Pipeline::DS18B20Pipeline(core::IClock& clock,
     configASSERT(store_);
 
     sensor_http_handler_.reset(new (std::nothrow) pipeline::httpserver::DS18B20Handler(
-        http_server, suspender, *store_));
+        router, suspender, *store_));
     configASSERT(sensor_http_handler_);
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE

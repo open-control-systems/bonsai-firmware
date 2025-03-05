@@ -9,11 +9,13 @@
 #include "ocs_algo/bit_ops.h"
 #include "ocs_algo/mdns_ops.h"
 #include "ocs_core/log.h"
+#include "ocs_http/router.h"
+#include "ocs_http/target_esp32/server.h"
 #include "ocs_io/adc/target_esp32/line_fitting_converter.h"
 #include "ocs_io/adc/target_esp32/oneshot_store.h"
-#include "ocs_io/spi/master_store.h"
+#include "ocs_io/spi/target_esp32/master_store.h"
 #include "ocs_io/spi/types.h"
-#include "ocs_net/default_mdns_server.h"
+#include "ocs_net/target_esp32/default_mdns_server.h"
 #include "ocs_pipeline/jsonfmt/ap_network_formatter.h"
 #include "ocs_pipeline/jsonfmt/sta_network_formatter.h"
 #include "ocs_status/code_to_str.h"
@@ -71,8 +73,8 @@ const char* log_tag = "project_pipeline";
 } // namespace
 
 ProjectPipeline::ProjectPipeline() {
-    delayer_ = system::make_delayer(system::DelayerStrategy::Default);
-    configASSERT(delayer_);
+    rt_delayer_ = system::PlatformBuilder::make_rt_delayer();
+    configASSERT(rt_delayer_);
 
     fanout_suspender_.reset(new (std::nothrow) system::FanoutSuspender());
     configASSERT(fanout_suspender_);
@@ -94,29 +96,6 @@ ProjectPipeline::ProjectPipeline() {
         system_pipeline_->get_task_scheduler(), system_pipeline_->get_reboot_handler(),
         system_pipeline_->get_device_info()));
     configASSERT(json_data_pipeline_);
-
-#ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
-    console_pipeline_.reset(new (std::nothrow) pipeline::jsonfmt::ConsolePipeline(
-        system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_telemetry_formatter(),
-        json_data_pipeline_->get_registration_formatter(),
-        pipeline::jsonfmt::ConsolePipeline::Params {
-            .telemetry =
-                pipeline::jsonfmt::ConsolePipeline::DataParams {
-                    .interval = core::Duration::second
-                        * CONFIG_BONSAI_FIRMWARE_CONSOLE_TELEMETRY_INTERVAL,
-                    .buffer_size = CONFIG_BONSAI_FIRMWARE_CONSOLE_TELEMETRY_BUFFER_SIZE,
-                },
-            .registration =
-                pipeline::jsonfmt::ConsolePipeline::DataParams {
-                    .interval = core::Duration::second
-                        * CONFIG_BONSAI_FIRMWARE_CONSOLE_REGISTRATION_INTERVAL,
-                    .buffer_size =
-                        CONFIG_BONSAI_FIRMWARE_CONSOLE_REGISTRATION_BUFFER_SIZE,
-                },
-        }));
-    configASSERT(console_pipeline_);
-#endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
     fanout_network_handler_.reset(new (std::nothrow) net::FanoutNetworkHandler());
     configASSERT(fanout_network_handler_);
@@ -149,9 +128,20 @@ ProjectPipeline::ProjectPipeline() {
 
     mdns_server_->add(*http_mdns_service_);
 
+    http_router_.reset(new (std::nothrow) http::Router());
+    configASSERT(http_router_);
+
+    http_server_.reset(new (std::nothrow) http::Server(
+        *http_router_,
+        http::Server::Params {
+            .server_port = CONFIG_OCS_HTTP_SERVER_PORT,
+            .max_uri_handlers = CONFIG_OCS_HTTP_SERVER_MAX_URI_HANDLERS,
+        }));
+    configASSERT(http_server_);
+
     http_pipeline_.reset(new (std::nothrow) pipeline::httpserver::HttpPipeline(
         system_pipeline_->get_reboot_task(), *fanout_network_handler_, *mdns_config_,
-        json_data_pipeline_->get_telemetry_formatter(),
+        *http_server_, *http_router_, json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(),
         pipeline::httpserver::HttpPipeline::Params {
             .telemetry =
@@ -162,17 +152,12 @@ ProjectPipeline::ProjectPipeline() {
                 pipeline::httpserver::HttpPipeline::DataParams {
                     .buffer_size = CONFIG_BONSAI_FIRMWARE_HTTP_REGISTRATION_BUFFER_SIZE,
                 },
-            .server =
-                http::Server::Params {
-                    .server_port = CONFIG_OCS_HTTP_SERVER_PORT,
-                    .max_uri_handlers = CONFIG_OCS_HTTP_SERVER_MAX_URI_HANDLERS,
-                },
         }));
     configASSERT(http_pipeline_);
 
     // Time valid since 2024/12/03.
     time_pipeline_.reset(new (std::nothrow) pipeline::httpserver::TimePipeline(
-        http_pipeline_->get_server(), json_data_pipeline_->get_telemetry_formatter(),
+        *http_router_, json_data_pipeline_->get_telemetry_formatter(),
         json_data_pipeline_->get_registration_formatter(), 1733215816));
     configASSERT(time_pipeline_);
 
@@ -192,7 +177,7 @@ ProjectPipeline::ProjectPipeline() {
 
         ap_network_handler_.reset(
             new (std::nothrow) pipeline::httpserver::ApNetworkHandler(
-                http_pipeline_->get_server(), *network_pipeline_->get_ap_config(),
+                *http_router_, *network_pipeline_->get_ap_config(),
                 system_pipeline_->get_reboot_task()));
         configASSERT(ap_network_handler_);
     }
@@ -206,7 +191,7 @@ ProjectPipeline::ProjectPipeline() {
     }
 
     sta_network_handler_.reset(new (std::nothrow) pipeline::httpserver::StaNetworkHandler(
-        http_pipeline_->get_server(), network_pipeline_->get_sta_config(),
+        *http_router_, network_pipeline_->get_sta_config(),
         system_pipeline_->get_reboot_task()));
     configASSERT(sta_network_handler_);
 
@@ -277,10 +262,10 @@ ProjectPipeline::ProjectPipeline() {
     analog_config_store_.reset(new (std::nothrow) sensor::AnalogConfigStore());
     configASSERT(analog_config_store_);
 
-    analog_config_store_handler_.reset(
-        new (std::nothrow) pipeline::httpserver::AnalogConfigStoreHandler(
-            system_pipeline_->get_func_scheduler(), http_pipeline_->get_server(),
-            *analog_config_store_));
+    analog_config_store_handler_.reset(new (std::nothrow)
+                                           pipeline::httpserver::AnalogConfigStoreHandler(
+                                               system_pipeline_->get_func_scheduler(),
+                                               *http_router_, *analog_config_store_));
     configASSERT(analog_config_store_handler_);
 
 #ifdef CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE
@@ -293,8 +278,8 @@ ProjectPipeline::ProjectPipeline() {
     analog_config_store_->add(*ldr_sensor_config_);
 
     ldr_sensor_pipeline_.reset(new (std::nothrow) sensor::ldr::AnalogSensorPipeline(
-        *delayer_, *adc_store_, *adc_converter_, system_pipeline_->get_task_scheduler(),
-        *ldr_sensor_config_, ldr_sensor_id_,
+        *rt_delayer_, *adc_store_, *adc_converter_,
+        system_pipeline_->get_task_scheduler(), *ldr_sensor_config_, ldr_sensor_id_,
         sensor::ldr::AnalogSensorPipeline::Params {
             .adc_channel = static_cast<io::adc::Channel>(
                 CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ADC_CHANNEL),
@@ -324,7 +309,7 @@ ProjectPipeline::ProjectPipeline() {
     soil_relay_sensor_pipeline_.reset(
         new (std::nothrow) sensor::soil::AnalogRelaySensorPipeline(
             system_pipeline_->get_clock(), *adc_store_, *adc_converter_,
-            system_pipeline_->get_storage_builder(), *delayer_,
+            system_pipeline_->get_storage_builder(), *rt_delayer_,
             system_pipeline_->get_reboot_handler(),
             system_pipeline_->get_task_scheduler(), *soil_relay_sensor_config_,
             soil_relay_sensor_id_,
@@ -369,7 +354,7 @@ ProjectPipeline::ProjectPipeline() {
 
     soil_sensor_pipeline_.reset(new (std::nothrow) sensor::soil::AnalogSensorPipeline(
         system_pipeline_->get_clock(), *adc_store_, *adc_converter_,
-        system_pipeline_->get_storage_builder(), *delayer_,
+        system_pipeline_->get_storage_builder(), *rt_delayer_,
         system_pipeline_->get_reboot_handler(), system_pipeline_->get_task_scheduler(),
         *soil_sensor_config_, soil_sensor_id_,
         sensor::soil::AnalogSensorPipeline::Params {
@@ -397,7 +382,7 @@ ProjectPipeline::ProjectPipeline() {
     sht41_pipeline_.reset(new (std::nothrow) SHT41Pipeline(
         i2c_master_store_pipeline_->get_store(), system_pipeline_->get_task_scheduler(),
         system_pipeline_->get_func_scheduler(), system_pipeline_->get_storage_builder(),
-        json_data_pipeline_->get_telemetry_formatter(), http_pipeline_->get_server(),
+        json_data_pipeline_->get_telemetry_formatter(), *http_router_,
         core::Duration::second * CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_READ_INTERVAL));
     configASSERT(sht41_pipeline_);
 #endif // CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE
@@ -407,14 +392,14 @@ ProjectPipeline::ProjectPipeline() {
     ds18b20_pipeline_.reset(new (std::nothrow) DS18B20Pipeline(
         system_pipeline_->get_clock(), system_pipeline_->get_storage_builder(),
         system_pipeline_->get_task_scheduler(),
-        json_data_pipeline_->get_telemetry_formatter(), *delayer_, *fanout_suspender_,
-        http_pipeline_->get_server()));
+        json_data_pipeline_->get_telemetry_formatter(), *rt_delayer_, *fanout_suspender_,
+        *http_router_));
     configASSERT(ds18b20_pipeline_);
 #endif // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE) ||
        // defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
 
-    web_gui_pipeline_.reset(new (std::nothrow) pipeline::httpserver::WebGuiPipeline(
-        http_pipeline_->get_server()));
+    web_gui_pipeline_.reset(new (std::nothrow)
+                                pipeline::httpserver::WebGuiPipeline(*http_router_));
     configASSERT(web_gui_pipeline_);
 }
 

@@ -31,7 +31,7 @@ public:
                   scheduler::AsyncFuncScheduler& func_scheduler,
                   storage::StorageBuilder& storage_builder,
                   fmt::json::FanoutFormatter& telemetry_formatter,
-                  http::Server& server,
+                  http::IRouter& router,
                   core::Time read_interval);
 
 private:

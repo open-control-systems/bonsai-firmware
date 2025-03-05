@@ -13,8 +13,10 @@
 #include "ocs_core/iclock.h"
 #include "ocs_core/noncopyable.h"
 #include "ocs_fmt/json/fanout_formatter.h"
+#include "ocs_http/irouter.h"
+#include "ocs_http/iserver.h"
 #include "ocs_io/adc/istore.h"
-#include "ocs_io/i2c/master_store_pipeline.h"
+#include "ocs_io/i2c/target_esp32/master_store_pipeline.h"
 #include "ocs_io/spi/istore.h"
 #include "ocs_net/basic_mdns_server.h"
 #include "ocs_net/fanout_network_handler.h"
@@ -32,13 +34,9 @@
 #include "ocs_scheduler/itask_scheduler.h"
 #include "ocs_sensor/analog_config_store.h"
 #include "ocs_storage/storage_builder.h"
-#include "ocs_system/delayer_configuration.h"
 #include "ocs_system/fanout_reboot_handler.h"
 #include "ocs_system/fanout_suspender.h"
-
-#ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
-#include "ocs_pipeline/jsonfmt/console_pipeline.h"
-#endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
+#include "ocs_system/platform_builder.h"
 
 #if defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE)               \
     || defined(CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE)
@@ -85,15 +83,11 @@ private:
     static constexpr const char* mdns_config_storage_id_ = "mdns_config";
     static constexpr const char* analog_config_storage_id_ = "analog_config";
 
-    system::IDelayerPtr delayer_;
+    system::PlatformBuilder::IRtDelayerPtr rt_delayer_;
     std::unique_ptr<system::FanoutSuspender> fanout_suspender_;
 
     std::unique_ptr<pipeline::basic::SystemPipeline> system_pipeline_;
     std::unique_ptr<pipeline::jsonfmt::DataPipeline> json_data_pipeline_;
-
-#ifdef CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
-    std::unique_ptr<pipeline::jsonfmt::ConsolePipeline> console_pipeline_;
-#endif // CONFIG_BONSAI_FIRMWARE_CONSOLE_ENABLE
 
     std::unique_ptr<net::FanoutNetworkHandler> fanout_network_handler_;
 
@@ -102,6 +96,8 @@ private:
     std::unique_ptr<net::MdnsService> http_mdns_service_;
     std::unique_ptr<net::BasicMdnsServer> mdns_server_;
 
+    std::unique_ptr<http::IRouter> http_router_;
+    std::unique_ptr<http::IServer> http_server_;
     std::unique_ptr<pipeline::httpserver::HttpPipeline> http_pipeline_;
     std::unique_ptr<pipeline::httpserver::TimePipeline> time_pipeline_;
 

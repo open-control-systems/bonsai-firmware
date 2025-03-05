@@ -17,6 +17,7 @@ jobs:
       IDF_VERSION: v5.3.1
       CONFIGURATION_PATH_CCACHE: .env/ccache
       CONFIGURATION_PATH_BONSAI_GROWLAB: .env/bonsai_growlab_configuration
+      CONFIGURATION_PATH_BONSAI_ZERO_AR_1: .env/bonsai_zero_ar_1
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -53,13 +54,18 @@ jobs:
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
           CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
 
+      - name: bonsai-zero-ar-1 check formatting
+        uses: ./project/control-components/.github/actions/core/fmt
+        with:
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1
+          CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
+
       - name: bonsai-growlab prepare configuration
         shell: bash
         run: |
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_RELAY_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
@@ -69,10 +75,29 @@ jobs:
           echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai GrowLab Firmware\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
           echo "CONFIG_FREERTOS_USE_TRACE_FACILITY=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
+      - name: bonsai-zero-ar-1 prepare configuration
+        shell: bash
+        run: |
+          echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-zero-ar-1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
+          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai Zero Analog Relay 1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
+
       - name: bonsai-growlab web GUI build
         shell: bash
         run: |
           cd ${{ env.SOURCE_PATH }}/projects/bonsai-growlab/web-gui
+          npm install
+          npm run build
+          npm run fmt
+
+          if [ -n "$(git status --porcelain .)" ]; then
+            echo "Please run 'npm run fmt' and commit the updated files."
+            exit 1
+          fi
+
+      - name: bonsai-zero-ar-1 web GUI build
+        shell: bash
+        run: |
+          cd ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1/web-gui
           npm install
           npm run build
           npm run fmt
@@ -90,8 +115,22 @@ jobs:
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
           CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
 
+      - name: bonsai-zero-ar-1 build
+        uses: ./project/control-components/.github/actions/esp32/project
+        with:
+          IDF_PATH: ${{ env.IDF_PATH }}
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1
+          CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
+          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
+
       - name: bonsai-growlab upload
         uses: ./project/control-components/.github/actions/esp32/upload
         with:
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
           PROJECT_ID: bonsai-growlab
+
+      - name: bonsai-zero-ar-1 upload
+        uses: ./project/control-components/.github/actions/esp32/upload
+        with:
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1
+          PROJECT_ID: bonsai-zero-ar-1

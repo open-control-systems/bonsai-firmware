@@ -98,6 +98,7 @@ ProjectPipeline::ProjectPipeline() {
     http_mdns_service_->add_txt_record("api", CONFIG_OCS_HTTP_SERVER_API_BASE_PATH);
 
     algo::MdnsOps::enable_autodiscovery(*http_mdns_service_,
+                                        system_pipeline_->get_device_info().get_fw_name(),
                                         CONFIG_OCS_HTTP_SERVER_API_BASE_PATH);
 
     mdns_server_.reset(new (std::nothrow)

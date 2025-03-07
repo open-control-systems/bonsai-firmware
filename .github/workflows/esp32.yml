@@ -9,16 +9,24 @@ on:
       - '*'
 
 jobs:
-  build:
+  build-firmware:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - name: "bonsai-growlab"
+            config: ".env/bonsai_growlab_configuration"
+
+          - name: "bonsai-zero-ar-1"
+            config: ".env/bonsai_zero_ar_1"
+
+          - name: "bonsai-zero-a-1"
+            config: ".env/bonsai_zero_a_1"
     env:
       SOURCE_PATH: project
       IDF_PATH: esp-idf
       IDF_VERSION: v5.3.1
       CONFIGURATION_PATH_CCACHE: .env/ccache
-      CONFIGURATION_PATH_BONSAI_GROWLAB: .env/bonsai_growlab_configuration
-      CONFIGURATION_PATH_BONSAI_ZERO_AR_1: .env/bonsai_zero_ar_1
-      CONFIGURATION_PATH_BONSAI_ZERO_A_1: .env/bonsai_zero_a_1
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -26,153 +34,87 @@ jobs:
           path: ${{ env.SOURCE_PATH }}
           submodules: recursive
 
-      - name: node.js setup env
+      - name: install yq
+        shell: bash
+        run: |
+          VERSION=v4.2.0
+          BINARY=yq_linux_amd64
+          wget https://github.com/mikefarah/yq/releases/download/${VERSION}/${BINARY}.tar.gz -O - | \
+          tar xz && sudo mv ${BINARY} /usr/bin/yq
+
+      - name: setup node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: esp32 setup env
+      - name: setup ESP32 environment
         uses: ./project/control-components/.github/actions/esp32/env
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
           IDF_VERSION: ${{ env.IDF_VERSION }}
 
-      - name: system setup env
+      - name: setup system environment
         uses: ./project/control-components/.github/actions/system/env
 
-      - name: system setup ccache
+      - name: setup ccache
         uses: ./project/control-components/.github/actions/system/ccache
         with:
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
 
-      - name: core format firmware build version
+      - name: format firmware build version
         id: version_formatter
         uses: ./project/control-components/.github/actions/core/version
 
-      - name: bonsai-growlab check formatting
+      - name: check formatting
         uses: ./project/control-components/.github/actions/core/fmt
         with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/${{ matrix.project.name }}
           CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
 
-      - name: bonsai-zero-ar-1 check formatting
-        uses: ./project/control-components/.github/actions/core/fmt
-        with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1
-          CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
-
-      - name: bonsai-zero-a-1 check formatting
-        uses: ./project/control-components/.github/actions/core/fmt
-        with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-a-1
-          CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
-
-      - name: bonsai-growlab prepare configuration
+      - name: prepare configuration
         shell: bash
         run: |
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_BME280_SPI_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SHT41_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_SOIL_ANALOG_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_LDR_ANALOG_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_SOIL_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_BONSAI_FIRMWARE_SENSOR_DS18B20_OUTSIDE_TEMPERATURE_ENABLE=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-growlab\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai GrowLab Firmware\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
-          echo "CONFIG_FREERTOS_USE_TRACE_FACILITY=y" >> ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          PROJECT_NAME="${{ matrix.project.name }}"
+          CONFIG_PATH="${{ matrix.project.config }}"
+          CONFIG_FILE="${{ env.SOURCE_PATH }}/ci/projects.yml"
 
-      - name: bonsai-zero-ar-1 prepare configuration
+          # Read the project-specific config from YAML and append to the config file
+          if yq eval ".projects[\"$PROJECT_NAME\"].config" "$CONFIG_FILE" | grep -qv "null"; then
+            yq eval ".projects[\"$PROJECT_NAME\"].config[]" "$CONFIG_FILE" | while read -r line; do
+              [ -n "$line" ] && echo "$line" >> "$CONFIG_PATH"
+            done
+          fi
+
+          # Read the firmware description from YAML
+          FW_DESCRIPTION=$(yq eval ".projects[\"$PROJECT_NAME\"].desc" "$CONFIG_FILE")
+
+          # Append general firmware metadata
+          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> "$CONFIG_PATH"
+          echo "CONFIG_OCS_CORE_FW_NAME=\"$PROJECT_NAME\"" >> "$CONFIG_PATH"
+          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"$FW_DESCRIPTION\"" >> "$CONFIG_PATH"
+
+      - name: build web gUI
         shell: bash
         run: |
-          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
-          echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-zero-ar-1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
-          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai Zero Analog Relay 1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
-
-      - name: bonsai-zero-a-1 prepare configuration
-        shell: bash
-        run: |
-          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_A_1 }}
-          echo "CONFIG_OCS_CORE_FW_NAME=\"bonsai-zero-a-1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_A_1 }}
-          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"Bonsai Zero Analog 1\"" >> ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_A_1 }}
-
-      - name: bonsai-growlab web GUI build
-        shell: bash
-        run: |
-          cd ${{ env.SOURCE_PATH }}/projects/bonsai-growlab/web-gui
+          cd ${{ env.SOURCE_PATH }}/projects/${{ matrix.project.name }}/web-gui
           npm install
           npm run build
           npm run fmt
-
           if [ -n "$(git status --porcelain .)" ]; then
             echo "Please run 'npm run fmt' and commit the updated files."
             exit 1
           fi
 
-      - name: bonsai-zero-ar-1 web GUI build
-        shell: bash
-        run: |
-          cd ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1/web-gui
-          npm install
-          npm run build
-          npm run fmt
-
-          if [ -n "$(git status --porcelain .)" ]; then
-            echo "Please run 'npm run fmt' and commit the updated files."
-            exit 1
-          fi
-
-      - name: bonsai-zero-a-1 web GUI build
-        shell: bash
-        run: |
-          cd ${{ env.SOURCE_PATH }}/projects/bonsai-zero-a-1/web-gui
-          npm install
-          npm run build
-          npm run fmt
-
-          if [ -n "$(git status --porcelain .)" ]; then
-            echo "Please run 'npm run fmt' and commit the updated files."
-            exit 1
-          fi
-
-      - name: bonsai-growlab build
+      - name: build firmware
         uses: ./project/control-components/.github/actions/esp32/project
         with:
           IDF_PATH: ${{ env.IDF_PATH }}
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/${{ matrix.project.name }}
           CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
-          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_GROWLAB }}
+          CONFIGURATION_PATH_PROJECT: ${{ matrix.project.config }}
 
-      - name: bonsai-zero-ar-1 build
-        uses: ./project/control-components/.github/actions/esp32/project
-        with:
-          IDF_PATH: ${{ env.IDF_PATH }}
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1
-          CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
-          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_AR_1 }}
-
-      - name: bonsai-zero-a-1 build
-        uses: ./project/control-components/.github/actions/esp32/project
-        with:
-          IDF_PATH: ${{ env.IDF_PATH }}
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-a-1
-          CONFIGURATION_PATH_CCACHE: ${{ env.CONFIGURATION_PATH_CCACHE }}
-          CONFIGURATION_PATH_PROJECT: ${{ env.CONFIGURATION_PATH_BONSAI_ZERO_A_1 }}
-
-      - name: bonsai-growlab upload
+      - name: upload firmware
         uses: ./project/control-components/.github/actions/esp32/upload
         with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-growlab
-          PROJECT_ID: bonsai-growlab
-
-      - name: bonsai-zero-ar-1 upload
-        uses: ./project/control-components/.github/actions/esp32/upload
-        with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-ar-1
-          PROJECT_ID: bonsai-zero-ar-1
-
-      - name: bonsai-zero-a-1 upload
-        uses: ./project/control-components/.github/actions/esp32/upload
-        with:
-          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/bonsai-zero-a-1
-          PROJECT_ID: bonsai-zero-a-1
+          PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/${{ matrix.project.name }}
+          PROJECT_ID: ${{ matrix.project.name }}

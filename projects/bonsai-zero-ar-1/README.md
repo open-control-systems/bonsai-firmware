@@ -14,7 +14,7 @@ Single analog soil moisture sensor, periodically powered through the relay.
 - Builtin HTTP server
 - mDNS to simplify application network discovery
 
-**Supported Sensors**
+**Tested Sensors**
 
 - YL-69 Soil Moisture Sensor
 - Capacitive Soil Moisture Sensor V1.2

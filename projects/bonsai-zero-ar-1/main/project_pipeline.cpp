@@ -87,7 +87,7 @@ ProjectPipeline::ProjectPipeline() {
 
     const auto mdns_instance_name =
         std::string("Bonsai Zero Analog Relay 1X HTTP Service (")
-        + mdns_config_->get_hostname() + ")";
+        + system_pipeline_->get_device_info().get_fw_name() + ")";
 
     http_mdns_service_.reset(new (std::nothrow) net::MdnsService(
         mdns_instance_name.c_str(), net::MdnsService::ServiceType::Http,

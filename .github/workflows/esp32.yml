@@ -76,7 +76,7 @@ jobs:
         run: |
           PROJECT_NAME="${{ matrix.project.name }}"
           CONFIG_PATH="${{ matrix.project.config }}"
-          CONFIG_FILE="${{ env.SOURCE_PATH }}/ci/projects.yml"
+          CONFIG_FILE="${{ env.SOURCE_PATH }}/projects/config.yml"
 
           # Read the project-specific config from YAML and append to the config file
           if yq eval ".projects[\"$PROJECT_NAME\"].config" "$CONFIG_FILE" | grep -qv "null"; then

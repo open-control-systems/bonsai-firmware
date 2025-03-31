@@ -34,14 +34,6 @@ jobs:
           path: ${{ env.SOURCE_PATH }}
           submodules: recursive
 
-      - name: install yq
-        shell: bash
-        run: |
-          VERSION=v4.2.0
-          BINARY=yq_linux_amd64
-          wget https://github.com/mikefarah/yq/releases/download/${VERSION}/${BINARY}.tar.gz -O - | \
-          tar xz && sudo mv ${BINARY} /usr/bin/yq
-
       - name: setup node.js
         uses: actions/setup-node@v4
         with:
@@ -72,26 +64,11 @@ jobs:
           CONTROL_COMPONENTS_PATH: ${{ env.SOURCE_PATH }}/control-components
 
       - name: prepare configuration
-        shell: bash
-        run: |
-          PROJECT_NAME="${{ matrix.project.name }}"
-          CONFIG_PATH="${{ matrix.project.config }}"
-          CONFIG_FILE="${{ env.SOURCE_PATH }}/projects/config.yml"
-
-          # Read the project-specific config from YAML and append to the config file
-          if yq eval ".projects[\"$PROJECT_NAME\"].config" "$CONFIG_FILE" | grep -qv "null"; then
-            yq eval ".projects[\"$PROJECT_NAME\"].config[]" "$CONFIG_FILE" | while read -r line; do
-              [ -n "$line" ] && echo "$line" >> "$CONFIG_PATH"
-            done
-          fi
-
-          # Read the firmware description from YAML
-          FW_DESCRIPTION=$(yq eval ".projects[\"$PROJECT_NAME\"].desc" "$CONFIG_FILE")
-
-          # Append general firmware metadata
-          echo "CONFIG_OCS_CORE_FW_VERSION=\"${{ steps.version_formatter.outputs.build_version }}\"" >> "$CONFIG_PATH"
-          echo "CONFIG_OCS_CORE_FW_NAME=\"$PROJECT_NAME\"" >> "$CONFIG_PATH"
-          echo "CONFIG_OCS_CORE_FW_DESCRIPTION=\"$FW_DESCRIPTION\"" >> "$CONFIG_PATH"
+        uses: ./project/control-components/.github/actions/core/config
+        with:
+          PROJECT_NAME: ${{ matrix.project.name }}
+          BUILD_CONFIG_PATH: ${{ matrix.project.config }}
+          PROJECT_CONFIG_PATH: ${{ env.SOURCE_PATH }}/projects/config.yml
 
       - name: build web gUI
         shell: bash

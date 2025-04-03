@@ -67,6 +67,7 @@ jobs:
         uses: ./project/control-components/.github/actions/core/config
         with:
           PROJECT_NAME: ${{ matrix.project.name }}
+          BUILD_VERSION: ${{ steps.version_formatter.outputs.build_version }}
           BUILD_CONFIG_PATH: ${{ matrix.project.config }}
           PROJECT_CONFIG_PATH: ${{ env.SOURCE_PATH }}/projects/config.yml
 
@@ -94,4 +95,5 @@ jobs:
         uses: ./project/control-components/.github/actions/esp32/upload
         with:
           PROJECT_PATH: ${{ env.SOURCE_PATH }}/projects/${{ matrix.project.name }}
-          PROJECT_ID: ${{ matrix.project.name }}
+          PROJECT_NAME: ${{ matrix.project.name }}
+          BUILD_VERSION: ${{ steps.version_formatter.outputs.build_version }}

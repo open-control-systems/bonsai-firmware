@@ -1,4 +1,4 @@
-## Bonsai GrowLab Local
+## Bonsai GrowLab
 
 bonsai-growlab is a highly configurable R&D firmware for various experiments and research on plant growth. Please note that some features may not be available on some platforms.
 

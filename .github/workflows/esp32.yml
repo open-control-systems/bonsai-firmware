@@ -22,6 +22,9 @@ jobs:
 
           - name: "bonsai-zero-a-1"
             config: ".env/bonsai_zero_a_1"
+
+          - name: "bonsai-zero-a-2"
+            config: ".env/bonsai_zero_a_2"
     env:
       SOURCE_PATH: project
       IDF_PATH: esp-idf

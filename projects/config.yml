@@ -14,3 +14,5 @@ projects:
     desc: "Bonsai Zero Analog Relay 1"
   bonsai-zero-a-1:
     desc: "Bonsai Zero Analog 1"
+  bonsai-zero-a-2:
+    desc: "Bonsai Zero Analog 2"

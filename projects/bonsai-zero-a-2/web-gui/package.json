@@ -1,0 +1,21 @@
+{
+  "name": "web-gui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "fmt": "npx eslint --fix ."
+  },
+  "dependencies": {
+    "preact": "^10.24.3"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.1",
+    "eslint-plugin-prettier": "^5.2.1",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.10",
+    "vite-plugin-compression": "^0.5.1"
+  }
+}

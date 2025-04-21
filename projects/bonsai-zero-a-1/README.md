@@ -1,4 +1,4 @@
-## Bonsai Analog Relay 1
+## Bonsai Zero Analog 1
 
 Single analog soil moisture sensor.
 

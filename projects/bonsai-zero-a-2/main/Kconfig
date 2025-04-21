@@ -1,0 +1,67 @@
+menu "Bonsai Firmware Configuration"
+    menu "HTTP Server Configuration"
+        config BONSAI_FIRMWARE_HTTP_TELEMETRY_BUFFER_SIZE
+            int "Buffer size to hold the formatted telemetry JSON data"
+            default 1024
+            help
+                Buffer size to hold the formatted telemetry JSON data, in bytes.
+
+        config BONSAI_FIRMWARE_HTTP_REGISTRATION_BUFFER_SIZE
+            int "Buffer size to hold the formatted registration JSON data"
+            default 512
+            help
+                Buffer size to hold the formatted registration JSON data, in bytes.
+    endmenu
+
+    menu "Soil Analog Sensor Configuration 0"
+        config BONSAI_FIRMWARE_SENSOR_SOIL_0_ANALOG_ADC_CHANNEL
+            int "ADC channel"
+            default 4
+            help
+                ADC channel to read the soil moisture values.
+
+        config BONSAI_FIRMWARE_SENSOR_SOIL_0_ANALOG_VALUE_MAX
+            int "Soil dryness threshold"
+            default 2300
+            help
+                Value of completely dry soil.
+
+        config BONSAI_FIRMWARE_SENSOR_SOIL_0_ANALOG_VALUE_MIN
+            int "Soil wetness threshold"
+            default 900
+            help
+                Value of completely wet soil.
+
+        config BONSAI_FIRMWARE_SENSOR_SOIL_0_ANALOG_READ_INTERVAL
+            int "Read interval, in seconds"
+            default 5
+            help
+                How often to read data from the sensor.
+    endmenu
+
+    menu "Soil Analog Sensor Configuration 1"
+        config BONSAI_FIRMWARE_SENSOR_SOIL_1_ANALOG_ADC_CHANNEL
+            int "ADC channel"
+            default 5
+            help
+                ADC channel to read the soil moisture values.
+
+        config BONSAI_FIRMWARE_SENSOR_SOIL_1_ANALOG_VALUE_MAX
+            int "Soil dryness threshold"
+            default 2300
+            help
+                Value of completely dry soil.
+
+        config BONSAI_FIRMWARE_SENSOR_SOIL_1_ANALOG_VALUE_MIN
+            int "Soil wetness threshold"
+            default 900
+            help
+                Value of completely wet soil.
+
+        config BONSAI_FIRMWARE_SENSOR_SOIL_1_ANALOG_READ_INTERVAL
+            int "Read interval, in seconds"
+            default 5
+            help
+                How often to read data from the sensor.
+    endmenu
+endmenu

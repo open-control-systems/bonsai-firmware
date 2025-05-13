@@ -1,6 +1,6 @@
 ## Introduction
 
-`bonsai-firmware` is an agro-tech toolkit, a collection of embedded systems for healthy plant growth. See the list below to choose the right one for your needs:
+`bonsai-firmware` is an agro-tech toolkit, a collection of embedded systems for precise environmental monitoring and control. See the list below to choose the right one for your needs:
 
 - [bonsai-growlab](projects/bonsai-growlab/README.md): indoor lab setup for controlled experiments and research on plant growth. Continuous monitoring of many environmental parameters: humidity, temperature, soil moisture, light. Bultin HTTP Web Server, mDNS, Web GUI.
 - [bonsai-zero-a-1](projects/bonsai-zero-a-1/README.md): single analog soil moisture sensor. Builtin HTTP Web Server, mDNS, Web GUI.
